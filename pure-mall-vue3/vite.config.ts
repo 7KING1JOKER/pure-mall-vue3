@@ -3,7 +3,6 @@ import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import { VantResolver } from 'unplugin-vue-components/resolvers'
 import path from 'path'
-
 export default defineConfig({
   // 插件配置区
   plugins: [
@@ -25,7 +24,7 @@ export default defineConfig({
   resolve: {
     alias: {
       // 路径别名配置(将 @ 映射到 src 目录)
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, './src'),
     }
   }
 })
