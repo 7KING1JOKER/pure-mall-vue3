@@ -1,14 +1,21 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+
 import Components from 'unplugin-vue-components/vite'
-import { VantResolver } from 'unplugin-vue-components/resolvers'
+import AutoImport from 'unplugin-auto-import/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import path from 'path'
+
 export default defineConfig({
   // 插件配置区
   plugins: [
     vue(), // 核心 Vue 插件
-    Components({ // 组件自动导入 Vant 组件
-      resolvers: [VantResolver()],
+    // 自动导入 ElementPlus 组件
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
     }),
   ],
   // CSS 预处理器配置
