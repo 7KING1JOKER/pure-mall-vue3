@@ -17,6 +17,7 @@
         class="desktop-menu"
         :default-active="activeIndex"
         :router="true"
+        :ellipsis="false"
         @select="handleSelect"
       >
         <el-menu-item index="home" route="/">
@@ -77,9 +78,6 @@
 
     <!-- 页面内容 -->
     <div class="content">
-      <h1>欢迎来到pure mall</h1>
-      <p>这是一个基于 Vue 3 的商城应用</p>
-      
       <div class="demo-content">
         <el-card v-for="i in 5" :key="i" class="demo-card">
           <template #header>
@@ -166,6 +164,8 @@ onBeforeUnmount(() => {
 .responsive-menu .logo {
     position: absolute;
     left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     z-index: 1001;
 }
 
@@ -191,6 +191,12 @@ onBeforeUnmount(() => {
 
 .mobile-menu-toggle .el-button {
   margin-left: 10px;
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.mobile-menu-toggle .el-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .mobile-menu {
