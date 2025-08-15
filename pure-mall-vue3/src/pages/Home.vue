@@ -23,6 +23,23 @@
         <el-menu-item index="home" route="/">
           <el-icon><HomeFilled /></el-icon>
         </el-menu-item>
+        <!-- 搜索菜单项 -->
+        <el-sub-menu index="search" popper-class="search-dropdown">
+          <template #title>
+            <el-icon><Search /></el-icon>
+          </template>
+          <!-- 下拉搜索框 -->
+          <div class="search-dropdown-content">
+            <el-input
+              v-model="searchQuery"
+              placeholder="Search products..."
+              class="search-input"
+              clearable
+              @keyup.enter="handleSearch"
+            >
+            </el-input>
+          </div>
+        </el-sub-menu>
         <el-menu-item index="category" route="/category">
           <el-icon><Menu /></el-icon>
         </el-menu-item>
@@ -39,8 +56,9 @@
         <el-button 
           type="primary" 
           @click="drawerVisible = true"
-          icon="Menu"
+          :icon="More"
           circle
+          size="medium"
         />
       </div>
 
@@ -48,7 +66,7 @@
       <el-drawer 
         v-model="drawerVisible" 
         direction="ltr" 
-        size="70%"
+        size="30%"
         :with-header="false"
       >
         <el-menu 
@@ -77,24 +95,77 @@
     </div>
 
     <!-- 页面内容 -->
-    <div class="content">
-      <div class="demo-content">
-        <el-card v-for="i in 5" :key="i" class="demo-card">
-          <template #header>
-            <div class="card-header">
-              <span>商品 {{ i }}</span>
+    <div class="scroll-container">
+      <!-- 轮播图区域 -->
+      <section class="scroll-section section-carousel">
+          <el-carousel 
+            :interval="5000" 
+            indicator-position="inside"
+            class="fullscreen-carousel"
+          >
+            <el-carousel-item v-for="item in carouselItems" :key="item.id">
+              <div class="carousel-item">
+                <img 
+                  :src="item.image" 
+                  class="carousel-image"
+                  :alt="item.title"
+                >
+                <div class="carousel-overlay">
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.description }}</p>
+                  <el-button type="primary" size="small">查看详情</el-button>
+                </div>
+              </div>
+            </el-carousel-item>
+          </el-carousel>
+      </section>
+
+      <!-- 卡片列表区域 -->
+      <section class="scroll-section section-cards">
+        <div class="card-list">
+          
+        </div>
+      </section>
+
+      <!-- 页脚区域 -->
+      <section class="scroll-section section-footer">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <el-image 
+              src="https://vuejs.org/images/logo.png" 
+              fit="contain" 
+              style="width: 80px; height: 80px;"
+            />
+            <h3>Pure Mall</h3>
+          </div>
+          <div class="footer-links">
+            <div class="link-group">
+              <h4>购物指南</h4>
+              <a href="#">购物流程</a>
+              <a href="#">会员介绍</a>
+              <a href="#">常见问题</a>
             </div>
-          </template>
-          <img src="https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png" class="image">
-          <div style="padding: 14px;">
-            <span>美味的汉堡</span>
-            <div class="bottom">
-              <el-button text class="button">查看详情</el-button>
+            <div class="link-group">
+              <h4>配送方式</h4>
+              <a href="#">上门自提</a>
+              <a href="#">配送服务</a>
+              <a href="#">运费说明</a>
+            </div>
+            <div class="link-group">
+              <h4>售后服务</h4>
+              <a href="#">退款说明</a>
+              <a href="#">保修政策</a>
+              <a href="#">取消订单</a>
             </div>
           </div>
-        </el-card>
-      </div>
+          <div class="footer-copyright">
+            <p>© 2023 Pure Mall. All rights reserved.</p>
+          </div>
+        </div>
+      </section>
     </div>
+
+
   </div>
 </template>
 
@@ -104,9 +175,41 @@ import {
   HomeFilled,
   Menu,
   ShoppingCart,
-  User
+  User,
+  Search,
+  More
 } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
+
+
+// data
+// 轮播图数据
+const carouselItems = ref([
+  {
+    id: 1,
+    title: "春季新品上市",
+    description: "简约设计，舒适体验",
+    image: "https://picsum.photos/1200/800?random=1"
+  },
+  {
+    id: 2,
+    title: "夏日清凉系列",
+    description: "透气材质，清爽一夏",
+    image: "https://picsum.photos/1200/800?random=2"
+  },
+  {
+    id: 3,
+    title: "秋季时尚搭配",
+    description: "温暖质感，优雅风格",
+    image: "https://picsum.photos/1200/800?random=3"
+  },
+  {
+    id: 4,
+    title: "冬季保暖精选",
+    description: "厚实面料，抵御严寒",
+    image: "https://picsum.photos/1200/800?random=4"
+  }
+])
 
 // 路由相关
 const route = useRoute()
@@ -115,10 +218,24 @@ const route = useRoute()
 const isMobile = ref(false)
 const drawerVisible = ref(false)
 const activeIndex = ref(route.path)
+const searchQuery = ref('') // 搜索关键词
 
+
+
+// methods
 // 检测屏幕宽度
 const checkScreenWidth = () => {
   isMobile.value = window.innerWidth < 768
+}
+
+
+// 处理搜索
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    console.log("执行搜索:", searchQuery.value)
+    // 这里可以添加实际的搜索逻辑
+    // 例如: 调用API搜索商品，或跳转到搜索结果页
+  }
 }
 
 // 菜单选择处理
@@ -129,6 +246,7 @@ const handleSelect = (index: string) => {
   if (isMobile.value) {
     drawerVisible.value = false
   }
+  
 }
 
 // 生命周期钩子
@@ -151,6 +269,7 @@ onBeforeUnmount(() => {
   min-height: 100vh;
 }
 
+/* 响应式菜单栏样式 */
 .responsive-menu {
   position: fixed;
   top: 0;
@@ -158,20 +277,23 @@ onBeforeUnmount(() => {
   right: 0;
   z-index: 1000;
   background-color: #fff;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .responsive-menu .logo {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1001;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
 }
 
 .responsive-menu .logo .el-image {
   width: 10px;
   height: 10px;
+}
+
+.responsive-menu .el-menu {
+  border-bottom: none !important;
 }
 
 .responsive-menu .el-menu > .el-menu-item:nth-child(1) {
@@ -183,6 +305,17 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
+/* 搜索下拉框样式 */
+.search-dropdown-content {
+  padding: 15px;
+  width: 300px;
+}
+
+.search-input {
+  width: 100%;
+}
+
+/* 侧栏样式 */
 .mobile-menu-toggle {
   padding: 10px;
   background-color: #fff;
@@ -190,71 +323,254 @@ onBeforeUnmount(() => {
 }
 
 .mobile-menu-toggle .el-button {
+  color: #000000;
+  background-color: #ffffff;
+  border: none;
   margin-left: 10px;
-  background-color: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .mobile-menu-toggle .el-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  color: rgb(64, 158, 255);
 }
 
 .mobile-menu {
   height: 100%;
 }
 
-.content {
-  margin-top: 60px; /* 为顶部菜单留出空间 */
-  padding: 20px;
-  flex: 1;
-  text-align: center;
+.scroll-container {
+  /* 全屏滑动 */
+  height: calc(100vh - 60px); /* 减去顶部菜单高度 */
+  overflow-y: auto; /* 启用滚动 */
+  scroll-snap-type: y mandatory; /* 关键属性 */
+  scroll-behavior: smooth; /* 平滑滚动 */
+  margin-top: 60px; /* 顶部菜单高度 */
 }
 
-.demo-content {
+/* 滚动区域 */
+.scroll-section {
+  height: calc(100vh - 60px); /* 每个区域占满一屏 */
+  min-height: calc(100vh - 60px);
+  scroll-snap-align: start; /* 关键属性 */
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.demo-card {
-  width: 240px;
+/* 轮播图区域 */
+.section-carousel {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
 }
 
-.image {
+.section-carousel {
+  position: relative;
+  padding: 0; /* 移除内边距 */
+}
+
+.fullscreen-carousel {
   width: 100%;
+  height: 100%; /* 占据整个父容器高度 */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.carousel-item {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3); /* 半透明遮罩 */
+  color: white;
+  padding: 20px;
+}
+
+
+/* 箭头导航样式 */
+:deep(.el-carousel__arrow) {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-carousel__arrow:hover) {
+  background-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+:deep(.el-carousel__arrow i) {
+  font-size: 20px;
+}
+
+/* 图片内容 */
+.section-cards {
+  background-color: skyblue;
+}
+
+/* 页脚区域 */
+.section-footer {
+  background-color: #2c3e50;
+  color: white;
+}
+
+.footer-content {
+  max-width: 1200px;
+  width: 100%;
+  padding: 40px 20px;
+}
+
+.footer-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.footer-logo h3 {
+  margin-top: 15px;
+  font-size: 1.8rem;
+  font-weight: 300;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.link-group {
+  min-width: 200px;
+  margin-bottom: 30px;
+}
+
+.link-group h4 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  font-weight: 400;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 10px;
+}
+
+.link-group a {
   display: block;
+  color: #bdc3c7;
+  margin-bottom: 10px;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.link-group a:hover {
+  color: white;
 }
 
-.bottom {
-  margin-top: 13px;
-  line-height: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.footer-copyright {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.button {
-  padding: 0;
-  min-height: auto;
+/* 动画定义 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 调整el-menu-item激活样式 */
+
+/* 桌面菜单激活状态 */
+.desktop-menu .el-menu-item:hover {
+  background-color: transparent !important;
+}
+
+/* 移动菜单激活状态 */
+/* .mobile-menu .el-menu-item:hover {
+  background-color: transparent !important;
+} */
 
 /* 响应式调整 */
-@media (max-width: 768px) {
-  .content {
-    margin-top: 50px; /* 移动端顶部按钮较小 */
+@media (max-width: 992px) {
+  .card-list {
+    gap: 20px;
   }
   
-  .demo-card {
-    width: 100%;
+  .featured-card {
+    width: 45%;
     max-width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+   .scroll-container {
+    height: calc(100vh - 50px); /* 减去顶部菜单高度 */
+    margin-top: 50px; /* 移动端顶部菜单较小 */
+    scroll-snap-type: none; /* 移动端禁用滚动捕捉 */
+  }
+  
+  .scroll-section {
+    height: calc(100vh - 50px);
+    min-height: calc(100vh - 50px);
+    padding: 80px 20px;
+  }
+  
+  .carousel-title {
+    font-size: 2.2rem;
+  }
+  
+  .carousel-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .carousel-image {
+    height: 300px;
+  }
+  
+  .featured-card {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 }
 
