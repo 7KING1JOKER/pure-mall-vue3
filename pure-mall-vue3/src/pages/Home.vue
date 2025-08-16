@@ -113,17 +113,37 @@
                 <div class="carousel-overlay">
                   <h3>{{ item.title }}</h3>
                   <p>{{ item.description }}</p>
-                  <el-button type="primary" size="small">查看详情</el-button>
                 </div>
               </div>
             </el-carousel-item>
           </el-carousel>
       </section>
 
-      <!-- 卡片列表区域 -->
+      <!-- 卡片列表区域1 -->
       <section class="scroll-section section-cards">
         <div class="card-list">
-          
+          <ImageCard
+            v-for="(card, index) in cards1" 
+            :key="index" 
+            :imageUrl="card.image" 
+            :title="card.title"
+            :overlayOpacity="0.7"
+            :titleColor="'white'"
+          />
+        </div>
+      </section>
+
+      <!-- 卡片列表区域2 -->
+      <section class="scroll-section section-cards">
+        <div class="card-list">
+          <ImageCard
+            v-for="(card, index) in cards2" 
+            :key="index" 
+            :imageUrl="card.image" 
+            :title="card.title"
+            :overlayOpacity="0.7"
+            :titleColor="'white'"
+          />
         </div>
       </section>
 
@@ -180,6 +200,7 @@ import {
   More
 } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
+import ImageCard from '../components/ImageCard.vue'
 
 
 // data
@@ -187,27 +208,50 @@ import { useRoute } from 'vue-router'
 const carouselItems = ref([
   {
     id: 1,
-    title: "春季新品上市",
+    title: "春",
     description: "简约设计，舒适体验",
     image: "https://picsum.photos/1200/800?random=1"
   },
   {
     id: 2,
-    title: "夏日清凉系列",
+    title: "夏",
     description: "透气材质，清爽一夏",
     image: "https://picsum.photos/1200/800?random=2"
   },
   {
     id: 3,
-    title: "秋季时尚搭配",
+    title: "秋",
     description: "温暖质感，优雅风格",
     image: "https://picsum.photos/1200/800?random=3"
   },
   {
     id: 4,
-    title: "冬季保暖精选",
+    title: "冬",
     description: "厚实面料，抵御严寒",
     image: "https://picsum.photos/1200/800?random=4"
+  }
+])
+
+// 卡片数据
+const cards1 = ref([
+  {
+    title: "春季",
+    image: "https://plus.unsplash.com/premium_photo-1675804669850-a1c3b87589d5?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    title: "夏日",
+    image: "https://images.unsplash.com/photo-1682685797229-b2930538da47?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHNjZW5lcnl8ZW58MHx8MHx8fDA%3D"
+  }
+])
+
+const cards2 = ref([
+  {
+    title: "秋季",
+    image: "https://images.unsplash.com/photo-1617634667039-8e4cb277ab46?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHNjZW5lcnl8ZW58MHx8MHx8fDA%3D"
+  },
+  {
+    title: "冬日",
+    image: "https://images.unsplash.com/photo-1504714146340-959ca07e1f38?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzN8fHNjZW5lcnl8ZW58MHx8MHx8fDA%3D"
   }
 ])
 
@@ -288,8 +332,8 @@ onBeforeUnmount(() => {
 }
 
 .responsive-menu .logo .el-image {
-  width: 10px;
-  height: 10px;
+  width: 50px !important;
+  height: 50px !important;
 }
 
 .responsive-menu .el-menu {
@@ -354,7 +398,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 60px;
   box-sizing: border-box;
 }
 
@@ -374,6 +418,10 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+.fullscreen-carousel:deep(.el-carousel__container) {
+  height: 100% !important;
 }
 
 .carousel-item {
@@ -404,6 +452,17 @@ onBeforeUnmount(() => {
   padding: 20px;
 }
 
+.carousel-overlay h3 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  animation: fadeInUp 1s ease forwards;
+}
+
+.carousel-overlay p {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  animation: fadeInUp 1s ease 0.3s forwards;
+}
 
 /* 箭头导航样式 */
 :deep(.el-carousel__arrow) {
@@ -424,9 +483,25 @@ onBeforeUnmount(() => {
   font-size: 20px;
 }
 
-/* 图片内容 */
+/* 图片list内容 */
 .section-cards {
   background-color: skyblue;
+  padding: 0;
+}
+
+.section-cards .card-list {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+}
+
+.card-list > * {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  transition: all 0.3s ease;
 }
 
 /* 页脚区域 */
@@ -490,28 +565,7 @@ onBeforeUnmount(() => {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* 动画定义 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 
 /* 调整el-menu-item激活样式 */
 
@@ -520,20 +574,15 @@ onBeforeUnmount(() => {
   background-color: transparent !important;
 }
 
-/* 移动菜单激活状态 */
-/* .mobile-menu .el-menu-item:hover {
-  background-color: transparent !important;
-} */
-
 /* 响应式调整 */
 @media (max-width: 992px) {
-  .card-list {
-    gap: 20px;
+  .section-cards .card-list {
+    flex-direction: column;
   }
   
-  .featured-card {
-    width: 45%;
-    max-width: 300px;
+  .card-list > * {
+    height: 50%; /* 移动端各占50%高度 */
+    min-height: 300px; /* 最小高度 */
   }
 }
 
@@ -562,11 +611,10 @@ onBeforeUnmount(() => {
     height: 300px;
   }
   
-  .featured-card {
-    width: 100%;
-    max-width: 350px;
+  .card-list > * {
+    min-height: 250px; /* 更小的屏幕调整最小高度 */
   }
-  
+
   .footer-links {
     flex-direction: column;
     align-items: center;
