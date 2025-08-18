@@ -369,20 +369,9 @@ onBeforeUnmount(() => {
 }
 
 /* 响应式调整 */
-@media (max-width: 992px) {
-  .section-cards .card-list {
-    flex-direction: column;
-  }
-  
-  .card-list > * {
-    height: 50%; /* 移动端各占50%高度 */
-    min-height: 300px; /* 最小高度 */
-  }
-}
-
 @media (max-width: 768px) {
    .scroll-container {
-    height: calc(100vh - 50px); /* 减去顶部菜单高度 */
+    height: calc(100vh - 52px); /* 减去顶部菜单高度 */
     margin-top: 50px; /* 移动端顶部菜单较小 */
     scroll-snap-type: none; /* 移动端禁用滚动捕捉 */
   }
@@ -390,7 +379,6 @@ onBeforeUnmount(() => {
   .scroll-section {
     height: calc(100vh - 50px);
     min-height: calc(100vh - 50px);
-    padding: 80px 20px;
   }
   
   .carousel-title {
@@ -404,9 +392,21 @@ onBeforeUnmount(() => {
   .carousel-image {
     height: 300px;
   }
-  
+
+  .section-cards {
+    padding: 0 !important;
+  }
+
+  .card-list {
+    flex-direction: column; /* 列表在小屏幕上垂直排列 */
+    height: 100%;
+  }
+
   .card-list > * {
-    min-height: 250px; /* 更小的屏幕调整最小高度 */
+    width: 100%; /* 每个卡片占满宽度 */
+    height: 100%; /* 每个卡片占满高度 */
+    min-height: calc(100vh - 50px); /* 每个卡片占满一屏 */
+    box-sizing: border-box;
   }
 
   .footer-links {
