@@ -83,9 +83,5 @@ defineProps({
   .image-title {
     font-size: 1.3rem;
   }
-
-  .image-container {
-    height: 100%; /* 继承父容器高度 */
-  }
 }
 </style>

@@ -330,6 +330,7 @@ onBeforeUnmount(() => {
 
 .section-carousel {
   position: relative;
+  min-height: calc(100vh - 60px); /* 确保轮播图区域占满屏幕 */
   padding: 0; /* 移除内边距 */
 }
 
@@ -343,12 +344,12 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: row;
+  flex-wrap: wrap;
   box-sizing: border-box;
 }
 
 .card-list > * {
-  flex: 1;
+  flex: 0 0 50%;
   min-width: 0;
   height: 100%;
   transition: all 0.3s ease;
@@ -371,16 +372,24 @@ onBeforeUnmount(() => {
 /* 响应式调整 */
 @media (max-width: 768px) {
    .scroll-container {
-    height: calc(100vh - 52px); /* 减去顶部菜单高度 */
-    margin-top: 50px; /* 移动端顶部菜单较小 */
+    height: auto;
+    min-height: calc(100vh - 50px); /* 减去顶部菜单高度 */
+    overflow-y: visible;
     scroll-snap-type: none; /* 移动端禁用滚动捕捉 */
   }
   
   .scroll-section {
-    height: calc(100vh - 50px);
-    min-height: calc(100vh - 50px);
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    display: block; /* 移动端使用块级布局 */
   }
   
+  .section-carousel {
+    height: calc(100vh - 50px); /* 确保轮播图区域占满屏幕 */
+    min-height: calc(100vh - 50px) !important; /* 确保轮播图区域占满屏幕 */
+  }
+
   .carousel-title {
     font-size: 2.2rem;
   }
@@ -393,20 +402,16 @@ onBeforeUnmount(() => {
     height: 300px;
   }
 
-  .section-cards {
-    padding: 0 !important;
-  }
-
   .card-list {
     flex-direction: column; /* 列表在小屏幕上垂直排列 */
-    height: 100%;
+    height: auto;
   }
 
   .card-list > * {
-    width: 100%; /* 每个卡片占满宽度 */
-    height: 100%; /* 每个卡片占满高度 */
-    min-height: calc(100vh - 50px); /* 每个卡片占满一屏 */
-    box-sizing: border-box;
+    width: 100%; /* 宽度占满视口 */
+    height: calc(100vh - 50px); /* 高度继承父容器 */
+    min-height: calc(100vh - 50px); /* 确保最小高度 */
+    flex: none;
   }
 
   .footer-links {
