@@ -4,3 +4,17 @@
     box-sizing: border-box;
     font-size: 2vmin;
 }
+
+
+/* 遮罩元素是挂载在 body 上的全局元素 */
+/* @register-dialog */
+.custom-register-mask {
+  background-color: rgba(255, 255, 255, 0.25) !important; /* 自定义模态背景颜色 */
+  -webkit-backdrop-filter: blur(4px); /* Safari 9+, iOS 9+ 支持 */
+  backdrop-filter: blur(4px); /* 添加模糊效果 */
+}
+
+.register-dialog .el-dialog {
+  background-color: transparent !important;
+  border: none !important;
+}

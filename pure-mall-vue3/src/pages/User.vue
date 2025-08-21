@@ -1,4 +1,5 @@
 <template>
+  <PcMenu />
   <div class="main-container">
     <!-- 侧边栏 -->
     <div class="sidebar">
@@ -23,9 +24,6 @@
         </div>
         <div class="nav-link" :class="{active: activeTab === 'wishlist'}" @click="activeTab = 'wishlist'">
           <i class="fas fa-heart"></i> 我的收藏
-        </div>
-        <div class="nav-link" @click="$router.push('/register')">
-          <i class="fas fa-cog"></i> 切换至注册页面
         </div>
       </div>
     </div>
@@ -134,77 +132,81 @@
   </div>
 </template>
 
-<script>
-import { ElTable, ElTableColumn, ElTag, ElButton, ElCard, ElRow, ElCol } from 'element-plus';
+<script setup>
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { 
+  ElTable, 
+  ElTableColumn, 
+  ElTag, 
+  ElButton, 
+  ElCard, 
+  ElRow, 
+  ElCol 
+} from 'element-plus'
+import PcMenu from '../components/PcMenu.vue'
 
-export default {
-  name: 'UserCenter',
-  components: {
-    ElTable,
-    ElTableColumn,
-    ElTag,
-    ElButton,
-    ElCard,
-    ElRow,
-    ElCol
+const router = useRouter()
+
+// 响应式数据
+const activeTab = ref('profile')
+const tabTitles = reactive({
+  profile: '个人资料',
+  orders: '我的订单',
+  address: '地址管理',
+  security: '账户安全',
+  wishlist: '我的收藏'
+})
+const orders = ref([
+  { id: '20230528001', date: '2023-05-28', product: 'Apple iPhone 14 Pro Max', amount: '¥8,999', status: '已完成' },
+  { id: '20230527002', date: '2023-05-27', product: 'Samsung Galaxy S23 Ultra', amount: '¥7,899', status: '待发货' },
+  { id: '20230525003', date: '2023-05-25', product: 'Sony WH-1000XM5 耳机', amount: '¥2,599', status: '已发货' },
+  { id: '20230520004', date: '2023-05-20', product: 'MacBook Pro 14英寸', amount: '¥14,999', status: '已完成' },
+  { id: '20230515005', date: '2023-05-15', product: 'Nike Air Jordan 1', amount: '¥1,299', status: '已取消' }
+])
+const addresses = ref([
+  {
+    name: '张明 (家)',
+    phone: '13800138000',
+    province: '北京市',
+    city: '北京市',
+    district: '朝阳区',
+    street: '建国路88号现代城A座1508室',
+    zip: '100022',
+    isDefault: true
   },
-  data() {
-    return {
-      activeTab: 'profile',
-      tabTitles: {
-        profile: '个人资料',
-        orders: '我的订单',
-        address: '地址管理',
-        security: '账户安全',
-        wishlist: '我的收藏'
-      },
-      orders: [
-        { id: '20230528001', date: '2023-05-28', product: 'Apple iPhone 14 Pro Max', amount: '¥8,999', status: '已完成' },
-        { id: '20230527002', date: '2023-05-27', product: 'Samsung Galaxy S23 Ultra', amount: '¥7,899', status: '待发货' },
-        { id: '20230525003', date: '2023-05-25', product: 'Sony WH-1000XM5 耳机', amount: '¥2,599', status: '已发货' },
-        { id: '20230520004', date: '2023-05-20', product: 'MacBook Pro 14英寸', amount: '¥14,999', status: '已完成' },
-        { id: '20230515005', date: '2023-05-15', product: 'Nike Air Jordan 1', amount: '¥1,299', status: '已取消' }
-      ],
-      addresses: [
-        {
-          name: '张明 (家)',
-          phone: '13800138000',
-          province: '北京市',
-          city: '北京市',
-          district: '朝阳区',
-          street: '建国路88号现代城A座1508室',
-          zip: '100022',
-          isDefault: true
-        },
-        {
-          name: '张明 (公司)',
-          phone: '13800138111',
-          province: '北京市',
-          city: '北京市',
-          district: '海淀区',
-          street: '中关村大街1号海龙大厦12层',
-          zip: '100080',
-          isDefault: false
-        }
-      ]
-    };
-  },
-  methods: {
-    statusType(status) {
-      const map = {
-        '已完成': 'success',
-        '待发货': 'warning',
-        '已发货': '',
-        '已取消': 'danger'
-      };
-      return map[status] || 'info';
-    }
+  {
+    name: '张明 (公司)',
+    phone: '13800138111',
+    province: '北京市',
+    city: '北京市',
+    district: '海淀区',
+    street: '中关村大街1号海龙大厦12层',
+    zip: '100080',
+    isDefault: false
   }
-};
+])
+
+// 方法
+const statusType = (status) => {
+  const map = {
+    '已完成': 'success',
+    '待发货': 'warning',
+    '已发货': '',
+    '已取消': 'danger'
+  }
+  return map[status] || 'info'
+}
 </script>
 
 <style scoped>
+/* 为导航栏添加阴影 */
+.responsive-menu {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
 .main-container {
+  margin-top: 60px;
   display: flex;
   flex: 1;
   padding: 20px;

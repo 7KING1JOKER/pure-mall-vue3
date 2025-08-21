@@ -15,11 +15,11 @@
       mode="horizontal" 
       class="desktop-menu"
       :default-active="activeIndex"
-      :router="true"
       :ellipsis="false"
+      :router="false"
       @select="handleSelect"
     >
-      <el-menu-item index="home" route="/">
+      <el-menu-item index="home">
         <el-icon><HomeFilled /></el-icon>
       </el-menu-item>
       
@@ -41,15 +41,15 @@
         </div>
       </el-sub-menu>
       
-      <el-menu-item index="category" route="/category">
+      <el-menu-item index="category">
         <el-icon><Menu /></el-icon>
       </el-menu-item>
       
-      <el-menu-item index="cart" route="/cart">
+      <el-menu-item index="cart">
         <el-icon><ShoppingCart /></el-icon>
       </el-menu-item>
       
-      <el-menu-item index="user" route="/user">
+      <el-menu-item index="user">
         <el-icon><User /></el-icon>
       </el-menu-item>
     </el-menu>
@@ -70,6 +70,7 @@
       v-model="drawerVisible" 
       direction="ltr" 
       size="30%"
+      :router="false"
       :with-header="false"
     >
       <el-menu 
@@ -95,12 +96,28 @@
         </el-menu-item>
       </el-menu>
     </el-drawer>
+
+    <!-- 注册弹窗组件 -->
+    <RegisterDialog 
+      v-model:visible="registerDialogVisible" 
+      @success="handleRegisterSuccess"
+      @to-login="openLoginDialog"
+      @cancel="handleRegisterCancel"
+    />
+    
+    <!-- 登录弹窗组件 -->
+    <LoginDialog 
+      v-model:visible="loginDialogVisible" 
+      @success="handleLoginSuccess"
+      @cancel="handleLoginCancel"
+    />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   HomeFilled,
   Menu,
@@ -112,12 +129,17 @@ import {
 
 // 路由相关
 const route = useRoute()
+const router = useRouter()
 
 // 响应式状态
 const isMobile = ref(false)
 const drawerVisible = ref(false)
 const activeIndex = ref(route.path)
 const searchQuery = ref('') // 搜索关键词
+
+const isLoggedIn = ref(false) // 假设用户登录状态
+const registerDialogVisible = ref(false) // 注册弹窗状态
+const loginDialogVisible = ref(false) // 登录弹窗状态
 
 // 检测屏幕宽度
 const checkScreenWidth = () => {
@@ -136,12 +158,82 @@ const handleSearch = () => {
 // 菜单选择处理
 const handleSelect = (index: string) => {
   activeIndex.value = index
+
+  // 处理user路由跳转
+  if(index === 'user') {
+    handleUserClick()
+    return
+  }
+
   console.log(`导航到: ${index}`)
+
+  // 实际导航
+  switch (index) {
+    case 'home':
+      router.push('/')
+      break
+    case 'categories':
+      router.push('/categories')
+      break
+    case 'cart':
+      router.push('/cart')
+      break
+    default:
+      console.warn(`未知菜单项: ${index}`)
+      break
+  }
+
+  if (isMobile.value) {
+    drawerVisible.value = false // 关闭抽屉菜单
+  }
+}
+
+// 处理用户点击
+const handleUserClick = () => {
+  // 检查用户是否登录 - 这里应该是从全局状态获取
+  
+  if (isLoggedIn.value) {
+    router.push('/user')
+  } else {
+    // 显示注册弹窗
+    registerDialogVisible.value = true
+  }
   
   // 在移动端选择后关闭抽屉
   if (isMobile.value) {
     drawerVisible.value = false
   }
+}
+
+// 注册成功处理
+const handleRegisterSuccess = (userData: { username: string; email: string }) => {
+  console.log('注册成功:', userData)
+  // 这里可以保存用户信息到全局状态
+}
+
+// 打开登录弹窗
+const openLoginDialog = () => {
+  loginDialogVisible.value = true
+}
+
+// 注册取消处理
+const handleRegisterCancel = () => {
+  console.log('注册已取消')
+}
+
+// 登录成功处理
+const handleLoginSuccess = (userData: { username: string }) => {
+  console.log('登录成功:', userData)
+  // 更新登录状态
+  isLoggedIn.value = true
+  
+  // 跳转到用户中心
+  router.push('/user')
+}
+
+// 登录取消处理
+const handleLoginCancel = () => {
+  console.log('登录已取消')
 }
 
 // 生命周期钩子

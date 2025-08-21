@@ -32,25 +32,25 @@ const carouselItems = ref([
     id: 1,
     title: "春",
     description: "简约设计，舒适体验",
-    image: "https://picsum.photos/1200/800?random=1"
+    image: "https://images.unsplash.com/photo-1640406896486-532488702c4c?q=80&w=980&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   },
   {
     id: 2,
     title: "夏",
     description: "透气材质，清爽一夏",
-    image: "https://picsum.photos/1200/800?random=2"
+    image: "https://images.unsplash.com/photo-1604513830532-8fce22d9941f?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   },
   {
     id: 3,
     title: "秋",
     description: "温暖质感，优雅风格",
-    image: "https://picsum.photos/1200/800?random=3"
+    image: "https://images.unsplash.com/photo-1505898683753-a875a57542e4?q=80&w=995&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   },
   {
     id: 4,
     title: "冬",
     description: "厚实面料，抵御严寒",
-    image: "https://picsum.photos/1200/800?random=4"
+    image: "https://images.unsplash.com/photo-1741604047914-5805eb7ff554?q=80&w=1020&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   }
 ])
 

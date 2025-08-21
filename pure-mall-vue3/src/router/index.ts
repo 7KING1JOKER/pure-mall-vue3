@@ -25,12 +25,6 @@ const routes = [
     name: 'User',
     component: () => import('@/pages/User.vue'),
     meta: { title: '个人' }
-  },
-  {
-    path: '/register',
-    name: 'Register',
-    component: () => import('@/pages/Register.vue'),
-    meta: { title: '注册' }
   }
 ]
 
