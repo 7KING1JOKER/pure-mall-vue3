@@ -7,6 +7,7 @@
 
 
 /* 遮罩元素是挂载在 body 上的全局元素 */
+
 /* @register-dialog */
 .custom-register-mask {
   background-color: rgba(255, 255, 255, 0.25) !important; /* 自定义模态背景颜色 */
@@ -16,5 +17,11 @@
 
 .register-dialog .el-dialog {
   background-color: transparent !important;
-  border: none !important;
 }
+
+/* @login-dialog */
+.login-dialog .el-dialog {
+  background-color: transparent !important;
+}
+
+

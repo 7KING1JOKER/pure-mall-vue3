@@ -15,58 +15,90 @@
         </div>
         
         <el-form ref="formRef" :model="formData" :rules="rules" class="register-form">
+          <!-- 用户名输入框 -->
           <el-form-item prop="username">
-            <el-input 
-              v-model="formData.username" 
-              placeholder="用户名"
-              size="large"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><User /></el-icon>
-              </template>
-            </el-input>
+            <div class="input-container">
+              <el-input 
+                v-model="formData.username" 
+                placeholder="用户名"
+                size="large"
+                clearable
+                @input="updateUnderline('username')"
+                @focus="activeInput = 'username'"
+              >
+                <template #prefix>
+                  <el-icon><User /></el-icon>
+                </template>
+              </el-input>
+              <div class="input-underline" :class="{ active: activeInput === 'username' }">
+                <div class="dynamic-underline" :style="{ width: `${usernameWidth}px` }"></div>
+              </div>
+            </div>
           </el-form-item>
           
+          <!-- 邮箱输入框 -->
           <el-form-item prop="email">
-            <el-input 
-              v-model="formData.email" 
-              placeholder="邮箱地址"
-              size="large"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><Message /></el-icon>
-              </template>
-            </el-input>
+            <div class="input-container">
+              <el-input 
+                v-model="formData.email" 
+                placeholder="邮箱地址"
+                size="large"
+                clearable
+                @input="updateUnderline('email')"
+                @focus="activeInput = 'email'"
+              >
+                <template #prefix>
+                  <el-icon><Message /></el-icon>
+                </template>
+              </el-input>
+              <div class="input-underline" :class="{ active: activeInput === 'email' }">
+                <div class="dynamic-underline" :style="{ width: `${emailWidth}px` }"></div>
+              </div>
+            </div>
           </el-form-item>
           
+          <!-- 密码输入框 -->
           <el-form-item prop="password">
-            <el-input 
-              v-model="formData.password" 
-              type="password" 
-              placeholder="设置密码"
-              size="large"
-              show-password
-            >
-              <template #prefix>
-                <el-icon><Lock /></el-icon>
-              </template>
-            </el-input>
+            <div class="input-container">
+              <el-input 
+                v-model="formData.password" 
+                type="password" 
+                placeholder="设置密码"
+                size="large"
+                show-password
+                @input="updateUnderline('password')"
+                @focus="activeInput = 'password'"
+              >
+                <template #prefix>
+                  <el-icon><Lock /></el-icon>
+                </template>
+              </el-input>
+              <div class="input-underline" :class="{ active: activeInput === 'password' }">
+                <div class="dynamic-underline" :style="{ width: `${passwordWidth}px` }"></div>
+              </div>
+            </div>
           </el-form-item>
           
+          <!-- 确认密码输入框 -->
           <el-form-item prop="confirmPassword">
-            <el-input 
-              v-model="formData.confirmPassword" 
-              type="password" 
-              placeholder="确认密码"
-              size="large"
-              show-password
-            >
-              <template #prefix>
-                <el-icon><Lock /></el-icon>
-              </template>
-            </el-input>
+            <div class="input-container">
+              <el-input 
+                v-model="formData.confirmPassword" 
+                type="password" 
+                placeholder="确认密码"
+                size="large"
+                show-password
+                @input="updateUnderline('confirmPassword')"
+                @focus="activeInput = 'confirmPassword'"
+              >
+                <template #prefix>
+                  <el-icon><Lock /></el-icon>
+                </template>
+              </el-input>
+              <div class="input-underline" :class="{ active: activeInput === 'confirmPassword' }">
+                <div class="dynamic-underline" :style="{ width: `${confirmPasswordWidth}px` }"></div>
+              </div>
+            </div>
           </el-form-item>
           
           <div class="form-footer">
@@ -91,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
 import { User, Message, Lock } from '@element-plus/icons-vue'
 
@@ -153,6 +185,58 @@ const rules = reactive<FormRules>({
   ]
 })
 
+// 动态下划线相关状态
+const activeInput = ref('')
+const usernameWidth = ref(0)
+const emailWidth = ref(0)
+const passwordWidth = ref(0)
+const confirmPasswordWidth = ref(0)
+
+// 创建测量元素
+const measureSpan = document.createElement('span')
+measureSpan.style.visibility = 'hidden'
+measureSpan.style.position = 'absolute'
+measureSpan.style.whiteSpace = 'pre'
+measureSpan.style.font = 'inherit'
+document.body.appendChild(measureSpan)
+
+// 更新下划线宽度
+const updateUnderline = (field: keyof typeof formData) => {
+  nextTick(() => {
+    const text = formData[field]
+    if (!text) {
+      // 文本为空时宽度为0
+      if (field === 'username') usernameWidth.value = 0
+      if (field === 'email') emailWidth.value = 0
+      if (field === 'password') passwordWidth.value = 0
+      if (field === 'confirmPassword') confirmPasswordWidth.value = 0
+      return
+    }
+    
+    // 设置测量元素的字体样式
+    const input = document.querySelector(`.input-container:nth-child(${
+      field === 'username' ? 1 : 
+      field === 'email' ? 2 : 
+      field === 'password' ? 3 : 4
+    }) .el-input__inner`)
+    
+    if (input) {
+      const computedStyle = window.getComputedStyle(input)
+      measureSpan.style.font = computedStyle.font
+    }
+    
+    // 测量文本宽度
+    measureSpan.textContent = text
+    const width = measureSpan.offsetWidth
+    
+    // 更新对应字段的下划线宽度
+    if (field === 'username') usernameWidth.value = width
+    if (field === 'email') emailWidth.value = width
+    if (field === 'password') passwordWidth.value = width
+    if (field === 'confirmPassword') confirmPasswordWidth.value = width
+  })
+}
+
 // 提交表单
 const submit = async () => {
   const valid = await formRef.value?.validate()
@@ -198,10 +282,17 @@ const goToLogin = () => {
   visible.value = false
   emit('to-login')
 }
+
+// 组件卸载时移除测量元素
+onMounted(() => {
+  updateUnderline('username')
+  updateUnderline('email')
+  updateUnderline('password')
+  updateUnderline('confirmPassword')
+})
 </script>
 
 <style scoped>
-
 /* 对话框内容容器 */
 .register-content {
   padding: 20px;
@@ -220,11 +311,6 @@ const goToLogin = () => {
   margin-bottom: 8px;
 }
 
-.register-header p {
-  color: #666;
-  font-size: 0.95rem;
-}
-
 /* 表单样式 */
 .register-form {
   margin-top: 20px;
@@ -235,27 +321,66 @@ const goToLogin = () => {
   margin-bottom: 24px;
 }
 
+/* 输入框容器 */
+.input-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
 /* 输入框样式 */
 .register-form :deep(.el-input) {
-  --el-input-bg-color: #ffffff;
-  --el-input-border: 1px solid #ffffff;
-  --el-input-hover-border: #c0c0c0;
-  --el-input-focus-border: #409eff;
+  --el-input-bg-color: transparent;
   --el-input-border-radius: 8px;
   --el-input-padding: 0 15px;
+}
+
+.register-form :deep(.el-input__wrapper) {
+  box-shadow: none !important; /* 去除默认阴影(边框) */
 }
 
 .register-form :deep(.el-input__inner) {
   height: 48px;
   line-height: 48px;
   font-size: 0.95rem;
+  text-align: left;
 }
 
 .register-form :deep(.el-input__prefix) {
   display: flex;
   align-items: center;
   padding-left: 10px;
+  color: #999;
+  transition: color 0.3s;
 }
+
+.register-form :deep(.el-input.is-focus .el-input__prefix) {
+  color: #409eff;
+}
+
+/* 下划线容器 */
+.input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 52px;
+  width: 80%;
+  height: 2px;
+  background-color: #fff;
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+/* 动态下划线 */
+.dynamic-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: #333;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
 
 /* 注册按钮样式 */
 .register-btn {
@@ -265,29 +390,31 @@ const goToLogin = () => {
   border-radius: 8px;
   margin-top: 10px;
   font-size: 1rem;
-  background-color: #409eff;
+  background-color: transparent;
+  color: #ffffffb7;
   border: none;
   transition: all 0.3s ease;
 }
 
 .register-btn:hover {
-  background-color: #66b1ff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(64, 158, 255, 0.3);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 /* 登录提示样式 */
 .login-hint {
   text-align: center;
   margin-top: 20px;
-  color: #666;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
   font-size: 0.95rem;
 }
 
 .login-hint .el-link {
+  text-shadow: none;
   margin-left: 5px;
   font-weight: 500;
+  color: #ffffffb7;
+  text-decoration-color: #333 !important;
 }
-
 </style>
-

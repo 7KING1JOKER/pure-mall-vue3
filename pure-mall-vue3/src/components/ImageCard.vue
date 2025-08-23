@@ -70,18 +70,12 @@ defineProps({
 
 /* 响应式调整 */
 @media (max-width: 992px) {
-  .image-title {
-    font-size: 1.5rem;
-  }
+  
 }
 
 @media (max-width: 768px) {
   .image-info {
     padding: 15px;
-  }
-  
-  .image-title {
-    font-size: 1.3rem;
   }
 }
 </style>

@@ -38,6 +38,7 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     Footer: typeof import('./src/components/Footer.vue')['default']
     ImageCard: typeof import('./src/components/ImageCard.vue')['default']
+    InputDecoration: typeof import('./src/components/InputDecoration.vue')['default']
     LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
     PcMenu: typeof import('./src/components/PcMenu.vue')['default']
     RegisterDialog: typeof import('./src/components/RegisterDialog.vue')['default']
