@@ -48,11 +48,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref} from 'vue'
-import PcMenu from '../components/PcMenu.vue'
+import { ref } from 'vue'
+import PcMenu from '../layouts/PcMenu.vue'
+import Footer from '../layouts/Footer.vue'
 import ImageCard from '../components/ImageCard.vue'
 import Carousel from '../components/Carousel.vue'
-
 
 // data
 // 卡片数据

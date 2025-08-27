@@ -6,6 +6,16 @@
 }
 
 
+/* 去除element-plus的默认样式 */
+.el-menu-item,
+.el-menu-item:hover,
+.el-menu-item.is-active {
+  color: inherit !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
+}
+
 /* 遮罩元素是挂载在 body 上的全局元素 */
 
 /* @register-dialog */

@@ -16,7 +16,7 @@
         
         <el-form ref="formRef" :model="formData" :rules="rules" class="register-form">
           <!-- 用户名输入框 -->
-          <el-form-item prop="username">
+          <el-form-item prop="username" class="prop-username">
             <div class="input-container">
               <el-input 
                 v-model="formData.username" 
@@ -25,6 +25,7 @@
                 clearable
                 @input="updateUnderline('username')"
                 @focus="activeInput = 'username'"
+                @blur="(e: Event) => updateUnderline('username', e)"
               >
                 <template #prefix>
                   <el-icon><User /></el-icon>
@@ -37,7 +38,7 @@
           </el-form-item>
           
           <!-- 邮箱输入框 -->
-          <el-form-item prop="email">
+          <el-form-item prop="email" class="prop-email">
             <div class="input-container">
               <el-input 
                 v-model="formData.email" 
@@ -46,6 +47,7 @@
                 clearable
                 @input="updateUnderline('email')"
                 @focus="activeInput = 'email'"
+                @blur="(e: Event) => updateUnderline('email', e)"
               >
                 <template #prefix>
                   <el-icon><Message /></el-icon>
@@ -58,7 +60,7 @@
           </el-form-item>
           
           <!-- 密码输入框 -->
-          <el-form-item prop="password">
+          <el-form-item prop="password" class="prop-password">
             <div class="input-container">
               <el-input 
                 v-model="formData.password" 
@@ -68,6 +70,7 @@
                 show-password
                 @input="updateUnderline('password')"
                 @focus="activeInput = 'password'"
+                @blur="(e: Event) => updateUnderline('password', e)"
               >
                 <template #prefix>
                   <el-icon><Lock /></el-icon>
@@ -80,7 +83,7 @@
           </el-form-item>
           
           <!-- 确认密码输入框 -->
-          <el-form-item prop="confirmPassword">
+          <el-form-item prop="confirmPassword" class="prop-confirmPassword">
             <div class="input-container">
               <el-input 
                 v-model="formData.confirmPassword" 
@@ -90,6 +93,7 @@
                 show-password
                 @input="updateUnderline('confirmPassword')"
                 @focus="activeInput = 'confirmPassword'"
+                @blur="(e: Event) => updateUnderline('confirmPassword', e)"
               >
                 <template #prefix>
                   <el-icon><Lock /></el-icon>
@@ -201,11 +205,28 @@ measureSpan.style.font = 'inherit'
 document.body.appendChild(measureSpan)
 
 // 更新下划线宽度
-const updateUnderline = (field: keyof typeof formData) => {
+const updateUnderline = (field: keyof typeof formData, event?: Event) => {
   nextTick(() => {
     const text = formData[field]
+    const isBlurEvent = event?.type === 'blur'
+    
+    // 获取对应的input元素
+    const inputContainer = document.querySelector(`.el-form-item.prop-${field} .input-container`) as HTMLElement
+    const input = inputContainer?.querySelector('.el-input__inner') as HTMLElement
+    
+    // 如果输入框失去焦点且内容不为空，设置宽度为100%
+    if (isBlurEvent && text && input) {
+      const inputWidth = input.offsetWidth
+      if (field === 'username') usernameWidth.value = inputWidth
+      if (field === 'email') emailWidth.value = inputWidth
+      // 密码框宽度稍微大一点: 额外的切换按钮 or 密码输入框的DOM结构不同
+      if (field === 'password') passwordWidth.value = inputWidth + 20
+      if (field === 'confirmPassword') confirmPasswordWidth.value = inputWidth + 20
+      return
+    }
+    
+    // 文本为空时宽度为0
     if (!text) {
-      // 文本为空时宽度为0
       if (field === 'username') usernameWidth.value = 0
       if (field === 'email') emailWidth.value = 0
       if (field === 'password') passwordWidth.value = 0
@@ -214,12 +235,6 @@ const updateUnderline = (field: keyof typeof formData) => {
     }
     
     // 设置测量元素的字体样式
-    const input = document.querySelector(`.input-container:nth-child(${
-      field === 'username' ? 1 : 
-      field === 'email' ? 2 : 
-      field === 'password' ? 3 : 4
-    }) .el-input__inner`)
-    
     if (input) {
       const computedStyle = window.getComputedStyle(input)
       measureSpan.style.font = computedStyle.font

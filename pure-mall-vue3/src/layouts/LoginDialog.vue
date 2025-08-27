@@ -15,43 +15,45 @@
         </div>
         
         <el-form ref="formRef" :model="formData" :rules="rules" class="login-form">
-          <el-form-item prop="username">
+          <el-form-item prop="loginUserName" class="prop-loginUserName">
             <div class="input-container">
               <el-input 
-                v-model="formData.username" 
+                v-model="formData.loginUserName" 
                 placeholder="用户名"
                 size="large"
                 clearable
-                @input="updateUnderline('username')"
-                @focus="activeInput = 'username'"
+                @input="updateUnderline('loginUserName')"
+                @focus="activeInput = 'loginUserName'"
+                @blur="(e: Event) => updateUnderline('loginUserName', e)"
               >
                 <template #prefix>
                   <el-icon><User /></el-icon>
                 </template>
               </el-input>
-              <div class="input-underline" :class="{ active: activeInput === 'username' }">
-                <div class="dynamic-underline" :style="{ width: `${usernameWidth}px` }"></div>
+              <div class="input-underline" :class="{ active: activeInput === 'loginUserName' }">
+                <div class="dynamic-underline" :style="{ width: `${loginUserNameWidth}px` }"></div>
               </div>
             </div>
           </el-form-item>
           
-          <el-form-item prop="password">
+          <el-form-item prop="loginPassWord" class="prop-loginPassWord">
             <div class="input-container">
               <el-input 
-                v-model="formData.password" 
-                type="password" 
+                v-model="formData.loginPassWord" 
+                type="loginPassWord" 
                 placeholder="密码"
                 size="large"
-                show-password
-                @input="updateUnderline('password')"
-                @focus="activeInput = 'password'"
+                show-loginPassWord
+                @input="updateUnderline('loginPassWord')"
+                @focus="activeInput = 'loginPassWord'"
+                @blur="(e: Event) => updateUnderline('loginPassWord', e)"
               >
                 <template #prefix>
                   <el-icon><Lock /></el-icon>
                 </template>
               </el-input>
-              <div class="input-underline" :class="{ active: activeInput === 'password' }">
-                <div class="dynamic-underline" :style="{ width: `${passwordWidth}px` }"></div>
+              <div class="input-underline" :class="{ active: activeInput === 'loginPassWord' }">
+                <div class="dynamic-underline" :style="{ width: `${loginPassWordWidth}px` }"></div>
               </div>
             </div>
           </el-form-item>
@@ -83,8 +85,8 @@ const visible = defineModel<boolean>('visible', { required: true })
 
 // 表单数据
 const formData = reactive({
-  username: '',
-  password: ''
+  loginUserName: '',
+  loginPassWord: ''
 })
 
 // 表单引用
@@ -92,11 +94,11 @@ const formRef = ref<FormInstance | null>(null)
 
 // 验证规则
 const rules = reactive<FormRules>({
-  username: [
+  loginUserName: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 16, message: '用户名长度在3到16个字符', trigger: 'blur' }
   ],
-  password: [
+  loginPassWord: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 8, message: '密码长度至少8位', trigger: 'blur' }
   ]
@@ -104,8 +106,8 @@ const rules = reactive<FormRules>({
 
 // 动态下划线相关状态
 const activeInput = ref('')
-const usernameWidth = ref(0)
-const passwordWidth = ref(0)
+const loginUserNameWidth = ref(0)
+const loginPassWordWidth = ref(0)
 
 // 创建测量元素
 const measureSpan = document.createElement('span')
@@ -116,21 +118,31 @@ measureSpan.style.font = 'inherit'
 document.body.appendChild(measureSpan)
 
 // 更新下划线宽度
-const updateUnderline = (field: keyof typeof formData) => {
+const updateUnderline = (field: keyof typeof formData, event?: Event) => {
   nextTick(() => {
     const text = formData[field]
-    if (!text) {
-      // 文本为空时宽度为0
-      if (field === 'username') usernameWidth.value = 0
-      if (field === 'password') passwordWidth.value = 0
+    const isBlurEvent = event?.type === 'blur'
+
+    // 获取对应的input元素
+    const inputContainer = document.querySelector(`.el-form-item.prop-${field} .input-container`) as HTMLElement
+    const input = inputContainer?.querySelector('.el-input__inner') as HTMLElement
+    
+    // 如果输入框失去焦点且内容不为空，设置宽度为100%
+    if (isBlurEvent && text && input) {
+      const inputWidth = input.offsetWidth
+      if (field === 'loginUserName') loginUserNameWidth.value = inputWidth
+      // 密码框宽度稍微大一点: 额外的切换按钮 or 密码输入框的DOM结构不同
+      if (field === 'loginPassWord') loginPassWordWidth.value = inputWidth + 20
       return
     }
     
-    // 设置测量元素的字体样式
-    const input = document.querySelector(`.input-container:nth-child(${
-      field === 'username' ? 1 : 
-      2
-    }) .el-input__inner`)
+    // 文本为空时宽度为0
+    if (!text) {
+      if (field === 'loginUserName') loginUserNameWidth.value = 0
+      if (field === 'loginPassWord') loginPassWordWidth.value = 0
+      return
+    }
+    
     
     if (input) {
       const computedStyle = window.getComputedStyle(input)
@@ -142,8 +154,8 @@ const updateUnderline = (field: keyof typeof formData) => {
     const width = measureSpan.offsetWidth
     
     // 更新对应字段的下划线宽度
-    if (field === 'username') usernameWidth.value = width
-    if (field === 'password') passwordWidth.value = width
+    if (field === 'loginUserName') loginUserNameWidth.value = width
+    if (field === 'loginPassWord') loginPassWordWidth.value = width
   })
 }
 
@@ -165,7 +177,7 @@ const submit = async () => {
     
     // 通知父组件登录成功
     emit('success', {
-      username: formData.username
+      loginUserName: formData.loginUserName
     })
     
     // 清空表单
@@ -183,8 +195,8 @@ const submit = async () => {
 }
 
 onMounted(() => {
-  updateUnderline('username')
-  updateUnderline('password')
+  updateUnderline('loginUserName')
+  updateUnderline('loginPassWord')
 })
 
 </script>

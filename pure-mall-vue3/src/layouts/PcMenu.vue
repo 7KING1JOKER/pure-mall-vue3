@@ -19,7 +19,7 @@
       :router="false"
       @select="handleSelect"
     >
-      <el-menu-item index="home">
+      <el-menu-item index="/">
         <el-icon><HomeFilled /></el-icon>
       </el-menu-item>
       
@@ -41,15 +41,15 @@
         </div>
       </el-sub-menu>
       
-      <el-menu-item index="category">
+      <el-menu-item index="/category">
         <el-icon><Menu /></el-icon>
       </el-menu-item>
       
-      <el-menu-item index="cart">
+      <el-menu-item index="/cart">
         <el-icon><ShoppingCart /></el-icon>
       </el-menu-item>
       
-      <el-menu-item index="user">
+      <el-menu-item index="/user">
         <el-icon><User /></el-icon>
       </el-menu-item>
     </el-menu>
@@ -78,20 +78,28 @@
         :default-active="activeIndex"
         @select="handleSelect"
       >
-        <el-menu-item index="home">
-          <el-icon><HomeFilled /></el-icon>
+        <el-menu-item index="/">
+          <el-icon>
+            <HomeFilled />
+          </el-icon>
           <span>首页</span>
         </el-menu-item>
-        <el-menu-item index="categories">
-          <el-icon><Menu /></el-icon>
+        <el-menu-item index="/category">
+          <el-icon>
+            <Menu />
+          </el-icon>
           <span>分类</span>
         </el-menu-item>
-        <el-menu-item index="cart">
-          <el-icon><ShoppingCart /></el-icon>
+        <el-menu-item index="/cart">
+          <el-icon>
+            <ShoppingCart />
+          </el-icon>
           <span>购物车</span>
         </el-menu-item>
-        <el-menu-item index="profile">
-          <el-icon><User /></el-icon>
+        <el-menu-item index="/user">
+          <el-icon>
+            <User />
+          </el-icon>
           <span>我的</span>
         </el-menu-item>
       </el-menu>
@@ -116,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   HomeFilled,
@@ -126,6 +134,9 @@ import {
   Search,
   More
 } from '@element-plus/icons-vue'
+
+import RegisterDialog from '../layouts/RegisterDialog.vue'
+import LoginDialog from '../layouts/LoginDialog.vue'
 
 // 路由相关
 const route = useRoute()
@@ -140,6 +151,7 @@ const searchQuery = ref('') // 搜索关键词
 const isLoggedIn = ref(false) // 假设用户登录状态
 const registerDialogVisible = ref(false) // 注册弹窗状态
 const loginDialogVisible = ref(false) // 登录弹窗状态
+console.log('当前路由路径:', activeIndex.value)
 
 // 检测屏幕宽度
 const checkScreenWidth = () => {
@@ -160,28 +172,14 @@ const handleSelect = (index: string) => {
   activeIndex.value = index
 
   // 处理user路由跳转
-  if(index === 'user') {
+  if(index === '/user') {
     handleUserClick()
     return
   }
 
   console.log(`导航到: ${index}`)
 
-  // 实际导航
-  switch (index) {
-    case 'home':
-      router.push('/')
-      break
-    case 'categories':
-      router.push('/categories')
-      break
-    case 'cart':
-      router.push('/cart')
-      break
-    default:
-      console.warn(`未知菜单项: ${index}`)
-      break
-  }
+  router.push(index)
 
   if (isMobile.value) {
     drawerVisible.value = false // 关闭抽屉菜单
@@ -283,6 +281,13 @@ onBeforeUnmount(() => {
   margin-right: auto;
 }
 
+/* 激活状态样式 */
+.responsive-menu :deep(.el-menu-item.is-active) .el-icon {
+  color: #409eff !important;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
 .mobile-menu-toggle {
   padding: 10px;
   background-color: #fff;
@@ -315,6 +320,7 @@ onBeforeUnmount(() => {
     display: none;
   }
 }
+
 </style>
 
 <style>

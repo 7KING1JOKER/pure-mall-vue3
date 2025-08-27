@@ -144,7 +144,7 @@ import {
   ElRow, 
   ElCol 
 } from 'element-plus'
-import PcMenu from '../components/PcMenu.vue'
+import PcMenu from '../layouts/PcMenu.vue'
 
 const router = useRouter()
 
