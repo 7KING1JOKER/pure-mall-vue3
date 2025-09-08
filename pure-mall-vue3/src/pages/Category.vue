@@ -1,5 +1,4 @@
 <template>
-  <div>
     <div class="category-container">
       <!-- 响应式菜单 -->
       <PcMenu />
@@ -105,7 +104,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script lang="ts" setup>
@@ -288,7 +286,6 @@ onMounted(() => {
   width: 100%;
   height: calc(100vh - 60px);
   overflow-y: auto;
-  background-color: #d4c7c7;
 }
 
 .breadcrumb {

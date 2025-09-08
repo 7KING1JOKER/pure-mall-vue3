@@ -309,7 +309,6 @@ onMounted(() => {
 .cart-container {
   width: 100%;
   height: calc(100vh - 60px);
-  background-color: #d4c7c7;
   margin: 60px auto 0;
   padding: 20px;
   overflow-y: auto;

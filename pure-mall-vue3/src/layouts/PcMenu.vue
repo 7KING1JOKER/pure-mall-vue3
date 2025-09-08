@@ -281,11 +281,15 @@ onBeforeUnmount(() => {
   margin-right: auto;
 }
 
+/* 默认状态样式 */
+.responsive-menu :deep(.el-menu-item) .el-icon {
+  transform: translateY(0);
+}
+
 /* 激活状态样式 */
 .responsive-menu :deep(.el-menu-item.is-active) .el-icon {
   color: #409eff !important;
-  transform: translateY(-2px);
-  transition: all 0.3s ease;
+  transform: translateY(-4px);
 }
 
 .mobile-menu-toggle {
