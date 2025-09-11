@@ -32,19 +32,19 @@
       >
         <el-menu-item index="profile">
           <el-icon><User /></el-icon>
-          <span>个人资料</span>
+          <span :class="{ 'through-line': activeTab === 'profile' }">个人资料</span>
         </el-menu-item>
         <el-menu-item index="orders">
           <el-icon><ShoppingCart /></el-icon>
-          <span>我的订单</span>
+          <span :class="{ 'through-line': activeTab === 'orders' }">我的订单</span>
         </el-menu-item>
         <el-menu-item index="address">
           <el-icon><Location /></el-icon>
-          <span>地址管理</span>
+          <span :class="{ 'through-line': activeTab === 'address' }">地址管理</span>
         </el-menu-item>
         <el-menu-item index="wishlist">
           <el-icon><Star /></el-icon>
-          <span>我的收藏</span>
+          <span :class="{ 'through-line': activeTab === 'wishlist' }">我的收藏</span>
         </el-menu-item>
       </el-menu>
     </div>
@@ -65,25 +65,39 @@
       </template>
       
       <!-- 个人资料 -->
-      <div v-if="activeTab === 'profile'">
+      <div v-if="activeTab === 'profile'" class="profile-section">
         <el-descriptions title="基本信息" :column="2" border>
-          <el-descriptions-item label="用户名">张明</el-descriptions-item>
-          <el-descriptions-item label="邮箱">zhangming@example.com</el-descriptions-item>
-          <el-descriptions-item label="手机">13800138000</el-descriptions-item>
-          <el-descriptions-item label="性别">男</el-descriptions-item>
-          <el-descriptions-item label="生日">1990-05-15</el-descriptions-item>
+          <el-descriptions-item
+            v-for="(item, index) in basicInfo"
+            :key="index"
+            :label="item.label"
+            label-class-name="profile-label"
+            class-name="profile-content"
+          >
+            {{ item.value }}
+          </el-descriptions-item>
         </el-descriptions>
         
         <el-descriptions title="会员信息" :column="2" border style="margin-top: 20px;">
-          <el-descriptions-item label="会员等级">黄金会员</el-descriptions-item>
-          <el-descriptions-item label="积分">3,850 分</el-descriptions-item>
-          <el-descriptions-item label="优惠券">5 张可用</el-descriptions-item>
+          <el-descriptions-item
+            v-for="(item, index) in memberInfo"
+            :key="index"
+            :label="item.label"
+            label-class-name="profile-label"
+            class-name="profile-content"
+          >
+            {{ item.value }}
+          </el-descriptions-item>
         </el-descriptions>
+        <el-button type="primary" @click="EditProfileDialogVisible = true">修改资料</el-button>
       </div>
       
       <!-- 我的订单 -->
-      <div v-if="activeTab === 'orders'">
-        <el-table :data="orders" style="width: 100%">
+      <div v-if="activeTab === 'orders'" class="orders-section" style="margin-top: 20px;">
+        <el-table 
+          :data="orders" style="width: 100%" border="true"
+          :header-row-style="{ background: 'transparent' }"
+        >
           <el-table-column prop="id" label="订单号" width="180" />
           <el-table-column prop="date" label="日期" width="120" />
           <el-table-column prop="product" label="商品" width="250" />
@@ -97,14 +111,14 @@
           </el-table-column>
           <el-table-column label="操作" width="120">
             <template #default>
-              <el-button size="small" type="text">查看</el-button>
+              <el-button size="small" type="primary">查看</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
       
       <!-- 地址管理 -->
-      <div v-if="activeTab === 'address'">
+      <div v-if="activeTab === 'address'" class="address-section" style="margin-top: 20px;">
         <el-row :gutter="20">
           <el-col :span="12" v-for="(address, index) in addresses" :key="index">
             <el-card class="address-card" shadow="hover">
@@ -140,6 +154,7 @@
         </el-empty>
       </div>
     </el-card>
+    <EditProfileDialog :v-model="EditProfileDialogVisible" />
   </div>
 </template>
 
@@ -174,9 +189,13 @@ import {
 } from '@element-plus/icons-vue'
 import PcMenu from '../layouts/PcMenu.vue'
 
+
+
 // 响应式数据
+
 const vip = ref('会员')
 const activeTab = ref('profile')
+const EditProfileDialogVisible = ref(false) // 登录弹窗状态
 const tabIcons = reactive({
   profile: User,        // 个人资料图标
   orders: ShoppingCart, // 我的订单图标
@@ -189,6 +208,20 @@ const tabTitles = reactive({
   address: '地址管理',
   wishlist: '我的收藏'
 })
+
+const basicInfo = ref([
+  { label: '用户名', value: '张明' },
+  { label: '邮箱', value: 'zhangming@example.com' },
+  { label: '手机', value: '13800138000' },
+  { label: '性别', value: '男' },
+  { label: '生日', value: '1990-05-15' }
+])
+
+const memberInfo = ref([
+  { label: '会员等级', value: '黄金会员' },
+  { label: '积分', value: '3,850 分' },
+  { label: '优惠券', value: '5 张可用' }
+])
 
 const orders = ref([
   { id: '20230528001', date: '2023-05-28', product: 'Apple iPhone 14 Pro Max', amount: '¥8,999', status: '已完成' },
@@ -259,7 +292,7 @@ const handleMenuSelect = (index) => {
   gap: 20px;
   width: 100%;
   height: calc(100vh - 60px);
-  overflow-y: auto;
+  overflow-y: auto !important; /* 启用滚动 */
 }
 
 .sidebar .user-profile-card {
@@ -274,6 +307,10 @@ const handleMenuSelect = (index) => {
 .sidebar .el-menu .el-menu-item {
   background-color: transparent !important;
   border-bottom: 1px solid #333 !important;
+}
+
+.sidebar .el-menu .el-menu-item span.through-line {
+  text-decoration: line-through;
 }
 
 .user-profile-header {
@@ -301,9 +338,32 @@ const handleMenuSelect = (index) => {
   border-right: none;
 }
 
+/* 个人资料部分样式优化 */
+.profile-section :deep(.el-descriptions .el-descriptions__body),
+.profile-section :deep(.profile-label),
+.profile-section :deep(.profile-content) {
+  background: transparent !important;
+}
+
+/* 我的订单部分样式优化 */
+.orders-section :deep(.el-table),
+.orders-section :deep(.el-table__body),
+/* 表头样式需要绑定header-row-style */
+.orders-section :deep(.el-table__header),
+.orders-section :deep(.el-table__row),
+.orders-section :deep(.el-table__cell) {
+  background: transparent !important;
+}
+
+/* 地址管理部分样式优化 */
+.address-section :deep(.el-card) {
+  background: transparent !important;
+}
+
+
 .content-card {
   flex: 1;
-  overflow-y: auto; /* 启用滚动 */
+  overflow-y: auto !important; /* 启用滚动 */
   background-color: var(--light-card-bg);
   backdrop-filter: blur(2px);
 }

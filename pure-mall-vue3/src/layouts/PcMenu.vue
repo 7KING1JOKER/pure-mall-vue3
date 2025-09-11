@@ -138,6 +138,8 @@ import {
 import RegisterDialog from '../layouts/RegisterDialog.vue'
 import LoginDialog from '../layouts/LoginDialog.vue'
 
+// data
+
 // 路由相关
 const route = useRoute()
 const router = useRouter()
@@ -152,6 +154,8 @@ const isLoggedIn = ref(false) // 假设用户登录状态
 const registerDialogVisible = ref(false) // 注册弹窗状态
 const loginDialogVisible = ref(false) // 登录弹窗状态
 console.log('当前路由路径:', activeIndex.value)
+
+// methods
 
 // 检测屏幕宽度
 const checkScreenWidth = () => {

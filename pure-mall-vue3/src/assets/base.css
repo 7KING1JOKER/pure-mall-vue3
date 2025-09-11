@@ -1,5 +1,13 @@
 :root {
   --light-card-bg: rgba(255, 255, 255, 0.3);
+  --dark-bg: #333
+}
+
+
+html {
+  /* 关闭浏览器右侧默认滑动条 */
+  overflow: hidden; 
+  height: 100%;
 }
 
 * {
