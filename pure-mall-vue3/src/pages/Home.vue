@@ -23,6 +23,7 @@
               :title="card.title"
               :overlayOpacity="0.7"
               :titleColor="'white'"
+              class="image-card"
             />
           </div>
         </section>
@@ -37,6 +38,7 @@
               :title="card.title"
               :overlayOpacity="0.7"
               :titleColor="'white'"
+              class="image-card"
             />
           </div>
         </section>
@@ -51,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, onUnmounted } from 'vue'
 import PcMenu from '../layouts/PcMenu.vue'
 import Footer from '../layouts/Footer.vue'
 import ImageCard from '../components/ImageCard.vue'
@@ -63,26 +65,27 @@ import Loading from '../layouts/Loading.vue'
 const cards1 = ref([
   {
     title: "春季",
-    image: "https://plus.unsplash.com/premium_photo-1675804669850-a1c3b87589d5?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    image: "https://images.unsplash.com/photo-1520262494112-9fe481d36ec3?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   },
   {
     title: "夏日",
-    image: "https://images.unsplash.com/photo-1682685797229-b2930538da47?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHNjZW5lcnl8ZW58MHx8MHx8fDA%3D"
+    image: "https://images.unsplash.com/photo-1513569771920-c9e1d31714af?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   }
 ])
 
 const cards2 = ref([
   {
     title: "秋季",
-    image: "https://images.unsplash.com/photo-1617634667039-8e4cb277ab46?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHNjZW5lcnl8ZW58MHx8MHx8fDA%3D"
+    image: "https://images.unsplash.com/photo-1499428665502-503f6c608263?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   },
   {
     title: "冬日",
-    image: "https://images.unsplash.com/photo-1504714146340-959ca07e1f38?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzN8fHNjZW5lcnl8ZW58MHx8MHx8fDA%3D"
+    image: "https://images.unsplash.com/photo-1571028634586-ae87c1a42432?q=80&w=986&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   }
 ])
 
 const loading = ref(true)
+// const isMobile = ref(false)
 
 function checkImagesLoaded() {
   const urls = [...cards1.value, ...cards2.value].map(card => card.image)
@@ -99,12 +102,48 @@ function checkImagesLoaded() {
   })
 }
 
-onMounted(() => {
-  nextTick(() => {
-    checkImagesLoaded()
-  })
+// function changeImageScroll() {
+//   let sectionCards = document.getElementsByClassName('section-cards')
+//   for (let i = 0; i < sectionCards.length; i++) {
+//     let sectionCard = sectionCards[i]
+//     sectionCard.classList.remove('scroll-section')
+//   }
+
+//   let imageCards = document.querySelectorAll('.image-card')
+//   imageCards.forEach(card => {
+//     card.classList.add('scroll-section')
+//   })
   
-})
+// }
+
+// function checkDeviceType() {
+//   isMobile.value = window.innerWidth <= 768;
+// }
+
+// onMounted(() => {
+//   nextTick(() => {
+//     checkImagesLoaded()
+//     checkDeviceType()
+
+//     // 监听窗口大小变化
+//     window.addEventListener('resize', () => {
+//       const wasMobile = isMobile.value;
+//       checkDeviceType();
+      
+//       // 如果移动状态发生变化，重新应用样式
+//       if (wasMobile !== isMobile.value) {
+//         changeImageScroll();
+//       }
+//     });
+    
+//     // 初始应用样式
+//     changeImageScroll();
+//   })
+// })
+
+// onUnmounted(() => {
+//   window.removeEventListener('resize', checkDeviceType);
+// })
 </script>
 
 <style scoped>
@@ -117,6 +156,7 @@ onMounted(() => {
 .scroll-container {
   /* 全屏滑动 */
   height: calc(100vh - 60px); /* 减去顶部菜单高度 */
+  width: 100%;
   overflow-y: auto; /* 启用滚动 */
   scroll-snap-type: y mandatory; /* 关键属性 */
   scroll-behavior: smooth; /* 平滑滚动 */
@@ -152,8 +192,6 @@ onMounted(() => {
   padding: 0;
 }
 
-/* section-cards的水平滑动 */
-
 .section-cards .card-list {
   width: 100%;
   height: 100%;
@@ -171,32 +209,27 @@ onMounted(() => {
 
 /* 页脚区域 */
 .section-footer {
-  background-color: #2c3e50;
+  background-color: #000000c9;
   color: white;
 }
 
-
-/* 调整el-menu-item激活样式 */
-
-/* 桌面菜单激活状态 */
-.desktop-menu .el-menu-item:hover {
-  background-color: transparent !important;
-}
 
 /* 响应式调整 */
 @media (max-width: 768px) {
    .scroll-container {
     height: calc(100vh - 52px);
-    min-height: calc(100vh - 52px);
     overflow-y: auto;
-    overflow-x: hidden;
     margin-top: 52px !important;
+    scroll-snap-type: none;
   }
   
   .scroll-section {
-    min-height: calc(100vh - 52px) !important;
+    height: calc(100vh - 52px);
     padding: 0 !important;
-    display: block; /* 移动端使用块级布局 */
+  }
+
+  .section-cards {
+    height: calc(2*(100vh - 52px));
   }
 
 
@@ -213,14 +246,14 @@ onMounted(() => {
   }
 
   .card-list {
+    display: flex;
     flex-direction: column; /* 列表在小屏幕上垂直排列 */
-    height: auto;
+    height: calc(2*(100vh - 52px)); /* 高度为一屏高度 */
   }
 
   .card-list > * {
     width: 100%; /* 宽度占满视口 */
-    height: 100%; /* 高度继承父容器 */
-    flex: none;
+    height: 50%; /* 每个卡片占满一屏 */
   }
 
   .footer-links {

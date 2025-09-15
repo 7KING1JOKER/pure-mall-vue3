@@ -21,9 +21,16 @@ declare module 'element-plus/dist/index.css' {
 }
 
 // 自定义js模块声明
-declare module '../styles/js/Xscroll-box.js' {
-  export function initScrollBox(): void
+declare module '@/utils/HorizontalScroll' {
+  const HorizontalScroll: {
+    init: () => void;
+    setupHorizontalScroll: () => void;
+    onResize: () => void;
+    destroy: () => void;
+  }
+  export default HorizontalScroll;
 }
+
 
 // 解决 unplugin-auto-import 的类型问题
 declare module 'unplugin-auto-import/vite' {
