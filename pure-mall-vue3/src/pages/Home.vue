@@ -1,58 +1,62 @@
 <template>
   <div class="home-container">
-    <!-- 响应式菜单栏 -->
-    <PcMenu />
-    <!-- 页面内容 -->
-    <div class="scroll-container">
-      <!-- 轮播图区域 -->
-      <section class="scroll-section section-carousel">
-        <Carousel />
-      </section>
+    <!-- <template v-if="loading">
+      <Loading />
+    </template>
+    <template v-else> -->
+      <!-- 响应式菜单栏 -->
+      <PcMenu />
+      <!-- 页面内容 -->
+      <div class="scroll-container">
+        <!-- 轮播图区域 -->
+        <section class="scroll-section section-carousel">
+          <Carousel />
+        </section>
 
-      <!-- 卡片列表区域1 -->
-      <section class="scroll-section section-cards">
-        <div class="card-list">
-          <ImageCard
-            v-for="(card, index) in cards1" 
-            :key="index" 
-            :imageUrl="card.image" 
-            :title="card.title"
-            :overlayOpacity="0.7"
-            :titleColor="'white'"
-          />
-        </div>
-      </section>
+        <!-- 卡片列表区域1 -->
+        <section class="scroll-section section-cards">
+          <div class="card-list">
+            <ImageCard
+              v-for="(card, index) in cards1" 
+              :key="index" 
+              :imageUrl="card.image" 
+              :title="card.title"
+              :overlayOpacity="0.7"
+              :titleColor="'white'"
+            />
+          </div>
+        </section>
 
-      <!-- 卡片列表区域2 -->
-      <section class="scroll-section section-cards">
-        <div class="card-list">
-          <ImageCard
-            v-for="(card, index) in cards2" 
-            :key="index" 
-            :imageUrl="card.image" 
-            :title="card.title"
-            :overlayOpacity="0.7"
-            :titleColor="'white'"
-          />
-        </div>
-      </section>
+        <!-- 卡片列表区域2 -->
+        <section class="scroll-section section-cards">
+          <div class="card-list">
+            <ImageCard
+              v-for="(card, index) in cards2" 
+              :key="index" 
+              :imageUrl="card.image" 
+              :title="card.title"
+              :overlayOpacity="0.7"
+              :titleColor="'white'"
+            />
+          </div>
+        </section>
 
-      <!-- 页脚区域 -->
-      <section class="scroll-section section-footer">
-        <Footer />
-      </section>
-    </div>
-
-
+        <!-- 页脚区域 -->
+        <section class="scroll-section section-footer">
+          <Footer />
+        </section>
+      </div>
+    <!-- </template> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import PcMenu from '../layouts/PcMenu.vue'
 import Footer from '../layouts/Footer.vue'
 import ImageCard from '../components/ImageCard.vue'
 import Carousel from '../components/Carousel.vue'
+import Loading from '../layouts/Loading.vue'
 
 // data
 // 卡片数据
@@ -78,7 +82,29 @@ const cards2 = ref([
   }
 ])
 
+const loading = ref(true)
 
+function checkImagesLoaded() {
+  const urls = [...cards1.value, ...cards2.value].map(card => card.image)
+  let loaded = 0
+  urls.forEach(url => {
+    const img = new window.Image()
+    img.onload = img.onerror = () => {
+      loaded++
+      if (loaded === urls.length) {
+        loading.value = false
+      }
+    }
+    img.src = url
+  })
+}
+
+onMounted(() => {
+  nextTick(() => {
+    checkImagesLoaded()
+  })
+  
+})
 </script>
 
 <style scoped>
@@ -126,6 +152,8 @@ const cards2 = ref([
   padding: 0;
 }
 
+/* section-cards的水平滑动 */
+
 .section-cards .card-list {
   width: 100%;
   height: 100%;
@@ -158,23 +186,19 @@ const cards2 = ref([
 /* 响应式调整 */
 @media (max-width: 768px) {
    .scroll-container {
-    height: auto;
-    min-height: calc(100vh - 50px); /* 减去顶部菜单高度 */
-    overflow-y: visible;
-    scroll-snap-type: none; /* 移动端禁用滚动捕捉 */
+    height: calc(100vh - 52px);
+    min-height: calc(100vh - 52px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 52px !important;
   }
   
   .scroll-section {
-    height: auto !important;
-    min-height: 0 !important;
+    min-height: calc(100vh - 52px) !important;
     padding: 0 !important;
     display: block; /* 移动端使用块级布局 */
   }
-  
-  .section-carousel {
-    height: calc(100vh - 50px); /* 确保轮播图区域占满屏幕 */
-    min-height: calc(100vh - 50px) !important; /* 确保轮播图区域占满屏幕 */
-  }
+
 
   .carousel-title {
     font-size: 2.2rem;
@@ -195,8 +219,7 @@ const cards2 = ref([
 
   .card-list > * {
     width: 100%; /* 宽度占满视口 */
-    height: calc(100vh - 50px); /* 高度继承父容器 */
-    min-height: calc(100vh - 50px); /* 确保最小高度 */
+    height: 100%; /* 高度继承父容器 */
     flex: none;
   }
 
@@ -204,7 +227,7 @@ const cards2 = ref([
     flex-direction: column;
     align-items: center;
     text-align: center;
+    height: calc(100vh - 52px);
   }
 }
-
 </style>

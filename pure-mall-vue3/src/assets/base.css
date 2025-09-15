@@ -6,7 +6,7 @@
 
 html {
   /* 关闭浏览器右侧默认滑动条 */
-  overflow: hidden; 
+  overflow: hidden;
   height: 100%;
 }
 
