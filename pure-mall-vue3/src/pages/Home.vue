@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, onUnmounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import PcMenu from '../layouts/PcMenu.vue'
 import Footer from '../layouts/Footer.vue'
 import ImageCard from '../components/ImageCard.vue'
@@ -85,7 +85,6 @@ const cards2 = ref([
 ])
 
 const loading = ref(true)
-// const isMobile = ref(false)
 
 function checkImagesLoaded() {
   const urls = [...cards1.value, ...cards2.value].map(card => card.image)
@@ -102,48 +101,12 @@ function checkImagesLoaded() {
   })
 }
 
-// function changeImageScroll() {
-//   let sectionCards = document.getElementsByClassName('section-cards')
-//   for (let i = 0; i < sectionCards.length; i++) {
-//     let sectionCard = sectionCards[i]
-//     sectionCard.classList.remove('scroll-section')
-//   }
+onMounted(() => {
+  nextTick(() => {
+    checkImagesLoaded()
+  })
+})
 
-//   let imageCards = document.querySelectorAll('.image-card')
-//   imageCards.forEach(card => {
-//     card.classList.add('scroll-section')
-//   })
-  
-// }
-
-// function checkDeviceType() {
-//   isMobile.value = window.innerWidth <= 768;
-// }
-
-// onMounted(() => {
-//   nextTick(() => {
-//     checkImagesLoaded()
-//     checkDeviceType()
-
-//     // 监听窗口大小变化
-//     window.addEventListener('resize', () => {
-//       const wasMobile = isMobile.value;
-//       checkDeviceType();
-      
-//       // 如果移动状态发生变化，重新应用样式
-//       if (wasMobile !== isMobile.value) {
-//         changeImageScroll();
-//       }
-//     });
-    
-//     // 初始应用样式
-//     changeImageScroll();
-//   })
-// })
-
-// onUnmounted(() => {
-//   window.removeEventListener('resize', checkDeviceType);
-// })
 </script>
 
 <style scoped>
@@ -220,18 +183,25 @@ function checkImagesLoaded() {
     height: calc(100vh - 52px);
     overflow-y: auto;
     margin-top: 52px !important;
-    scroll-snap-type: none;
   }
   
   .scroll-section {
-    height: calc(100vh - 52px);
+    height: auto; /* 不再固定高度 */
+    min-height: auto; /* 不再固定最小高度 */
+    scroll-snap-align: none; /* 移除滚动捕捉 */
     padding: 0 !important;
   }
 
-  .section-cards {
-    height: calc(2*(100vh - 52px));
+  .section-carousel {
+    height: calc(100vh - 52px); /* 轮播图区域占满一屏 */
+    min-height: calc(100vh - 52px);
+    scroll-snap-align: start; /* 启用滚动捕捉 */
   }
 
+  .section-cards {
+    height: calc(2*(100vh - 52px)); /* 不再固定高度 */
+    scroll-snap-align: none; /* 移除滚动捕捉 */
+  }
 
   .carousel-title {
     font-size: 2.2rem;
@@ -248,12 +218,19 @@ function checkImagesLoaded() {
   .card-list {
     display: flex;
     flex-direction: column; /* 列表在小屏幕上垂直排列 */
-    height: calc(2*(100vh - 52px)); /* 高度为一屏高度 */
+    height: auto; /* 不再固定高度 */
   }
 
   .card-list > * {
     width: 100%; /* 宽度占满视口 */
-    height: 50%; /* 每个卡片占满一屏 */
+    height: calc(100vh - 52px); /* 每个卡片占满一屏 */
+    scroll-snap-align: start; /* 启用滚动捕捉 */
+  }
+
+  .section-footer {
+    height: calc(100vh - 52px); /* 页脚区域占满一屏 */
+    min-height: calc(100vh - 52px);
+    scroll-snap-align: start; /* 启用滚动捕捉 */
   }
 
   .footer-links {
