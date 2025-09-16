@@ -21,6 +21,24 @@ const routes = [
     meta: { title: '购物车' }
   },
   {
+    path: '/checkout',
+    name: 'Checkout',
+    component: () => import('@/pages/Checkout.vue'),
+    meta: { title: '确认订单' }
+  },
+  {
+    path: '/payment',
+    name: 'Payment',
+    component: () => import('@/pages/Payment.vue'),
+    meta: { title: '订单支付' }
+  },
+  {
+    path: '/order-complete',
+    name: 'OrderComplete',
+    component: () => import('@/pages/OrderComplete.vue'),
+    meta: { title: '订单完成' }
+  },
+  {
     path: '/user',
     name: 'User',
     component: () => import('@/pages/User.vue'),
