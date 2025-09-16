@@ -5,7 +5,7 @@
     <!-- 付款头部 -->
     <div class="payment-header">
       <h1><el-icon><CreditCard /></el-icon> 订单支付</h1>
-      <el-steps :active="3" simple>
+      <el-steps :active="3" simple class="cart-steps">
         <el-step title="购物车" icon="ShoppingCart" />
         <el-step title="确认订单" icon="Document" />
         <el-step title="付款" icon="CreditCard" />
@@ -298,6 +298,10 @@ onBeforeUnmount(() => {
   margin-bottom: 20px;
 }
 
+.payment-header .cart-steps {
+  background: var(--light-card-bg);
+}
+
 /* 内容区域通用样式 */
 .payment-content {
   max-width: 800px;
@@ -318,7 +322,7 @@ onBeforeUnmount(() => {
 .payment-method-section,
 .payment-qrcode-section,
 .credit-card-section {
-  background: #fff;
+  background: var(--light-card-bg);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
@@ -328,7 +332,7 @@ onBeforeUnmount(() => {
 /* 订单信息 */
 .order-info {
   padding: 15px;
-  background: #f9f9f9;
+  background: var(--light-card-bg);
   border-radius: 8px;
 }
 

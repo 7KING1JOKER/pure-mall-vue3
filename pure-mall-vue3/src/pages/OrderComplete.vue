@@ -5,7 +5,7 @@
     <!-- 订单完成头部 -->
     <div class="order-complete-header">
       <h1><el-icon><SuccessFilled /></el-icon> 订单完成</h1>
-      <el-steps :active="4" simple finish-status="success">
+      <el-steps :active="4" simple finish-status="success" class="cart-steps">
         <el-step title="购物车" icon="ShoppingCart" />
         <el-step title="确认订单" icon="Document" />
         <el-step title="付款" icon="CreditCard" />
@@ -270,6 +270,10 @@ const goToUserCenter = () => {
   margin-bottom: 20px;
 }
 
+.order-complete-header .cart-steps {
+  background: var(--light-card-bg);
+}
+
 /* 内容区域通用样式 */
 .order-complete-content {
   max-width: 800px;
@@ -290,18 +294,32 @@ const goToUserCenter = () => {
 .logistics-section,
 .order-items-section,
 .recommended-section {
-  background: #fff;
+  background: var(--light-card-bg);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
+.order-items-section .order-items {
+  background: var(--light-card-bg);
+}
+
+/* 我的订单部分样式优化 */
+.orders-items :deep(.el-table),
+.orders-items :deep(.el-table__body),
+/* 表头样式需要绑定header-row-style */
+.orders-items :deep(.el-table__header),
+.orders-items :deep(.el-table__row),
+.orders-items :deep(.el-table__cell) {
+  background: var(--light-card-bg);
+}
+
 /* 订单成功信息 */
 .order-info {
   margin: 20px 0;
   padding: 15px;
-  background: #f9f9f9;
+  background: var(--light-card-bg);
   border-radius: 8px;
   text-align: left;
 }

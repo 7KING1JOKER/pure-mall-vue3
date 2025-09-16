@@ -5,7 +5,7 @@
     <!-- 确认订单头部 -->
     <div class="checkout-header">
       <h1><el-icon><Document /></el-icon> 确认订单</h1>
-      <el-steps :active="2" simple>
+      <el-steps :active="2" simple class="cart-steps">
         <el-step title="购物车" icon="ShoppingCart" />
         <el-step title="确认订单" icon="Document" />
         <el-step title="付款" />
@@ -86,19 +86,6 @@
         </div>
       </div>
 
-      <!-- 支付方式 -->
-      <div class="payment-method-section">
-        <div class="section-title">
-          <el-icon><CreditCard /></el-icon> 支付方式
-        </div>
-        <div class="payment-options">
-          <el-radio-group v-model="paymentMethod">
-            <el-radio label="alipay">支付宝</el-radio>
-            <el-radio label="wechat">微信支付</el-radio>
-            <el-radio label="creditcard">信用卡</el-radio>
-          </el-radio-group>
-        </div>
-      </div>
 
       <!-- 订单备注 -->
       <div class="order-remark-section">
@@ -147,7 +134,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PcMenu from '../layouts/PcMenu.vue'
-import { Document, Location, Edit, Delete, Plus, Goods, Van, CreditCard, ChatLineRound } from '@element-plus/icons-vue'
+import { Document, Location, Edit, Delete, Plus, Goods, Van, ChatLineRound } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -197,9 +184,6 @@ const orderItems = ref([
 
 // 配送方式
 const deliveryMethod = ref('standard')
-
-// 支付方式
-const paymentMethod = ref('alipay')
 
 // 订单备注
 const orderRemark = ref('')
@@ -303,9 +287,14 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
+.checkout-header .cart-steps {
+  background: var(--light-card-bg);
+}
+
 /* 内容区域通用样式 */
 .checkout-content {
-  max-width: 1200px;
+  background: transparent;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -323,10 +312,9 @@ onMounted(() => {
 .address-section,
 .order-items-section,
 .delivery-section,
-.payment-method-section,
 .order-remark-section,
 .order-summary-section {
-  background: #fff;
+  background: var(--light-card-bg);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
@@ -460,11 +448,6 @@ onMounted(() => {
 .delivery-options,
 .payment-options {
   padding: 10px 0;
-}
-
-/* 订单汇总 */
-.order-summary-section {
-  background: #fafafa;
 }
 
 .summary-item {

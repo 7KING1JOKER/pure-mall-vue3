@@ -5,7 +5,7 @@
       <!-- 购物车头部 -->
       <div class="cart-header">
         <h1><el-icon><ShoppingCart /></el-icon> 我的购物车</h1>
-        <el-steps :active="activeStep" simple>
+        <el-steps :active="activeStep" simple class="cart-steps">
           <el-step title="购物车" icon="ShoppingCart" />
           <el-step title="确认订单" />
           <el-step title="付款" />
@@ -138,7 +138,7 @@ const cartItems = ref([
     spec: '黑色',
     price: 299,
     quantity: 1,
-    image: 'https://images.unsplash.com/photo-1606220588914-08f6c7f2a8d2?w=400',
+    image: 'https://images.unsplash.com/photo-1578319439584-104c94d37305?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     selected: true
   },
   {
@@ -148,7 +148,7 @@ const cartItems = ref([
     spec: '白色',
     price: 399,
     quantity: 1,
-    image: 'https://images.unsplash.com/photo-1556911220-f7d27ca5528e?w=400',
+    image: 'https://images.unsplash.com/photo-1645356894529-8c3b231fbbbe?q=80&w=1035&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     selected: true
   },
   {
@@ -170,28 +170,28 @@ const recommendedProducts = ref([
     name: '无线充电器',
     description: '多设备同时充，智能快充',
     price: 149,
-    image: 'https://images.unsplash.com/photo-1606220588847-1edbf3a79d90?w=400'
+    image: 'https://images.unsplash.com/photo-1656185933032-923de7ef1b61?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
   },
   {
     id: 5,
     name: '桌面风扇',
     description: '静音柔风，三档调节',
     price: 79,
-    image: 'https://images.unsplash.com/photo-1581092168549-deab6be36f01?w=400'
+    image: 'https://images.unsplash.com/photo-1656428005715-74cbf05fdefb?q=80&w=1603&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
   },
   {
     id: 6,
     name: '折叠蓝牙键盘',
     description: '便携设计，智能连接',
     price: 189,
-    image: 'https://images.unsplash.com/photo-1629131726699-3cddce00def8?w=400'
+    image: 'https://images.unsplash.com/photo-1697022976761-67a1b0955cff?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
   },
   {
     id: 7,
     name: '便携水杯',
     description: '食品级材质，防漏设计',
     price: 59,
-    image: 'https://images.unsplash.com/photo-1558301211-0d8c82959edf?w=400'
+    image: 'https://images.unsplash.com/photo-1591224823040-88dfe36bcab5?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
   }
 ])
 
@@ -307,8 +307,8 @@ onMounted(() => {
 
 /* 购物车容器 */
 .cart-container {
-  width: 100%;
   height: calc(100vh - 60px);
+  width: 100%;
   margin: 60px auto 0;
   padding: 20px;
   overflow-y: auto;
@@ -320,6 +320,10 @@ onMounted(() => {
   margin-bottom: 40px;
   border-bottom: 1px solid #eee;
   padding-bottom: 20px;
+}
+
+.cart-header .cart-steps {
+  background: var(--light-card-bg);
 }
 
 .cart-header h1 {
@@ -335,7 +339,7 @@ onMounted(() => {
 
 /* 购物车商品列表 */
 .cart-items {
-  background: #fff;
+  background: var(--light-card-bg);
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
@@ -351,7 +355,7 @@ onMounted(() => {
 }
 
 .cart-item:hover {
-  background-color: #fafafa;
+  background-color: #fafafaad;
 }
 
 .cart-item > div {
@@ -426,7 +430,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
+  background: var(--light-card-bg);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -481,7 +485,7 @@ onMounted(() => {
 }
 
 .product-card {
-  background: #fff;
+  background: var(--light-card-bg);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
