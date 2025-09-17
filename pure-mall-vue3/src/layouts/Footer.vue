@@ -1,12 +1,12 @@
 <template>
     <div class="footer-content">
         <div class="footer-logo">
-        <el-image 
+        <!-- <el-image 
             src="https://vuejs.org/images/logo.png" 
             fit="contain" 
             style="width: 80px; height: 80px;"
-        />
-        <h3>Pure Mall</h3>
+        /> -->
+        <h1>Pure Mall</h1>
         </div>
         <div class="footer-links">
         <div class="link-group">
@@ -47,13 +47,13 @@
 
 .footer-logo {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 120px;
 }
 
-.footer-logo h3 {
-  margin-top: 15px;
+.footer-logo h1 {
   font-size: 1.8rem;
-  font-weight: 300;
+  font-family: fantasy;
+  font-weight: lighter
 }
 
 .footer-links {

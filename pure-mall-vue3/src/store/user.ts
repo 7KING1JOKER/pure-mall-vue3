@@ -1,5 +1,18 @@
 import { defineStore } from "pinia";
+import { ElMessage } from "element-plus";
 
+// 地址类型定义
+interface Address {
+  id?: string;
+  name: string;
+  phone: string;
+  province: string;
+  city: string;
+  district: string;
+  street: string;
+  zip: string;
+  isDefault: boolean;
+}
 
 export const useUserStore = defineStore("user", {
 	state: () => ({
@@ -38,6 +51,7 @@ export const useUserStore = defineStore("user", {
 		],
 		addresses: [
 			{
+				id: '1',
 				name: '张明 (家)',
 				phone: '13800138000',
 				province: '北京市',
@@ -48,6 +62,7 @@ export const useUserStore = defineStore("user", {
 				isDefault: true
 			},
 			{
+				id: '2',
 				name: '张明 (公司)',
 				phone: '13800138111',
 				province: '北京市',
@@ -58,7 +73,11 @@ export const useUserStore = defineStore("user", {
 				isDefault: false
 			}
 		],
-        EditProfileDialogVisible: false
+        EditProfileDialogVisible: false,
+        // 地址对话框相关状态
+        addressDialogVisible: false,
+        currentAddress: null as Address | null,
+        isEditingAddress: false
 	}),
 	actions: {
 		statusType(status: string) {
@@ -72,6 +91,90 @@ export const useUserStore = defineStore("user", {
 		},
 		handleMenuSelect(index:string) {
 			this.activeTab = index
+		},
+		// 地址管理相关方法
+		// 打开添加地址对话框
+		openAddAddressDialog() {
+			this.isEditingAddress = false
+			this.currentAddress = {
+				name: '',
+				phone: '',
+				province: '',
+				city: '',
+				district: '',
+				street: '',
+				zip: '',
+				isDefault: false
+			}
+			this.addressDialogVisible = true
+		},
+		// 打开编辑地址对话框
+		openEditAddressDialog(addressId: string) {
+			const address = this.addresses.find(addr => addr.id === addressId)
+			if (address) {
+				this.isEditingAddress = true
+				this.currentAddress = { ...address }
+				this.addressDialogVisible = true
+			}
+		},
+		// 保存地址（添加或更新）
+		saveAddress(address: Address) {
+			if (this.isEditingAddress && address.id) {
+				// 更新现有地址
+				const index = this.addresses.findIndex(addr => addr.id === address.id)
+				if (index !== -1) {
+					// 如果设置为默认地址，需要将其他地址设为非默认
+					if (address.isDefault) {
+						this.addresses.forEach(addr => {
+							if (addr.id !== address.id) {
+								addr.isDefault = false
+							}
+						})
+					}
+					this.addresses[index] = { ...address, id: address.id! }
+					ElMessage.success('地址更新成功')
+				}
+			} else {
+				// 添加新地址
+				const newAddress = {
+					...address,
+					id: Date.now().toString() // 生成唯一ID
+				}
+				
+				// 如果设置为默认地址，需要将其他地址设为非默认
+				if (newAddress.isDefault) {
+					this.addresses.forEach(addr => {
+						addr.isDefault = false
+					})
+				}
+				
+				this.addresses.push(newAddress)
+				ElMessage.success('地址添加成功')
+			}
+			
+			this.addressDialogVisible = false
+			this.currentAddress = null
+		},
+		// 删除地址
+		deleteAddress(addressId: string) {
+			const index = this.addresses.findIndex(addr => addr.id === addressId)
+			if (index !== -1) {
+				// 如果删除的是默认地址，且还有其他地址，则将第一个地址设为默认
+				if (this.addresses[index].isDefault && this.addresses.length > 1) {
+					const newDefaultIndex = index === 0 ? 1 : 0
+					this.addresses[newDefaultIndex].isDefault = true
+				}
+				
+				this.addresses.splice(index, 1)
+				ElMessage.success('地址删除成功')
+			}
+		},
+		// 设置默认地址
+		setDefaultAddress(addressId: string) {
+			this.addresses.forEach(addr => {
+				addr.isDefault = addr.id === addressId
+			})
+			ElMessage.success('默认地址设置成功')
 		}
 	}
 })

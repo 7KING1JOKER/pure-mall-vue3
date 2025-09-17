@@ -2,11 +2,7 @@
   <div class="responsive-menu">
     <!-- Logo -->
     <div class="logo">
-      <el-image 
-        src="https://vuejs.org/images/logo.png" 
-        fit="contain" 
-        style="width: 50px; height: 50px;"
-      />
+      <h1>PURE MALL</h1>
     </div>
     
     <!-- 顶部导航栏 (宽屏显示) -->
@@ -267,10 +263,16 @@ onBeforeUnmount(() => {
   z-index: 1001;
 }
 
-.logo .el-image {
+.logo h1{
+  font-size: larger;
+  font-family: fantasy;
+  font-weight: lighter;
+}
+
+/* .logo .el-image {
   width: 50px !important;
   height: 50px !important;
-}
+} */
 
 .el-menu {
   border-bottom: none !important;

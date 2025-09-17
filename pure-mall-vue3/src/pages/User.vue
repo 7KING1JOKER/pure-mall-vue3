@@ -136,15 +136,15 @@
               </div>
               <template #footer>
                 <el-button-group>
-                  <el-button type="primary" icon="Edit" text>编辑</el-button>
-                  <el-button type="danger" icon="Delete" text>删除</el-button>
-                  <el-button v-if="!address.isDefault" type="success" icon="Check" text>设为默认</el-button>
+                  <el-button type="primary" icon="Edit" text @click="editAddress(address.id)">编辑</el-button>
+                  <el-button type="danger" icon="Delete" text @click="confirmDeleteAddress(address.id)">删除</el-button>
+                  <el-button v-if="!address.isDefault" type="success" icon="Check" text @click="setAsDefault(address.id)">设为默认</el-button>
                 </el-button-group>
               </template>
             </el-card>
           </el-col>
         </el-row>
-        <el-button type="primary" icon="Plus" style="margin-top: 20px;">添加新地址</el-button>
+        <el-button type="primary" icon="Plus" style="margin-top: 20px;" @click="addNewAddress">添加新地址</el-button>
       </div>
 
       <!-- 我的收藏 -->
@@ -155,6 +155,7 @@
       </div>
     </el-card>
   <EditProfileDialog v-model="userStore.EditProfileDialogVisible" />
+  <AddressDialog v-model="userStore.addressDialogVisible" />
   </div>
 </template>
 
@@ -175,7 +176,8 @@ import {
   ElTableColumn, 
   ElRow, 
   ElCol,
-  ElEmpty
+  ElEmpty,
+  ElMessageBox
 } from 'element-plus'
 import {
   User,
@@ -189,12 +191,12 @@ import {
 } from '@element-plus/icons-vue'
 import PcMenu from '../layouts/PcMenu.vue'
 import EditProfileDialog from '../layouts/EditProfileDialog.vue'
+import AddressDialog from '../layouts/AddressDialog.vue'
 
 import { useUserStore } from '../store/user'
 import { storeToRefs } from 'pinia'
 
 // 获取userStore中响应式数据
-
 const userStore = useUserStore()
 const {
   vip,
@@ -207,6 +209,39 @@ const {
   addresses
 } = storeToRefs(userStore)
 const { statusType, handleMenuSelect } = userStore
+
+// 地址管理相关方法
+// 添加新地址
+const addNewAddress = () => {
+  userStore.openAddAddressDialog()
+}
+
+// 编辑地址
+const editAddress = (addressId) => {
+  userStore.openEditAddressDialog(addressId)
+}
+
+// 确认删除地址
+const confirmDeleteAddress = (addressId) => {
+  ElMessageBox.confirm(
+    '确定要删除这个地址吗？',
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    userStore.deleteAddress(addressId)
+  }).catch(() => {
+    // 取消删除，不做任何操作
+  })
+}
+
+// 设置为默认地址
+const setAsDefault = (addressId) => {
+  userStore.setDefaultAddress(addressId)
+}
 
 
 </script>
