@@ -1,7 +1,7 @@
 <template>
     <el-carousel 
     :interval="5000" 
-    indicator-position="inside"
+    indicator-position="none"
     motion-blur="true"
     @change="handleCarouselChange"
     class="fullscreen-carousel"

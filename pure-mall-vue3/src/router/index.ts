@@ -15,6 +15,12 @@ const routes = [
     meta: { title: '分类' }
   },
   {
+     path: '/product/:id',
+     name: 'product-detail',
+     component: () => import('@/pages/ProductDetail.vue'),
+     props: true
+   },
+  {
     path: '/cart',
     name: 'Cart',
     component: () => import('@/pages/Cart.vue'),
@@ -51,11 +57,22 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫 - 设置页面标题
-router.beforeEach((to) => {
-  if (to.meta.title) {
-    document.title = to.meta.title as string
+// 路由守卫，更新页面标题
+router.beforeEach((to, from, next) => {
+  // 根据路由名称设置页面标题
+  const titleMap: Record<string, string> = {
+    Home: '首页',
+    Category: '分类',
+    'product-detail': '商品详情',
+    Cart: '购物车',
+    Checkout: '结算',
+    Payment: '支付',
+    OrderComplete: '订单完成',
+    User: '个人中心'
   }
+
+  document.title = `${titleMap[to.name as string] || '页面'} - Pure Mall`
+  next()
 })
 
 export default router
