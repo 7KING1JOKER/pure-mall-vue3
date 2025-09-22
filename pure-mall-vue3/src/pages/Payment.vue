@@ -153,44 +153,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
+import { useOrderStore } from '../store/order'
+import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
-import { Document, CreditCard, CopyDocument } from '@element-plus/icons-vue'
+import { CreditCard, CopyDocument } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
-// 订单信息
-const orderNumber = ref('PO' + Date.now().toString().slice(-8))
-const orderTime = ref(new Date().toLocaleString())
-const orderAmount = ref(698)
+// 使用order store
+const orderStore = useOrderStore()
 
-// 支付方式
-const paymentMethod = ref('alipay')
+// 从store解构获取非响应式方法
+const { 
+  completePayment: storeCompletePayment,
+  getPaymentMethodName,
+  startCountdown
+} = orderStore
 
-// 倒计时
-const countdown = ref('15:00')
-let countdownInterval: number | null = null
+// 从store中解构响应式数据
+const { 
+  paymentMethod,
+  cardForm,
+  countdown,
+  currentOrder
+} = storeToRefs(orderStore)
 
-// 信用卡表单
-const cardForm = ref({
-  number: '',
-  name: '',
-  expiryMonth: '',
-  expiryYear: '',
-  cvv: ''
-})
+// 倒计时清理函数引用
+const countdownCleanup = ref<(() => void) | null>(null)
 
-// 获取支付方式名称
-const getPaymentMethodName = (method: string) => {
-  const methodMap: Record<string, string> = {
-    alipay: '支付宝',
-    wechat: '微信支付',
-    creditcard: '信用卡'
-  }
-  return methodMap[method] || method
-}
+// 订单信息 - 从当前订单中获取计算属性
+const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
+const orderTime = computed(() => currentOrder.value?.orderTime || '')
+const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
 
 // 复制订单号
 const copyOrderNumber = () => {
@@ -227,45 +224,34 @@ const completePayment = () => {
     duration: 2000
   })
 
+  // 调用store中的支付方法
+  storeCompletePayment()
+
   // 模拟支付成功，实际项目中这里会调用支付API
   setTimeout(() => {
     router.push('/order-complete')
   }, 2000)
 }
 
-// 启动倒计时
-const startCountdown = () => {
-  let minutes = 15
-  let seconds = 0
-
-  countdownInterval = window.setInterval(() => {
-    if (seconds === 0) {
-      if (minutes === 0) {
-        clearInterval(countdownInterval as number)
-        ElMessage.warning('支付超时，请重新下单')
-        router.push('/cart')
-        return
-      }
-      minutes--
-      seconds = 59
-    } else {
-      seconds--
-    }
-
-    countdown.value = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-  }, 1000)
-}
-
 // 页面加载时启动倒计时
 onMounted(() => {
   console.log('支付页面已加载')
-  startCountdown()
+  // 启动倒计时，传入超时回调
+  countdownCleanup.value = startCountdown(() => {
+    ElMessage.warning('支付超时，请重新下单')
+    router.push('/cart')
+  })
+  
+  // 如果当前订单为空，创建一个默认订单
+  if (!currentOrder.value) {
+    orderStore.createOrder()
+  }
 })
 
 // 页面卸载前清除倒计时
 onBeforeUnmount(() => {
-  if (countdownInterval) {
-    clearInterval(countdownInterval)
+  if (countdownCleanup.value) {
+    countdownCleanup.value()
   }
 })
 </script>

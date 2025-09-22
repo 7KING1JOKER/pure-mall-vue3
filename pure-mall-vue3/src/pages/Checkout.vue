@@ -130,115 +130,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useOrderStore } from '../store/order'
+import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
 import { Document, Location, Edit, Delete, Plus, Goods, Van, ChatLineRound } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
-// 收货地址数据
-const addresses = ref([
-  {
-    id: 1,
-    name: '张三',
-    phone: '13800138000',
-    province: '广东省',
-    city: '深圳市',
-    district: '南山区',
-    detail: '科技园南路XX号XX大厦XX室',
-    isDefault: true
-  },
-  {
-    id: 2,
-    name: '李四',
-    phone: '13900139000',
-    province: '广东省',
-    city: '广州市',
-    district: '天河区',
-    detail: '天河路XX号XX公寓XX室',
-    isDefault: false
-  }
-])
+// 使用order store
+const orderStore = useOrderStore()
 
-// 订单商品数据（模拟从购物车获取的已选商品）
-const orderItems = ref([
-  {
-    id: 1,
-    name: '无线蓝牙降噪耳机',
-    spec: '黑色',
-    price: 299,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1606220588914-08f6c7f2a8d2?w=400'
-  },
-  {
-    id: 2,
-    name: '便携式咖啡机',
-    spec: '白色',
-    price: 399,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1556911220-f7d27ca5528e?w=400'
-  }
-])
+// 从store解构获取非响应式方法
+const { 
+  selectAddress,
+  editAddress,
+  deleteAddress,
+  addNewAddress,
+  createOrder
+} = orderStore
 
-// 配送方式
-const deliveryMethod = ref('standard')
-
-// 订单备注
-const orderRemark = ref('')
-
-// 计算商品总价
-const subtotal = computed(() => {
-  return orderItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
-})
-
-// 计算配送费用
-const deliveryFee = computed(() => {
-  return deliveryMethod.value === 'express' ? 15 : 0
-})
-
-// 计算应付总额
-const totalAmount = computed(() => {
-  return subtotal.value + deliveryFee.value
-})
-
-// 选择地址
-const selectAddress = (index: number) => {
-  addresses.value.forEach((address, i) => {
-    address.isDefault = i === index
-  })
-}
-
-// 编辑地址
-const editAddress = (index: number) => {
-  ElMessage.info(`编辑地址：${addresses.value[index].name}`)
-  // 实际项目中这里会打开编辑地址的表单
-}
-
-// 删除地址
-const deleteAddress = (index: number) => {
-  ElMessageBox.confirm(
-    `确定要删除 ${addresses.value[index].name} 的地址吗？`,
-    '删除地址',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  ).then(() => {
-    addresses.value.splice(index, 1)
-    ElMessage.success('地址已删除')
-  }).catch(() => {
-    // 取消删除
-  })
-}
-
-// 添加新地址
-const addNewAddress = () => {
-  ElMessage.info('添加新地址')
-  // 实际项目中这里会打开添加地址的表单
-}
+// 从store中解构响应式数据
+const { 
+  addresses,
+  orderItems,
+  deliveryMethod,
+  orderRemark,
+  subtotal,
+  deliveryFee,
+  totalAmount
+} = storeToRefs(orderStore)
 
 // 返回购物车
 const goBack = () => {
@@ -247,7 +170,8 @@ const goBack = () => {
 
 // 提交订单，进入支付页面
 const proceedToPayment = () => {
-  // 这里可以添加订单提交的逻辑，如表单验证等
+  // 创建订单
+  orderStore.createOrder()
   // 提交成功后跳转到支付页面
   router.push('/payment')
 }

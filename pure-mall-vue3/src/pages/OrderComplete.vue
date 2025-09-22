@@ -139,29 +139,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useOrderStore } from '../store/order'
+import { useProductStore } from '../store/product'
+import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
 import { SuccessFilled, CopyDocument, Van, Goods, Star } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
-// 订单信息
-const orderNumber = ref('PO' + Date.now().toString().slice(-8))
-const paymentTime = ref(new Date().toLocaleString())
-const orderAmount = ref(698)
-const paymentMethod = ref('支付宝')
+// 使用order store
+const orderStore = useOrderStore()
 
-// 收货信息
-const deliveryInfo = ref({
+// 使用product store获取推荐商品
+const productStore = useProductStore()
+
+// 从store中解构响应式数据
+const { currentOrder } = storeToRefs(orderStore)
+
+// 订单信息 - 从当前订单中获取
+const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
+const paymentTime = computed(() => currentOrder.value?.paymentTime || new Date().toLocaleString())
+const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
+const paymentMethod = computed(() => currentOrder.value?.paymentMethod || '支付宝')
+
+// 收货信息 - 从当前订单中获取
+const deliveryInfo = computed(() => currentOrder.value?.deliveryInfo || {
   name: '张三',
   phone: '138****1234',
   address: '北京市朝阳区三里屯街道10号楼501室'
 })
 
-// 订单商品
-const orderItems = ref([
+// 订单商品 - 从当前订单中获取
+const orderItems = computed(() => currentOrder.value?.items || [
   {
     id: 1,
     name: '2023新款连帽卫衣',
@@ -180,33 +192,46 @@ const orderItems = ref([
   }
 ])
 
-// 推荐商品
-const recommendedProducts = ref([
-  {
-    id: 101,
-    name: '时尚休闲外套',
-    image: 'https://picsum.photos/id/239/300/300',
-    price: 459
-  },
-  {
-    id: 102,
-    name: '百搭T恤',
-    image: 'https://picsum.photos/id/240/300/300',
-    price: 129
-  },
-  {
-    id: 103,
-    name: '运动鞋',
-    image: 'https://picsum.photos/id/241/300/300',
-    price: 359
-  },
-  {
-    id: 104,
-    name: '时尚背包',
-    image: 'https://picsum.photos/id/242/300/300',
-    price: 199
+// 推荐商品 - 从product store获取或使用默认数据
+const recommendedProducts = computed(() => {
+  if (productStore.productDatabase.length > 0) {
+    // 从所有商品中随机选择4个作为推荐商品
+    const shuffled = [...productStore.productDatabase].sort(() => 0.5 - Math.random())
+    return shuffled.slice(0, 4).map(product => ({
+      id: product.id,
+      name: product.name,
+      image: product.images[0],
+      price: product.price
+    }))
   }
-])
+  // 默认推荐商品
+  return [
+    {
+      id: 101,
+      name: '时尚休闲外套',
+      image: 'https://picsum.photos/id/239/300/300',
+      price: 459
+    },
+    {
+      id: 102,
+      name: '百搭T恤',
+      image: 'https://picsum.photos/id/240/300/300',
+      price: 129
+    },
+    {
+      id: 103,
+      name: '运动鞋',
+      image: 'https://picsum.photos/id/241/300/300',
+      price: 359
+    },
+    {
+      id: 104,
+      name: '时尚背包',
+      image: 'https://picsum.photos/id/242/300/300',
+      price: 199
+    }
+  ]
+})
 
 // 复制订单号
 const copyOrderNumber = () => {
