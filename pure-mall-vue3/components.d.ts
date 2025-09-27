@@ -64,6 +64,7 @@ declare module 'vue' {
     InputDecoration: typeof import('./src/components/InputDecoration.vue')['default']
     LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
     PcMenu: typeof import('./src/components/PcMenu.vue')['default']
+    ProductCard: typeof import('./src/components/ProductCard.vue')['default']
     RegisterDialog: typeof import('./src/components/RegisterDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

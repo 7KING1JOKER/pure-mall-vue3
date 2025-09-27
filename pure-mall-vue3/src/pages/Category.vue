@@ -11,8 +11,9 @@
 
       <!-- 分类主体区域 -->
       <div class="category-main">
-        <!-- 左侧分类导航 -->
-        <div class="category-nav">
+        <!-- 分类导航 -->
+         <!-- 左侧分类导航 -->
+        <!-- <div class="category-nav">
           <div class="nav-header">商品分类</div>
           <el-tree 
             :data="categories"
@@ -29,8 +30,7 @@
               </span>
             </template>
           </el-tree>
-        </div>
-
+        </div> -->
         <!-- 右侧商品列表 -->
         <div class="product-list">
           <!-- 筛选工具栏 -->
@@ -55,30 +55,11 @@
 
           <!-- 商品网格 -->
           <div class="product-grid">
-            <div 
+            <ProductCard 
               v-for="product in displayProducts" 
               :key="product.id" 
-              class="product-card"
-              @click="goToProductDetail(product.id)"
-            >
-              <el-image 
-                :src="product.image" 
-                fit="cover" 
-                class="product-image"
-              />
-              <div class="product-info">
-                <h3 class="product-name">{{ product.name }}</h3>
-                <div class="product-price">¥{{ product.price.toFixed(2) }}</div>
-                <!-- 重新添加销量显示 -->
-                <div class="product-sales">已售 {{ product.sales }} 件</div>
-                <div class="product-actions">
-                  <el-button type="primary" size="small" @click.stop="addToCart(product)">
-                    加入购物车
-                  </el-button>
-                  <el-button icon="Star" circle size="small" @click.stop="addToWishlist(product)" />
-                </div>
-              </div>
-            </div>
+              :product="product"
+            />
           </div>
           
           <!-- 无商品时的提示 -->
@@ -98,6 +79,11 @@
           </div>
         </div>
       </div>
+
+      <!-- footer -->
+      <section class="section-footer">
+        <Footer />
+      </section>
     </div>
 </template>
 
@@ -108,6 +94,8 @@ import { useCategoryStore } from '../store/category';
 import { storeToRefs } from 'pinia';
 import { ArrowDown } from '@element-plus/icons-vue';
 import PcMenu from '../layouts/PcMenu.vue';
+import Footer from '../layouts/Footer.vue';
+import ProductCard from '../components/ProductCard.vue';
 
 // 使用路由
 const router = useRouter();
@@ -158,17 +146,24 @@ onMounted(() => {
 <style scoped>
 .category-container {
   margin-top: 60px;
-  padding: 20px;
   width: 100%;
   height: calc(100vh - 60px);
   overflow-y: auto;
 }
 
-.breadcrumb {
+.breadcrumb{
   margin-bottom: 20px;
   padding: 10px 15px;
-  background-color: var(--light-card-bg);
   border-radius: 4px;
+}
+
+/* 为面包屑的所有元素设置统一的大小和颜色 */
+.breadcrumb ::v-deep .el-breadcrumb__separator,
+.breadcrumb ::v-deep .el-breadcrumb__inner,
+.breadcrumb ::v-deep .el-breadcrumb__item {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #000000;
 }
 
 .category-main {
@@ -178,7 +173,7 @@ onMounted(() => {
 
 .category-nav {
   width: 250px;
-  background: var(--light-card-bg);
+  background: transparent;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
   padding: 15px;
@@ -209,10 +204,8 @@ onMounted(() => {
 
 .product-list {
   flex: 1;
-  background: var(--light-card-bg);
+  background: transparent;
   border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
-  padding: 20px;
 }
 
 .filter-toolbar {
@@ -220,7 +213,6 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
   margin-bottom: 20px;
 }
 
@@ -241,67 +233,13 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
-
-.product-card {
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  background: var(--light-card-bg);
-}
-
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.product-image {
-  width: 100%;
-  height: 200px;
-  background-color: #f5f7fa;
-}
-
-.product-info {
-  padding: 15px;
-}
-
-.product-name {
-  font-size: 14px;
-  height: 40px;
-  overflow: hidden;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  margin-bottom: 10px;
-  color: #333;
-}
-
-.product-price {
-  font-size: 18px;
-  font-weight: bold;
-  color: #e53935;
-  margin-bottom: 5px;
-}
-
-.product-actions {
-    display: flex;
-    justify-content: space-between;
-  }
   
-  .product-sales {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 10px;
-  }
-  
-  .no-products {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 50px 0;
-  }
+.no-products {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 0;
+}
 
 .pagination-container {
   margin-top: 30px;
@@ -309,10 +247,22 @@ onMounted(() => {
   justify-content: center;
 }
 
+/* 页脚区域 */
+.section-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+  box-sizing: border-box;
+  height: 80vh;
+  background-color: #000000c9;
+  color: white;
+}
+
 /* 响应式设计 */
 @media (max-width: 992px) {
   .product-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -325,16 +275,9 @@ onMounted(() => {
     width: 100%;
     margin-bottom: 20px;
   }
-  
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (max-width: 576px) {
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
   
   .filter-toolbar {
     flex-direction: column;

@@ -1,11 +1,6 @@
 <template>
     <div class="footer-content">
         <div class="footer-logo">
-        <!-- <el-image 
-            src="https://vuejs.org/images/logo.png" 
-            fit="contain" 
-            style="width: 80px; height: 80px;"
-        /> -->
         <h1>Pure Mall</h1>
         </div>
         <div class="footer-links">
@@ -40,7 +35,7 @@
 
 <style scoped>
 .footer-content {
-  max-width: 1200px;
+  height: 100%;
   width: 100%;
   padding: 40px 20px;
 }

@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { ElNotification } from 'element-plus';
 
 // 定义商品接口
-interface Product {
+export interface Product {
   id: number;
   name: string;
   price: number;
@@ -105,7 +105,7 @@ const categoryData: CategoryNode[] = [
 ];
 
 // 商品列表 - 服装相关商品
-const productData: Product[] = [
+export const productData: Product[] = [
   // 上衣类 - T恤
   { id: 1001, name: '纯棉宽松短袖T恤', price: 99, sales: 1250, image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
   { id: 1002, name: '男士印花短袖T恤', price: 89, sales: 2100, image: 'https://images.unsplash.com/photo-1688990982651-a5d751773eff?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fHNob3J0JTIwc2xlZXZlJTIwdCUyMHNoaXJ0JTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D' },
