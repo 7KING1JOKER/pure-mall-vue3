@@ -2,56 +2,40 @@
     <div class="category-container">
       <!-- 响应式菜单 -->
       <PcMenu />
-      <!-- 面包屑导航 -->
-      <el-breadcrumb separator="/" class="breadcrumb">
-        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>商品分类</el-breadcrumb-item>
-        <el-breadcrumb-item v-if="currentCategory.id">{{ currentCategory.label }}</el-breadcrumb-item>
-      </el-breadcrumb>
+      <!-- 顶部区域 -->
+      <div class="top-container">
+        <!-- 面包屑导航 -->
+        <el-breadcrumb separator="/" class="breadcrumb">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>商品分类</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="currentCategory.id">{{ currentCategory.label }}</el-breadcrumb-item>
+        </el-breadcrumb>
 
+        <!-- 筛选工具栏 -->
+        <div class="filter-toolbar">
+          <div class="filter-left">
+            <el-dropdown @command="handleSortChange">
+              <span class="dropdown-link">
+                  {{ sortOptions[currentSort as keyof typeof sortOptions] }}<el-icon><ArrowDown /></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="default">综合排序</el-dropdown-item>
+                  <el-dropdown-item command="priceAsc">价格从低到高</el-dropdown-item>
+                  <el-dropdown-item command="priceDesc">价格从高到低</el-dropdown-item>
+                  <el-dropdown-item command="salesDesc">销量优先</el-dropdown-item>
+                  <el-dropdown-item command="newest">最新上架</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </div>
+      </div>
       <!-- 分类主体区域 -->
       <div class="category-main">
         <!-- 分类导航 -->
-         <!-- 左侧分类导航 -->
-        <!-- <div class="category-nav">
-          <div class="nav-header">商品分类</div>
-          <el-tree 
-            :data="categories"
-            node-key="id"
-            :props="defaultProps"
-            :default-expanded-keys="['1']"
-            :highlight-current="true"
-            @node-click="handleNodeClick"
-          >
-            <template #default="{ node, data }">
-              <span class="custom-tree-node">
-                <el-icon v-if="data.icon"><component :is="data.icon" /></el-icon>
-                <span>{{ node.label }}</span>
-              </span>
-            </template>
-          </el-tree>
-        </div> -->
         <!-- 右侧商品列表 -->
         <div class="product-list">
-          <!-- 筛选工具栏 -->
-          <div class="filter-toolbar">
-            <div class="filter-left">
-              <el-dropdown @command="handleSortChange">
-                <span class="dropdown-link">
-                    {{ sortOptions[currentSort as keyof typeof sortOptions] }}<el-icon><ArrowDown /></el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="default">综合排序</el-dropdown-item>
-                    <el-dropdown-item command="priceAsc">价格从低到高</el-dropdown-item>
-                    <el-dropdown-item command="priceDesc">价格从高到低</el-dropdown-item>
-                    <el-dropdown-item command="salesDesc">销量优先</el-dropdown-item>
-                    <el-dropdown-item command="newest">最新上架</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-          </div>
 
           <!-- 商品网格 -->
           <div class="product-grid">
@@ -84,58 +68,41 @@
       <section class="section-footer">
         <Footer />
       </section>
+
+      <!-- 分类导航 -->
+      <CategoryNav />
     </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useCategoryStore } from '../store/category';
 import { storeToRefs } from 'pinia';
 import { ArrowDown } from '@element-plus/icons-vue';
 import PcMenu from '../layouts/PcMenu.vue';
 import Footer from '../layouts/Footer.vue';
 import ProductCard from '../components/ProductCard.vue';
-
-// 使用路由
-const router = useRouter();
+import CategoryNav from '../layouts/CategoryNavDialog.vue';
 
 // 使用category store
 const categoryStore = useCategoryStore();
 
 // 从store解构获取非响应式方法
 const { 
-  handleNodeClick,
   handleCurrentChange,
   handleSortChange,
-  addToCart,
-  addToWishlist,
   initializeData,
   sortOptions
 } = categoryStore;
 
 // 从store中解构响应式数据
 const { 
-  categories,
   displayProducts,
   currentCategory,
   currentSort,
   pageSize,
   totalProducts
 } = storeToRefs(categoryStore);
-
-// 配置el-tree的节点属性
-const defaultProps = {
-  children: 'children',
-  label: 'name'
-};
-
-
-
-// 跳转到商品详情页
-const goToProductDetail = (productId: number) => {
-  router.push(`/product/${productId}`);
-}
 
 onMounted(() => {
   // 组件挂载时加载初始数据
@@ -151,19 +118,53 @@ onMounted(() => {
   overflow-y: auto;
 }
 
+/* 顶部容器样式 - 面包屑和筛选工具栏水平排列 */
+.top-container {
+  height: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .breadcrumb{
-  margin-bottom: 20px;
   padding: 10px 15px;
   border-radius: 4px;
 }
 
 /* 为面包屑的所有元素设置统一的大小和颜色 */
-.breadcrumb ::v-deep .el-breadcrumb__separator,
-.breadcrumb ::v-deep .el-breadcrumb__inner,
-.breadcrumb ::v-deep .el-breadcrumb__item {
-  font-size: 0.8rem;
+.breadcrumb :deep(.el-breadcrumb__separator),
+.breadcrumb :deep(.el-breadcrumb__inner),
+.breadcrumb :deep(.el-breadcrumb__item) {
+  font-size: 14px;
   font-weight: 400;
   color: #000000;
+  line-height: 1.5;
+}
+
+.filter-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-left {
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-link {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  padding: 10px 15px;
+  border-radius: 4px;
+}
+
+.dropdown-link .el-icon {
+  margin-left: 5px;
 }
 
 .category-main {
@@ -171,14 +172,6 @@ onMounted(() => {
   gap: 20px;
 }
 
-.category-nav {
-  width: 250px;
-  background: transparent;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
-  padding: 15px;
-  height: fit-content;
-}
 
 .nav-header {
   font-size: 18px;
@@ -208,25 +201,7 @@ onMounted(() => {
   border-radius: 4px;
 }
 
-.filter-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-  margin-bottom: 20px;
-}
 
-.dropdown-link {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 14px;
-  color: #606266;
-}
-
-.dropdown-link .el-icon {
-  margin-left: 5px;
-}
 
 .product-grid {
   display: grid;
@@ -242,9 +217,28 @@ onMounted(() => {
 }
 
 .pagination-container {
-  margin-top: 30px;
+  height: 50px;
   display: flex;
   justify-content: center;
+}
+
+.pagination-container :deep(.el-pagination),
+.pagination-container :deep(.btn-prev),
+.pagination-container :deep(.btn-next),
+.pagination-container :deep(ul li) {
+  background-color: transparent !important;
+}
+
+.pagination-container :deep(.el-pagination .el-pagination__jump .el-input .el-input__wrapper) {
+  background-color: transparent !important;
+  color: #000000 !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  box-shadow: none !important;
+}
+
+.pagination-container :deep(.el-pagination) {
+  gap: 100px;
 }
 
 /* 页脚区域 */
@@ -271,10 +265,7 @@ onMounted(() => {
     flex-direction: column;
   }
   
-  .category-nav {
-    width: 100%;
-    margin-bottom: 20px;
-  }
+
 }
 
 @media (max-width: 576px) {

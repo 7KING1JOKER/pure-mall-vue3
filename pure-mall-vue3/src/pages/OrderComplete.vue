@@ -150,30 +150,20 @@ import { SuccessFilled, CopyDocument, Van, Goods, Star } from '@element-plus/ico
 
 const router = useRouter()
 
-// 使用order store
+// 使用store
 const orderStore = useOrderStore()
-
-// 使用product store获取推荐商品
 const productStore = useProductStore()
-
-// 从store中解构响应式数据
 const { currentOrder } = storeToRefs(orderStore)
 
-// 订单信息 - 从当前订单中获取
-const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
-const paymentTime = computed(() => currentOrder.value?.paymentTime || new Date().toLocaleString())
-const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
-const paymentMethod = computed(() => currentOrder.value?.paymentMethod || '支付宝')
-
-// 收货信息 - 从当前订单中获取
-const deliveryInfo = computed(() => currentOrder.value?.deliveryInfo || {
+// 默认地址信息
+const defaultDeliveryInfo = {
   name: '张三',
   phone: '138****1234',
   address: '北京市朝阳区三里屯街道10号楼501室'
-})
+}
 
-// 订单商品 - 从当前订单中获取
-const orderItems = computed(() => currentOrder.value?.items || [
+// 默认订单商品
+const defaultOrderItems = [
   {
     id: 1,
     name: '2023新款连帽卫衣',
@@ -190,7 +180,15 @@ const orderItems = computed(() => currentOrder.value?.items || [
     price: 399,
     quantity: 1
   }
-])
+]
+
+// 订单信息计算属性
+const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
+const paymentTime = computed(() => currentOrder.value?.paymentTime || new Date().toLocaleString())
+const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
+const paymentMethod = computed(() => currentOrder.value?.paymentMethod || '支付宝')
+const deliveryInfo = computed(() => currentOrder.value?.deliveryInfo || defaultDeliveryInfo)
+const orderItems = computed(() => currentOrder.value?.items || defaultOrderItems)
 
 // 推荐商品 - 从product store获取或使用默认数据
 const recommendedProducts = computed(() => {

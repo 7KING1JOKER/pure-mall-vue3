@@ -294,7 +294,7 @@ onBeforeUnmount(() => {
 
 /* 激活状态样式 */
 .responsive-menu :deep(.el-menu-item.is-active) .el-icon {
-  color: #409eff !important;
+  color: #000000 !important;
   transform: translateY(-4px);
 }
 

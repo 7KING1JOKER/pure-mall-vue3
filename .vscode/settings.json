@@ -4,6 +4,7 @@
         "pinia",
         "Tshirt",
         "unplugin",
+        "vnode",
         "wechat"
     ]
 }
