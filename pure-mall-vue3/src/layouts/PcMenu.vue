@@ -259,7 +259,7 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-65%, -50%);
+  transform: translate(-60%, -50%);
   z-index: 1001;
 }
 

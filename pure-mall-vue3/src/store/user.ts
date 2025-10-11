@@ -75,7 +75,7 @@ export const useUserStore = defineStore("user", {
 		],
         EditProfileDialogVisible: false,
         // 地址对话框相关状态
-        addressDialogVisible: false,
+        AddressDialogVisible: false,
         currentAddress: null as Address | null,
         isEditingAddress: false
 	}),
@@ -106,7 +106,7 @@ export const useUserStore = defineStore("user", {
 				zip: '',
 				isDefault: false
 			}
-			this.addressDialogVisible = true
+			this.AddressDialogVisible = true
 		},
 		// 打开编辑地址对话框
 		openEditAddressDialog(addressId: string) {
@@ -114,7 +114,7 @@ export const useUserStore = defineStore("user", {
 			if (address) {
 				this.isEditingAddress = true
 				this.currentAddress = { ...address }
-				this.addressDialogVisible = true
+				this.AddressDialogVisible = true
 			}
 		},
 		// 保存地址（添加或更新）
@@ -152,7 +152,7 @@ export const useUserStore = defineStore("user", {
 				ElMessage.success('地址添加成功')
 			}
 			
-			this.addressDialogVisible = false
+			this.AddressDialogVisible = false
 			this.currentAddress = null
 		},
 		// 删除地址

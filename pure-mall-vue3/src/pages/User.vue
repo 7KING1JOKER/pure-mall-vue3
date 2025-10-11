@@ -155,7 +155,7 @@
       </div>
     </el-card>
   <EditProfileDialog v-model="userStore.EditProfileDialogVisible" />
-  <AddressDialog v-model="userStore.addressDialogVisible" />
+  <AddressDialog v-model="userStore.AddressDialogVisible" />
   </div>
 </template>
 

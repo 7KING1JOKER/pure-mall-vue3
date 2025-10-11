@@ -44,11 +44,12 @@
         </section>
 
         <!-- 页脚区域 -->
-        <section class="scroll-section section-footer">
+        <!-- <section class="scroll-section section-footer">
           <Footer />
-        </section>
+        </section> -->
+
+        <Footer />
       </div>
-    <!-- </template> -->
   </div>
 </template>
 
@@ -168,12 +169,6 @@ onMounted(() => {
   min-width: 0;
   height: 100%;
   transition: all 0.3s ease;
-}
-
-/* 页脚区域 */
-.section-footer {
-  background-color: #000000c9;
-  color: white;
 }
 
 

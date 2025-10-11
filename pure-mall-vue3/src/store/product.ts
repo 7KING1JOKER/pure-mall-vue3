@@ -86,7 +86,7 @@ export const useProductStore = defineStore("product", {
             { id: 2, name: '黑色', price: 99 + Math.floor(productId % 100), stock: 80 },
             { id: 3, name: '灰色', price: 99 + Math.floor(productId % 100), stock: 60 }
           ],
-          detail: `<div style="padding: 20px;"><h2>产品详情</h2><p>本款${productType}采用优质面料制作，舒适透气，时尚百搭，适合各种场合穿着。</p><h3>产品特点</h3><ul><li>优质面料，舒适亲肤</li><li>时尚设计，百搭款式</li><li>精致做工，耐洗耐穿</li><li>多色可选，满足不同需求</li></ul><img src="${baseImage}" style="width:100%"/></div>`,
+          detail: `<div style="padding: 20px;"><h2>产品详情</h2><p>本款${productType}采用优质面料制作，舒适透气，时尚百搭，适合各种场合穿着。</p><h3>产品特点</h3><ul><li>优质面料，舒适亲肤</li><li>时尚设计，百搭款式</li><li>精致做工，耐洗耐穿</li><li>多色可选，满足不同需求</li></ul></div>`,
           params: [
             { name: '材质', value: '优质面料' },
             { name: '版型', value: '时尚版型' },
@@ -166,6 +166,23 @@ export const useProductStore = defineStore("product", {
     // 设置选项卡状态
     setActiveTab(tab: string) {
       this.activeTab = tab;
+    },
+
+    // 根据颜色名称获取实际颜色值
+    getColorValue(colorName: string) {
+      const colorMap: Record<string, string> = {
+        '黑色': '#000000',
+        '白色': '#FFFFFF',
+        '灰色': '#808080',
+        '红色': '#FF0000',
+        '蓝色': '#0000FF',
+        '绿色': '#00FF00',
+        '黄色': '#FFFF00',
+        '紫色': '#800080'
+      };
+      
+      // 如果找不到匹配的颜色，返回默认灰色
+      return colorMap[colorName] || '#808080';
     },
     
     // 添加到购物车

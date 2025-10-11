@@ -1,4 +1,5 @@
 <template>
+  <section class="section-footer scroll-section">
     <div class="footer-content">
         <div class="footer-logo">
         <h1>Pure Mall</h1>
@@ -27,6 +28,7 @@
         <p>© 2023 Pure Mall. All rights reserved.</p>
         </div>
     </div>
+  </section>
 </template>
 
 <script lang="ts" setup >
@@ -34,6 +36,18 @@
 </script>
 
 <style scoped>
+.section-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  background-color: #000000c9;
+  color: white;
+}
+
 .footer-content {
   height: 100%;
   width: 100%;

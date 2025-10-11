@@ -7,7 +7,9 @@
         <!-- 面包屑导航 -->
         <el-breadcrumb separator="/" class="breadcrumb">
           <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-          <el-breadcrumb-item>商品分类</el-breadcrumb-item>
+          <el-breadcrumb-item @mouseenter="categoryStore.CategoryNavVisible = true">
+            商品分类
+          </el-breadcrumb-item>
           <el-breadcrumb-item v-if="currentCategory.id">{{ currentCategory.label }}</el-breadcrumb-item>
         </el-breadcrumb>
 
@@ -65,12 +67,10 @@
       </div>
 
       <!-- footer -->
-      <section class="section-footer">
-        <Footer />
-      </section>
+      <Footer />
 
       <!-- 分类导航 -->
-      <CategoryNav />
+      <CategoryNav v-model="categoryStore.CategoryNavVisible" />
     </div>
 </template>
 
@@ -241,16 +241,9 @@ onMounted(() => {
   gap: 100px;
 }
 
-/* 页脚区域 */
+/* footer区域 */
 .section-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 50px;
-  box-sizing: border-box;
   height: 80vh;
-  background-color: #000000c9;
-  color: white;
 }
 
 /* 响应式设计 */
