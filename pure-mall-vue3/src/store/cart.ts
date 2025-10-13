@@ -25,6 +25,7 @@ interface RecommendedProduct {
 
 export const useCartStore = defineStore("cart", {
   state: () => ({
+
     // 购物车商品数据
     cartItems: [
       {
@@ -92,7 +93,7 @@ export const useCartStore = defineStore("cart", {
     ] as RecommendedProduct[],
     
     // 当前步骤（购物车流程）
-    activeStep: 1
+    activeStep: 0
   }),
   
   getters: {

@@ -2,16 +2,8 @@
   <div class="checkout-container">
     <!-- 响应式菜单栏 -->
     <PcMenu />
-    <!-- 确认订单头部 -->
-    <div class="checkout-header">
-      <h1><el-icon><Document /></el-icon> 确认订单</h1>
-      <el-steps :active="2" simple class="cart-steps">
-        <el-step title="购物车" icon="ShoppingCart" />
-        <el-step title="确认订单" icon="Document" />
-        <el-step title="付款" />
-        <el-step title="完成" />
-      </el-steps>
-    </div>
+    <!-- 购物车步骤条 -->
+    <CardSteps />
 
     <!-- 确认订单内容区域 -->
     <div class="checkout-content">
@@ -132,11 +124,11 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { useOrderStore } from '../store/order'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
-import { Document, Location, Edit, Delete, Plus, Goods, Van, ChatLineRound } from '@element-plus/icons-vue'
+import { Location, Edit, Delete, Plus, Goods, Van, ChatLineRound } from '@element-plus/icons-vue'
+import CardSteps from '../layouts/CardSteps.vue'
 
 const router = useRouter()
 
@@ -148,8 +140,7 @@ const {
   selectAddress,
   editAddress,
   deleteAddress,
-  addNewAddress,
-  createOrder
+  addNewAddress
 } = orderStore
 
 // 从store中解构响应式数据
@@ -185,41 +176,22 @@ onMounted(() => {
 
 <style scoped>
 .checkout-container {
-  width: 100%;
-  height: calc(100vh - 60px);
-  margin: 60px auto 0;
   padding: 20px;
-  overflow-y: auto;
-}
-
-/* 确认订单头部 */
-.checkout-header {
-  text-align: center;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 20px;
-}
-
-.checkout-header h1 {
-  font-size: 28px;
-  font-weight: 500;
-  color: #333;
+  gap: 20px;
+  margin-top: 60px;
+  height: calc(100vh - 60px);
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.checkout-header .cart-steps {
-  background: var(--light-card-bg);
 }
 
 /* 内容区域通用样式 */
 .checkout-content {
-  background: transparent;
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 90%;
+  border-radius: 5px;
+  border: 1px solid #fff;
+  background-color: var(--light-card-bg);
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
 }
 
 .section-title {

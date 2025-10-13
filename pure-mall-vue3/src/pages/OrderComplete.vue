@@ -2,16 +2,9 @@
   <div class="order-complete-container">
     <!-- 响应式菜单栏 -->
     <PcMenu />
-    <!-- 订单完成头部 -->
-    <div class="order-complete-header">
-      <h1><el-icon><SuccessFilled /></el-icon> 订单完成</h1>
-      <el-steps :active="4" simple finish-status="success" class="cart-steps">
-        <el-step title="购物车" icon="ShoppingCart" />
-        <el-step title="确认订单" icon="Document" />
-        <el-step title="付款" icon="CreditCard" />
-        <el-step title="完成" icon="SuccessFilled" />
-      </el-steps>
-    </div>
+
+    <!-- 购物车步骤条 -->
+    <CardSteps />
 
     <!-- 订单完成内容区域 -->
     <div class="order-complete-content">
@@ -146,7 +139,8 @@ import { useOrderStore } from '../store/order'
 import { useProductStore } from '../store/product'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
-import { SuccessFilled, CopyDocument, Van, Goods, Star } from '@element-plus/icons-vue'
+import CardSteps from '../layouts/CardSteps.vue'
+import { CopyDocument, Van, Goods, Star } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -267,40 +261,22 @@ const goToUserCenter = () => {
 
 <style scoped>
 .order-complete-container {
-  width: 100%;
-  height: calc(100vh - 60px);
-  margin: 60px auto 0;
   padding: 20px;
-  overflow-y: auto;
-}
-
-/* 订单完成头部 */
-.order-complete-header {
-  text-align: center;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 20px;
-}
-
-.order-complete-header h1 {
-  font-size: 28px;
-  font-weight: 500;
-  color: #333;
+  gap: 20px;
+  margin-top: 60px;
+  height: calc(100vh - 60px);
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.order-complete-header .cart-steps {
-  background: var(--light-card-bg);
 }
 
 /* 内容区域通用样式 */
 .order-complete-content {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 90%;
+  border-radius: 5px;
+  border: 1px solid #fff;
+  background-color: var(--light-card-bg);
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
 }
 
 .section-title {

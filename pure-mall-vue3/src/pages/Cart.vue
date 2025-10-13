@@ -2,16 +2,9 @@
     <div class="cart-container">
       <!-- 响应式菜单栏 -->
       <PcMenu />
-      <!-- 购物车头部 -->
-      <div class="cart-header">
-        <h1><el-icon><ShoppingCart /></el-icon> 我的购物车</h1>
-        <el-steps :active="activeStep" simple class="cart-steps">
-          <el-step title="购物车" icon="ShoppingCart" />
-          <el-step title="确认订单" />
-          <el-step title="付款" />
-          <el-step title="完成" />
-        </el-steps>
-      </div>
+
+      <!-- 购物车步骤条 -->
+      <CardSteps />
 
       <!-- 购物车内容区域 -->
       <div class="cart-content">
@@ -91,27 +84,7 @@
             </div>
           </div>
 
-          <!-- 为您推荐区域 -->
-          <div class="recommended-products">
-            <h2>为您推荐</h2>
-            <div class="product-list">
-              <div class="product-card" v-for="product in recommendedProducts" :key="product.id">
-                <el-image :src="product.image" fit="cover" class="product-img" />
-                <div class="product-info">
-                  <div class="product-name">{{ product.name }}</div>
-                  <div class="product-price">¥{{ product.price.toFixed(2) }}</div>
-                  <el-button 
-                    type="primary" 
-                    size="small" 
-                    @click="addToCart(product)" 
-                    icon="Plus"
-                  >
-                    加入购物车
-                  </el-button>
-                </div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -119,20 +92,21 @@
 
 <script setup lang="ts">
 import { useCartStore } from '../store/cart';
-import { ShoppingCart, Delete, Remove } from '@element-plus/icons-vue';
+import { Delete, Remove } from '@element-plus/icons-vue';
 import PcMenu from '../layouts/PcMenu.vue';
+import CardSteps from '../layouts/CardSteps.vue';
+
 
 // 使用购物车store
 const cartStore = useCartStore();
 
 // 从store解构获取数据和方法
-const { cartItems, recommendedProducts } = cartStore;
+const { cartItems  } = cartStore;
 const { 
   setSelectAll, 
   removeItem, 
   removeSelected, 
   clearCart, 
-  addToCart, 
   addToWishlist, 
   goShopping, 
   checkout 
@@ -141,48 +115,32 @@ const {
 // 从store获取计算属性
 const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
 
-// 当前步骤（购物车流程）
-const activeStep = 1;
 </script>
 
 <style scoped>
 
 /* 购物车容器 */
 .cart-container {
+  padding: 20px;
+  gap: 20px;
+  margin-top: 60px;
   height: calc(100vh - 60px);
   width: 100%;
-  margin: 60px auto 0;
-  padding: 20px;
+  display: flex;
+}
+
+/* 购物车内容 */
+.cart-content {
+  width: 90%;
+  border-radius: 5px;
+  border: 1px solid #fff;
+  background-color: var(--light-card-bg);
+  backdrop-filter: blur(2px);
   overflow-y: auto;
 }
 
-/* 购物车头部 */
-.cart-header {
-  text-align: center;
-  margin-bottom: 40px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 20px;
-}
-
-.cart-header .cart-steps {
-  background: var(--light-card-bg);
-}
-
-.cart-header h1 {
-  font-size: 28px;
-  font-weight: 500;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-/* 购物车商品列表 */
 .cart-items {
   background: var(--light-card-bg);
-  border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   margin-bottom: 40px;
@@ -215,7 +173,6 @@ const activeStep = 1;
 .item-image .el-image {
   width: 80px;
   height: 80px;
-  border-radius: 4px;
   overflow: hidden;
   border: 1px solid #eee;
 }
@@ -242,7 +199,6 @@ const activeStep = 1;
   background: #f5f7fa;
   display: inline-block;
   padding: 2px 6px;
-  border-radius: 3px;
 }
 
 .item-price {
@@ -274,7 +230,6 @@ const activeStep = 1;
   align-items: center;
   background: var(--light-card-bg);
   padding: 20px;
-  border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -328,7 +283,6 @@ const activeStep = 1;
 
 .product-card {
   background: var(--light-card-bg);
-  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s;

@@ -2,16 +2,8 @@
   <div class="payment-container">
     <!-- 响应式菜单栏 -->
     <PcMenu />
-    <!-- 付款头部 -->
-    <div class="payment-header">
-      <h1><el-icon><CreditCard /></el-icon> 订单支付</h1>
-      <el-steps :active="3" simple class="cart-steps">
-        <el-step title="购物车" icon="ShoppingCart" />
-        <el-step title="确认订单" icon="Document" />
-        <el-step title="付款" icon="CreditCard" />
-        <el-step title="完成" />
-      </el-steps>
-    </div>
+    <!-- 购物车步骤条 -->
+    <CardSteps />
 
     <!-- 付款内容区域 -->
     <div class="payment-content">
@@ -159,6 +151,7 @@ import { ElMessage, ElNotification } from 'element-plus'
 import { useOrderStore } from '../store/order'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
+import CardSteps from '../layouts/CardSteps.vue';
 import { CreditCard, CopyDocument } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -258,40 +251,23 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .payment-container {
-  width: 100%;
-  height: calc(100vh - 60px);
-  margin: 60px auto 0;
   padding: 20px;
-  overflow-y: auto;
-}
-
-/* 付款头部 */
-.payment-header {
-  text-align: center;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 20px;
-}
-
-.payment-header h1 {
-  font-size: 28px;
-  font-weight: 500;
-  color: #333;
+  gap: 20px;
+  margin-top: 60px;
+  height: calc(100vh - 60px);
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
 }
 
-.payment-header .cart-steps {
-  background: var(--light-card-bg);
-}
 
 /* 内容区域通用样式 */
 .payment-content {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 90%;
+  border-radius: 5px;
+  border: 1px solid #fff;
+  background-color: var(--light-card-bg);
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
 }
 
 .section-title {
