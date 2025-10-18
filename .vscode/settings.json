@@ -3,8 +3,10 @@
         "creditcard",
         "pinia",
         "qrcode",
+        "squres",
         "Tshirt",
         "unplugin",
+        "vite",
         "vnode",
         "wechat"
     ]

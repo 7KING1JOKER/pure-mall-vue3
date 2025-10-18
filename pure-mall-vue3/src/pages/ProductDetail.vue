@@ -64,8 +64,12 @@
         
         <!-- 其它描述 + 购买功能 -->
         <div class="product-desc">
-          <h2 class="desc-item product-desc-content">细节 & 描述</h2>
-          <h2 class="desc-item product-desc-size">尺码 & 选择</h2>
+          <h2 class="desc-item product-desc-content"
+              @click="useProductStore().productDetailsDialogVisible = true"
+          >细节 & 描述</h2>
+          <h2 class="desc-item product-desc-size"
+              @click="useProductStore().productSizeDialogVisible = true"
+          >尺码 & 选择</h2>
           <div class="product-actions">
             <div class="action-button add-to-wish-wrapper">
               <el-icon class="add-to-wish" @click="addToWishlist">
@@ -92,7 +96,14 @@
       </div>
     </div>
     
+    <!-- 页脚 -->
     <Footer />
+
+    <!-- 商品详情对话框 -->
+    <ProductDetailsDialog v-model="useProductStore().productDetailsDialogVisible" />
+    
+    <!-- 商品规格对话框 -->
+    <ProductSizeDialog v-model="useProductStore().productSizeDialogVisible" />
   </div>
 </template>
 
@@ -103,6 +114,8 @@ import { ElMessage } from 'element-plus';
 import { useProductStore } from '../store/product';
 import { storeToRefs } from 'pinia';
 import { ShoppingBag, Notebook } from '@element-plus/icons-vue';
+import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
+import ProductSizeDialog from '../layouts/ProductSizeDialog.vue';
 
 
 
@@ -188,6 +201,7 @@ const addToCart = () => {
 </script>
 
 <style scoped>
+
 .product-detail-container {
   margin-top: 60px;
   width: 100%;

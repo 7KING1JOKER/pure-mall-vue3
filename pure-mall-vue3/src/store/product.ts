@@ -25,7 +25,24 @@ export const useProductStore = defineStore("product", {
     activeTab: 'detail',
     
     // 从api/productDatabase导入的完整商品数据库
-    productDatabase: productDatabase
+    productDatabase: productDatabase,
+
+    // 商品详情对话框可见性
+    productDetailsDialogVisible: false,
+    
+    // 商品规格对话框可见性
+    productSizeDialogVisible: false,
+    
+    // 控制尺码说明展开/收起状态
+    isGuiderExpanded: false,
+
+    // 商品尺码列表
+    productSizeList: [
+      { id: 1, size: 'S', detail: '175/92A' },
+      { id: 2, size: 'M', detail: '178/95A' },
+      { id: 3, size: 'L', detail: '181/98A' },
+      { id: 4, size: 'XL', detail: '184/101A' },
+    ] 
   }),
   
   getters: {
@@ -136,6 +153,11 @@ export const useProductStore = defineStore("product", {
           }));
     },
     
+    // 切换展开 or 收起状态
+    toggleGuider(){
+      this.isGuiderExpanded = !(this.isGuiderExpanded);
+    },
+
     // 设置选中的规格
     setSelectedSpec(specId: number) {
       this.selectedSpec = specId;
