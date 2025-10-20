@@ -86,6 +86,7 @@ export const productDatabase = (() => {
         '适用场景': '日常/旅行'
       };
     }
+    briefText = `PURE致力于革新衣橱中的经典单品，而这款T恤便是品牌设计思路的体现。这款T恤在宽松的剪裁比例中，延续休闲的圆领设计，并注入细腻的针织肌理，构筑不凡的简约质感。\n\n- 休闲版型\n- 圆领设计\n- 短袖款式\n- 罗纹收边\n\n100%棉。不含配饰/可机洗\n\n尺码M码的后衣长为64厘米`;
 
     // 创建商品详情对象
     const productDetail = {
@@ -101,7 +102,7 @@ export const productDatabase = (() => {
         { id: 2, name: '黑色', price: baseProduct.price, stock: 80 },
         { id: 3, name: '灰色', price: baseProduct.price, stock: 60 }
       ],
-      detail: `<div style="padding: 20px;"><h2>产品详情</h2><p>${detailText}</p><h3>产品特点</h3><ul><li>优质面料，舒适亲肤</li><li>时尚设计，百搭款式</li><li>精致做工，耐洗耐穿</li><li>多色可选，满足不同需求</li></ul></div>`,
+      detail: `100% 棉 / 中温熨烫,不可干洗,需要时只可用非氯性漂白剂,平放晾干,温和机洗（最高温度30℃） 款号: 1263697001`,
       params: Object.entries(paramValues).map(([key, value]) => ({ name: key, value })),
       reviews: [
         {

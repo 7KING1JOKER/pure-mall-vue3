@@ -59,9 +59,27 @@ body {
   position: fixed;
   right: 0;
   height: 100vh;
+  padding: 10px 0;
 }
 
 .product-size-dialog .el-dialog .el-dialog__title{
+  padding-left: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* @product-details-dialog */
+.product-details-dialog .el-dialog {
+  background-color: rgba(255, 255, 255);
+  border-radius: 0;
+  position: fixed;
+  right: 0;
+  height: 100vh;
+  padding: 10px 0;
+}
+
+.product-details-dialog .el-dialog .el-dialog__title{
+  padding-left: 20px;
   font-size: 12px;
   font-weight: 600;
 }

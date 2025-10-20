@@ -4,7 +4,7 @@
         <el-dialog
             title="尺码选择"
             v-model="productStore.productSizeDialogVisible"
-            top="0" width="25%" border-radius="0px"
+            top="0" width="25%"
             transition="fade" open-delay="0.3s"
         >
         <!-- 尺码选择方块 -->
@@ -20,11 +20,11 @@
                 <span class="size-guider-title">尺码规格说明</span>
                 <span class="size-guider-icon">{{ isGuiderExpanded ? '-' : '+' }}</span>
             </div>
-            <transition name="slide">
+            <el-collapse-transition>
                 <div v-if="isGuiderExpanded" class="size-guider-content">
                     <img src="../assets/product-size-guider.png" alt="尺码说明图" class="size-guider-image">
                 </div>
-            </transition>
+            </el-collapse-transition>
         </div>
         </el-dialog>
     </div>
@@ -42,7 +42,7 @@ const { isGuiderExpanded } = storeToRefs(productStore);
 
 // 方法直接从productStore调用，不需要使用storeToRefs
 const toggleGuider = () => {
-    productStore.toggleGuider();
+  productStore.toggleGuider();
 };
 
 </script>
@@ -50,7 +50,10 @@ const toggleGuider = () => {
 <style scoped>
 
 .size-squres {
-  margin-top: 30px;
+  margin-top: 20px;
+  padding-top: 8px;
+  padding-left: 20px;
+  padding-right: 20px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -78,7 +81,9 @@ const toggleGuider = () => {
 .size-guider {
   margin-top: 30px;
   border-top: 1px solid rgba(0, 0, 0, 0.15);
-  padding-top: 20px;
+  padding-top: 8px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .size-guider-header {
