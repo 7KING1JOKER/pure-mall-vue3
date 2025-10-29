@@ -25,37 +25,36 @@ interface RecommendedProduct {
 
 export const useCartStore = defineStore("cart", {
   state: () => ({
-
     // 购物车商品数据
     cartItems: [
       {
-        id: 1,
-        name: '无线蓝牙降噪耳机',
-        description: '智能主动降噪，持久续航',
-        spec: '黑色',
-        price: 299,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1578319439584-104c94d37305?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        selected: true
-      },
-      {
-        id: 2,
-        name: '便携式咖啡机',
-        description: '一键萃取，3分钟享受现磨咖啡',
+        id: 1001,
+        name: '纯棉宽松短袖T恤',
+        description: '舒适透气的纯棉面料，宽松版型',
         spec: '白色',
-        price: 399,
+        price: 99,
         quantity: 1,
-        image: 'https://images.unsplash.com/photo-1645356894529-8c3b231fbbbe?q=80&w=1035&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         selected: true
       },
       {
-        id: 3,
-        name: '智能手表 GT3 Pro',
-        description: '全天健康监测，50米防水',
-        spec: '银色',
-        price: 1299,
+        id: 1002,
+        name: '男士印花短袖T恤',
+        description: '时尚印花设计，休闲百搭',
+        spec: '黑色',
+        price: 89,
         quantity: 1,
-        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
+        image: 'https://images.unsplash.com/photo-1688990982651-a5d751773eff?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fHNob3J0JTIwc2xlZXZlJTIwdCUyMHNoaXJ0JTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D',
+        selected: true
+      },
+      {
+        id: 1003,
+        name: '女士修身短袖T恤',
+        description: '修身版型，展现优雅曲线',
+        spec: '红色',
+        price: 109,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1688404970273-4d83251d3686?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjh8fFdvbWVuJ3MlMjBULXNoaXJ0JTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600',
         selected: true
       }
     ] as CartItem[],
@@ -91,6 +90,9 @@ export const useCartStore = defineStore("cart", {
         image: 'https://images.unsplash.com/photo-1591224823040-88dfe36bcab5?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
       }
     ] as RecommendedProduct[],
+
+    // 收藏商品
+    wishlistItems: [] as CartItem[],  
     
     // 当前步骤（购物车流程）
     activeStep: 0
@@ -102,9 +104,11 @@ export const useCartStore = defineStore("cart", {
       return state.cartItems.filter(item => item.selected).length;
     },
     
-    // 计算商品总数
+    // 计算选中商品总数
     totalQuantity: (state) => {
-      return state.cartItems.reduce((total, item) => total + item.quantity, 0);
+      return state.cartItems
+        .filter(item => item.selected)
+        .reduce((total, item) => total + item.quantity, 0);
     },
     
     // 计算总金额
@@ -121,6 +125,11 @@ export const useCartStore = defineStore("cart", {
   },
   
   actions: {
+    // 设置购物车步骤条步骤
+    setActiveStep(step: number) {
+      this.activeStep = step;
+    },
+
     // 设置全选状态
     setSelectAll(value: boolean) {
       this.cartItems.forEach(item => {
@@ -151,6 +160,8 @@ export const useCartStore = defineStore("cart", {
     
     // 添加商品到购物车
     addToCart(product: any) {
+      console.log("添加商品到购物车:", product);
+
       // 检查是否已在购物车中
       const existingItem = this.cartItems.find(item => item.id === product.id);
       
@@ -160,12 +171,18 @@ export const useCartStore = defineStore("cart", {
       } else {
         // 不存在则添加新商品
         this.cartItems.push({
-          ...product,
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
           quantity: 1,
           selected: true,
-          spec: '默认'
+          spec: '默认',
+          image: product.images[0]
         });
       }
+
+      console.log(this.cartItems);
       
       ElNotification({
         title: '已添加到购物车',

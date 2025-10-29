@@ -42,7 +42,7 @@
               </div>
               <div class="item-price">¥{{ item.price.toFixed(2) }}</div>
               <div class="item-quantity">
-                <el-input-number 
+                <el-input-number
                   v-model="item.quantity" 
                   :min="1" 
                   :max="10" 
@@ -51,14 +51,19 @@
               </div>
               <div class="item-subtotal">¥{{ (item.price * item.quantity).toFixed(2) }}</div>
               <div class="item-actions">
-                <el-button type="danger" icon="Delete" circle plain @click="removeItem(index)" />
-                <el-button type="info" icon="Star" circle plain @click="addToWishlist(item)" />
+                <el-button type="danger" circle plain @click="removeItem(index)">
+                  <el-icon><Delete /></el-icon>
+                </el-button>
+                <el-button type="info" circle plain @click="addToWishlist(item)">
+                  <el-icon><Star /></el-icon>
+                </el-button>
               </div>
             </div>
           </div>
 
           <!-- 购物车底部操作区 -->
           <div class="cart-footer">
+            <!-- 购物车底部左侧操作 -->
             <div class="footer-left">
               <el-checkbox :checked="selectAll" @change="setSelectAll">全选</el-checkbox>
               <el-button type="text" @click="removeSelected" :disabled="selectedCount === 0">
@@ -67,7 +72,9 @@
               <el-button type="text" @click="clearCart">
                 <el-icon><Remove /></el-icon> 清空购物车
               </el-button>
-            </div>
+            </div> 
+
+            <!-- 购物车底部右侧操作 -->
             <div class="footer-right">
               <div class="summary">
                 <div class="total-quantity">
@@ -78,13 +85,11 @@
                   <span class="amount">¥{{ totalAmount.toFixed(2) }}</span>
                 </div>
                 <div class="actions">
-                  <el-button type="success" @click="checkout">去结算</el-button>
+                  <el-icon @click="checkout" class="checkout-icon"> <ArrowRightBold /> </el-icon>
                 </div>
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
     </div>
@@ -92,16 +97,20 @@
 
 <script setup lang="ts">
 import { useCartStore } from '../store/cart';
-import { Delete, Remove } from '@element-plus/icons-vue';
+import { storeToRefs } from 'pinia';
+import { Delete, Remove, Star, ArrowRightBold } from '@element-plus/icons-vue';
 import PcMenu from '../layouts/PcMenu.vue';
 import CardSteps from '../layouts/CardSteps.vue';
+import { onMounted } from 'vue';
 
 
 // 使用购物车store
 const cartStore = useCartStore();
 
-// 从store解构获取数据和方法
-const { cartItems  } = cartStore;
+// 使用storeToRefs解构响应式数据和计算属性
+const { cartItems, selectedCount, totalQuantity, totalAmount, selectAll } = storeToRefs(cartStore);
+
+// 直接解构方法（方法不需要使用storeToRefs）
 const { 
   setSelectAll, 
   removeItem, 
@@ -109,11 +118,16 @@ const {
   clearCart, 
   addToWishlist, 
   goShopping, 
-  checkout 
+  checkout,
+  setActiveStep
 } = cartStore;
 
-// 从store获取计算属性
-const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
+onMounted(() => {
+  console.log('购物车页面已加载')
+  // 购物车步骤条设置为第1步
+  setActiveStep(0)
+})
+
 
 </script>
 
@@ -137,6 +151,7 @@ const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
   background-color: var(--light-card-bg);
   backdrop-filter: blur(2px);
   overflow-y: auto;
+  max-height: calc(100vh - 100px);
 }
 
 .cart-items {
@@ -203,8 +218,7 @@ const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
 
 .item-price {
   width: 100px;
-  color: #e53935;
-  font-weight: 500;
+  font-weight: 300;
 }
 
 .item-quantity {
@@ -213,7 +227,7 @@ const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
 
 .item-subtotal {
   width: 120px;
-  font-weight: 600;
+  font-weight: 400;
   color: #333;
 }
 
@@ -230,7 +244,10 @@ const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
   align-items: center;
   background: var(--light-card-bg);
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+  width: 100%;
+  bottom: 0;
 }
 
 .footer-left {
@@ -250,77 +267,35 @@ const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
 }
 
 .total-quantity {
-  color: #666;
+  font-size: 16px;
+  color: #000;
+  font-weight: 300;
 }
 
 .total-amount {
-  font-size: 18px;
+  font-size: 12px;
 }
 
 .total-amount .amount {
-  font-weight: 600;
-  color: #e53935;
-  font-size: 22px;
+  font-size: 18px;
+  font-weight: 350;
 }
 
-/* 为您推荐 */
-.recommended-products {
-  margin-top: 40px;
-}
-
-.recommended-products h2 {
-  font-size: 20px;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #eee;
-}
-
-.product-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.product-card {
-  background: var(--light-card-bg);
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+.checkout-icon {
+  font-size: 24px;
+  cursor: pointer;
   transition: all 0.3s;
 }
 
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+.checkout-icon:hover {
+  transform: translateY(-10px);
 }
+
 
 .product-img {
   width: 100%;
   height: 200px;
   background-color: #f5f7fa;
-}
-
-.product-info {
-  padding: 15px;
-  text-align: center;
-}
-
-.product-name {
-  font-weight: 500;
-  margin-bottom: 8px;
-  font-size: 16px;
-  height: 44px;
-  overflow: hidden;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.product-price {
-  color: #e53935;
-  font-weight: 600;
-  font-size: 18px;
-  margin: 10px 0 15px;
 }
 
 /* 空购物车 */
@@ -394,8 +369,5 @@ const { selectedCount, totalQuantity, totalAmount, selectAll } = cartStore;
     align-items: flex-end;
   }
   
-  .product-list {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  }
 }
 </style>

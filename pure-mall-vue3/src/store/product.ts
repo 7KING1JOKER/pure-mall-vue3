@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { ElNotification } from "element-plus";
 import { productData } from "../store/category";
 import { productDatabase } from "@/api/productDatabase";
 import type { Product, RelatedProduct } from "@/api/productDatabase";
@@ -206,52 +205,6 @@ export const useProductStore = defineStore("product", {
       // 如果找不到匹配的颜色，返回默认灰色
       return colorMap[colorName] || '#808080';
     },
-    
-    // 添加到购物车
-    addToCart() {
-      if (this.selectedSpec === null) {
-        ElNotification({
-          title: '请选择规格',
-          message: '请先选择商品规格',
-          type: 'warning',
-          duration: 2000
-        });
-        return false;
-      }
-      
-      ElNotification({
-        title: '已添加到购物车',
-        message: this.product ? `已添加 ${this.quantity} 件 "${this.product.name}" 到购物车` : '已添加商品到购物车',
-        type: 'success',
-        duration: 2000
-      });
-      
-      return true;
-    },
-    
-    // 立即购买
-    buyNow() {
-      if (this.selectedSpec === null) {
-        ElNotification({
-          title: '请选择规格',
-          message: '请先选择商品规格',
-          type: 'warning',
-          duration: 2000
-        });
-        return false;
-      }
-      
-      return true;
-    },
-    
-    // 添加到收藏夹
-    addToWishlist() {
-      ElNotification({
-        title: '已添加到收藏',
-        message: this.product ? `已将 "${this.product.name}" 添加到收藏夹` : '已将商品添加到收藏夹',
-        type: 'info',
-        duration: 2000
-      });
-    }
+
   }
 });

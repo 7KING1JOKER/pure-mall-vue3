@@ -1,7 +1,7 @@
 <template>
     <div class="cart-header">
       <el-steps 
-        :active="activeStep"
+        :active="cartStore.activeStep"
         class="cart-steps"
         direction="vertical"
       >
@@ -20,8 +20,6 @@ import { useCartStore } from '../store/cart';
 // 使用购物车store
 const cartStore = useCartStore();
 
-// 从store解构获取数据和方法
-const { activeStep } = cartStore;
 </script>
 
 <style scoped>
@@ -44,7 +42,7 @@ const { activeStep } = cartStore;
 
 .cart-steps :deep(.el-step__line) {
   margin-top: 25px;
-  background-color: #ffffff30;
+  background-color: #ffffff53;
 }
 
 .cart-steps :deep(.el-step__icon) {

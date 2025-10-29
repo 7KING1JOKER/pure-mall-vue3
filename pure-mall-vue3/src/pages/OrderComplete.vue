@@ -137,6 +137,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useOrderStore } from '../store/order'
 import { useProductStore } from '../store/product'
+import { useCartStore } from '../store/cart'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
 import CardSteps from '../layouts/CardSteps.vue'
@@ -146,8 +147,16 @@ const router = useRouter()
 
 // 使用store
 const orderStore = useOrderStore()
+const cartStore = useCartStore()
+
 const productStore = useProductStore()
 const { currentOrder } = storeToRefs(orderStore)
+
+const {
+  setActiveStep
+} = cartStore
+// 购物车步骤条设置为第4步
+setActiveStep(3)
 
 // 默认地址信息
 const defaultDeliveryInfo = {

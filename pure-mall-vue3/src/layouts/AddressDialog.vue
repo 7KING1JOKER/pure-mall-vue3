@@ -165,6 +165,7 @@ const saveAddress = async () => {
         ...addressForm,
         id: addressForm.id || undefined // 如果是新地址，id为undefined
       })
+      console.log('地址保存成功', userStore.addresses)
     } else {
       console.log('表单验证失败', fields)
       ElMessage.error('请完善表单信息')

@@ -149,15 +149,17 @@ import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useOrderStore } from '../store/order'
+import { useCartStore } from '../store/cart'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
 import CardSteps from '../layouts/CardSteps.vue';
-import { CreditCard, CopyDocument } from '@element-plus/icons-vue'
+import { CreditCard, CopyDocument, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
-// 使用order store
+// 使用stores
 const orderStore = useOrderStore()
+const cartStore = useCartStore()
 
 // 从store解构获取非响应式方法
 const { 
@@ -165,6 +167,12 @@ const {
   getPaymentMethodName,
   startCountdown
 } = orderStore
+
+const {
+  setActiveStep
+} = cartStore
+// 购物车步骤条设置为第3步
+setActiveStep(2)
 
 // 从store中解构响应式数据
 const { 

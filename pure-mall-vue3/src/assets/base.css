@@ -32,6 +32,9 @@ body {
   border-bottom: none !important;
 }
 
+.el-steps .el-step__line-inner {
+  border-color: #000 !important;
+}
 
 
 /* 遮罩元素是挂载在 body 上的全局元素 */

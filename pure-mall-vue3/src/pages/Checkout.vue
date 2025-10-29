@@ -11,35 +11,31 @@
       <div class="address-section">
         <div class="section-title">
           <el-icon><Location /></el-icon> 收货地址
+          <el-icon @click="addNewAddress" class="add-icon"> <Plus /> </el-icon>
         </div>
         <div class="address-list">
           <div 
-            v-for="(address, index) in addresses" 
-            :key="index"
-            :class="['address-item', { 'active': address.isDefault }]"
-            @click="selectAddress(index)"
+            v-for="address in addresses" 
+            :key="address.id"
+            :class="['address-item', { 'active': address.id === selectedAddressId }]"
+            @click="selectAddress(address.id)"
           >
             <div class="address-info">
               <div class="name-phone">
                 <span class="name">{{ address.name }}</span>
                 <span class="phone">{{ address.phone }}</span>
               </div>
-              <div class="address-detail">{{ address.province }} {{ address.city }} {{ address.district }} {{ address.detail }}</div>
+              <div class="address-detail">{{ address.province }} {{ address.city }} {{ address.district }} {{ address.street }}</div>
             </div>
             <div class="address-actions">
               <el-tag v-if="address.isDefault" size="small" type="success">默认</el-tag>
-              <el-button type="primary" text size="small" @click.stop="editAddress(index)">
+              <el-button type="primary" text size="small" @click.stop="editAddress(address.id)">
                 <el-icon><Edit /></el-icon>
               </el-button>
-              <el-button type="danger" text size="small" @click.stop="deleteAddress(index)">
+              <el-button type="danger" text size="small" @click.stop="confirmDeleteAddress(address.id)">
                 <el-icon><Delete /></el-icon>
               </el-button>
             </div>
-          </div>
-          <div class="add-address">
-            <el-button type="dashed" @click="addNewAddress">
-              <el-icon><Plus /></el-icon> 添加新地址
-            </el-button>
           </div>
         </div>
       </div>
@@ -50,7 +46,7 @@
           <el-icon><Goods /></el-icon> 订单商品
         </div>
         <div class="order-items">
-          <div class="order-item" v-for="(item, index) in orderItems" :key="index">
+          <div class="order-item" v-for="(item, index) in cartItems" :key="index">
             <div class="item-image">
               <el-image :src="item.image" fit="cover" class="product-img" />
             </div>
@@ -78,7 +74,6 @@
         </div>
       </div>
 
-
       <!-- 订单备注 -->
       <div class="order-remark-section">
         <div class="section-title">
@@ -96,63 +91,73 @@
         </div>
       </div>
 
-      <!-- 订单汇总 -->
-      <div class="order-summary-section">
-        <div class="summary-item">
-          <span>商品总价：</span>
-          <span>¥{{ subtotal.toFixed(2) }}</span>
-        </div>
-        <div class="summary-item">
-          <span>配送费用：</span>
-          <span>¥{{ deliveryFee.toFixed(2) }}</span>
-        </div>
-        <div class="summary-item total">
-          <span>应付总额：</span>
-          <span class="total-amount">¥{{ totalAmount.toFixed(2) }}</span>
-        </div>
-      </div>
-
       <!-- 底部操作栏 -->
       <div class="checkout-footer">
-        <el-button @click="goBack">返回购物车</el-button>
-        <el-button type="primary" @click="proceedToPayment">提交订单</el-button>
+        <div class="checkout-footer-left">
+          <span>商品总价({{ totalAmount.toFixed(2) }})</span>
+          <span>配送费({{ deliveryFee.toFixed(2) }})</span>
+          <span>总额({{ (totalAmount + deliveryFee).toFixed(2) }})</span>
+        </div>
+        <div class="checkout-footer-right">
+          <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
+          <el-icon @click="proceedToPayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
+        </div>
       </div>
     </div>
   </div>
+  <AddressDialog v-model="userStore.AddressDialogVisible" />
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useOrderStore } from '../store/order'
+import { useCartStore } from '../store/cart'
+import { useUserStore } from '../store/user'
 import { storeToRefs } from 'pinia'
+import { ElMessageBox } from 'element-plus'
 import PcMenu from '../layouts/PcMenu.vue'
-import { Location, Edit, Delete, Plus, Goods, Van, ChatLineRound } from '@element-plus/icons-vue'
+import { Location, Edit, Delete, Plus, Goods, Van, ChatLineRound, ArrowRightBold, ArrowLeftBold } from '@element-plus/icons-vue'
 import CardSteps from '../layouts/CardSteps.vue'
+import AddressDialog from '../layouts/AddressDialog.vue'
 
 const router = useRouter()
 
-// 使用order store
-const orderStore = useOrderStore()
+// 使用stores
+const cartStore = useCartStore()
+const userStore = useUserStore()
+
+// 本地选中的地址ID
+const selectedAddressId = ref<string>('')
 
 // 从store解构获取非响应式方法
 const { 
-  selectAddress,
-  editAddress,
-  deleteAddress,
-  addNewAddress
-} = orderStore
+  openEditAddressDialog: editAddress,
+  openAddAddressDialog: addNewAddress,
+  deleteAddress
+} = userStore
+
+const { setActiveStep } = cartStore
+
+// 选择地址
+const selectAddress = (addressId: string) => {
+  selectedAddressId.value = addressId
+}
 
 // 从store中解构响应式数据
 const { 
-  addresses,
-  orderItems,
-  deliveryMethod,
-  orderRemark,
-  subtotal,
-  deliveryFee,
+  addresses
+} = storeToRefs(userStore)
+
+// 本地状态管理
+const deliveryMethod = ref('standard')
+const orderRemark = ref('')
+const deliveryFee = ref(0)
+
+// 从cartStore中解构响应式数据
+const { 
+  cartItems,
   totalAmount
-} = storeToRefs(orderStore)
+} = storeToRefs(cartStore)
 
 // 返回购物车
 const goBack = () => {
@@ -160,9 +165,24 @@ const goBack = () => {
 }
 
 // 提交订单，进入支付页面
+// 确认删除地址
+const confirmDeleteAddress = (addressId: string) => {
+  ElMessageBox.confirm(
+    '确定要删除这个地址吗？',
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    deleteAddress(addressId)
+  }).catch(() => {
+    // 取消删除，不做任何操作
+  })
+}
+
 const proceedToPayment = () => {
-  // 创建订单
-  orderStore.createOrder()
   // 提交成功后跳转到支付页面
   router.push('/payment')
 }
@@ -170,7 +190,8 @@ const proceedToPayment = () => {
 // 页面加载时的操作
 onMounted(() => {
   console.log('确认订单页面已加载')
-  // 实际项目中这里可能会从API获取数据
+  // 购物车步骤条设置为第2步
+  setActiveStep(1)
 })
 </script>
 
@@ -204,14 +225,24 @@ onMounted(() => {
   color: #333;
 }
 
+.add-icon {
+  margin-left: auto;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-icon:hover {
+  transform: translateY(-6px);
+}
+
 /* 地址部分 */
 .address-section,
 .order-items-section,
 .delivery-section,
 .order-remark-section,
-.order-summary-section {
+.checkout-footer {
   background: var(--light-card-bg);
-  border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -235,13 +266,11 @@ onMounted(() => {
 }
 
 .address-item:hover {
-  border-color: #409eff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fafafaad;
 }
 
 .address-item.active {
-  border-color: #67c23a;
-  background-color: #f0f9eb;
+  background-color: #fafafaad;
 }
 
 .address-info {
@@ -257,12 +286,7 @@ onMounted(() => {
   margin-right: 15px;
 }
 
-.phone {
-  color: #666;
-}
-
 .address-detail {
-  color: #666;
   font-size: 14px;
 }
 
@@ -270,10 +294,6 @@ onMounted(() => {
   display: flex;
   gap: 10px;
   align-items: center;
-}
-
-.add-address {
-  margin-top: 10px;
 }
 
 /* 订单商品部分 */
@@ -312,13 +332,13 @@ onMounted(() => {
 }
 
 .item-title {
-  font-weight: 500;
+  font-weight: 400;
+  font-size: 14px;
   margin-bottom: 5px;
 }
 
 .item-spec {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
   background: #f5f7fa;
   display: inline-block;
   padding: 2px 6px;
@@ -328,16 +348,13 @@ onMounted(() => {
 .item-price,
 .item-quantity,
 .item-subtotal {
+  font-size: 16px;
   width: 100px;
   text-align: center;
 }
 
-.item-price {
-  color: #e53935;
-}
-
 .item-subtotal {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* 配送方式和支付方式 */
@@ -346,37 +363,43 @@ onMounted(() => {
   padding: 10px 0;
 }
 
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #666;
-}
-
-.summary-item.total {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-  border-top: 1px solid #eee;
-  padding-top: 15px;
-  margin-top: 15px;
-}
-
-.total-amount {
-  color: #e53935;
-  font-size: 24px;
-}
-
 /* 底部操作栏 */
 .checkout-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 15px;
-  margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  margin-bottom: 0;
 }
+
+.checkout-footer-left {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+.checkout-footer-left span {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.checkout-footer-right {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 20px;
+}
+
+.footer-icon{
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.footer-icon:hover {
+  transform: translateY(-10px);
+}
+
 
 /* 响应式设计 */
 @media (max-width: 768px) {

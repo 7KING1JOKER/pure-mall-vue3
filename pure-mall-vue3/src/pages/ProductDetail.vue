@@ -72,13 +72,13 @@
           >尺码 & 选择</h2>
           <div class="product-actions">
             <div class="action-button add-to-wish-wrapper">
-              <el-icon class="add-to-wish" @click="addToWishlist">
+              <el-icon class="add-to-wish" @click="cartStore.addToWishlist(product)">
                 <Notebook />
               </el-icon>
               <span class="action-text">收藏</span>
             </div>
             <div class="action-button add-to-cart-wrapper">
-              <el-icon class="add-to-cart" @click="addToCart">
+              <el-icon class="add-to-cart" @click="cartStore.addToCart(product)">
                 <ShoppingBag />
               </el-icon>
               <span class="action-text">购物车</span>
@@ -110,8 +110,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ElMessage } from 'element-plus';
 import { useProductStore } from '../store/product';
+import { useCartStore } from '../store/cart';
 import { storeToRefs } from 'pinia';
 import { ShoppingBag, Notebook } from '@element-plus/icons-vue';
 import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
@@ -128,6 +128,7 @@ const productId = computed(() => Number(route.params.id));
 
 // 使用store
 const productStore = useProductStore();
+const cartStore = useCartStore();
 
 // 从store中解构响应式数据
 const { 
@@ -173,8 +174,6 @@ const productCategoryInfo = computed(() => {
 const { 
   loadProductDetail,
   setSelectedSpec,
-  addToCart: addToCartInStore,
-  addToWishlist,
   getColorValue
 } = productStore;
 
@@ -189,13 +188,6 @@ onMounted(() => {
 watch(productId, () => {
   loadProductDetail(productId.value);
 });
-
-// 添加到购物车
-const addToCart = () => {
-  if (addToCartInStore()) {
-    ElMessage.success('已成功添加到购物车');
-  }
-};
 
 
 </script>
