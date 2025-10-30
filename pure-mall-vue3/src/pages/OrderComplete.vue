@@ -20,9 +20,6 @@
               <div class="info-item">
                 <span class="label">订单编号：</span>
                 <span class="value">{{ orderNumber }}</span>
-                <el-button type="text" size="small" @click="copyOrderNumber">
-                  <el-icon><CopyDocument /></el-icon> 复制
-                </el-button>
               </div>
               <div class="info-item">
                 <span class="label">支付时间：</span>
@@ -38,94 +35,11 @@
               </div>
             </div>
             <div class="action-buttons">
-              <el-button type="primary" @click="viewOrderDetails">查看订单详情</el-button>
+              <el-button @click="viewOrderDetails">查看订单详情</el-button>
               <el-button @click="continueShopping">继续购物</el-button>
             </div>
           </template>
         </el-result>
-      </div>
-
-      <!-- 物流信息 -->
-      <div class="logistics-section">
-        <div class="section-title">
-          <el-icon><Van /></el-icon> 物流信息
-        </div>
-        <div class="logistics-info">
-          <div class="delivery-address">
-            <h3>收货地址</h3>
-            <p>{{ deliveryInfo.name }} {{ deliveryInfo.phone }}</p>
-            <p>{{ deliveryInfo.address }}</p>
-          </div>
-          <div class="delivery-status">
-            <h3>配送状态</h3>
-            <el-steps direction="vertical" :active="1">
-              <el-step title="订单已支付" :description="paymentTime" />
-              <el-step title="商品打包中" description="预计24小时内发货" />
-              <el-step title="商品已发货" description="" />
-              <el-step title="配送中" description="" />
-              <el-step title="已送达" description="" />
-            </el-steps>
-          </div>
-        </div>
-      </div>
-
-      <!-- 订单商品 -->
-      <div class="order-items-section">
-        <div class="section-title">
-          <el-icon><Goods /></el-icon> 订单商品
-        </div>
-        <div class="order-items">
-          <el-table :data="orderItems" style="width: 100%">
-            <el-table-column label="商品信息">
-              <template #default="{ row }">
-                <div class="product-info">
-                  <el-image :src="row.image" :preview-src-list="[row.image]" fit="cover" class="product-image" />
-                  <div class="product-details">
-                    <div class="product-name">{{ row.name }}</div>
-                    <div class="product-specs">{{ row.specs }}</div>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column prop="price" label="单价" width="120">
-              <template #default="{ row }">
-                <span>¥{{ row.price.toFixed(2) }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="quantity" label="数量" width="100" />
-            <el-table-column label="小计" width="120">
-              <template #default="{ row }">
-                <span class="subtotal">¥{{ (row.price * row.quantity).toFixed(2) }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-      </div>
-
-      <!-- 推荐商品 -->
-      <div class="recommended-section">
-        <div class="section-title">
-          <el-icon><Star /></el-icon> 为您推荐
-        </div>
-        <div class="recommended-products">
-          <el-carousel :interval="4000" type="card" height="240px">
-            <el-carousel-item v-for="(item, index) in recommendedProducts" :key="index">
-              <div class="product-card" @click="viewProduct(item.id)">
-                <el-image :src="item.image" fit="cover" class="card-image" />
-                <div class="card-content">
-                  <div class="card-title">{{ item.name }}</div>
-                  <div class="card-price">¥{{ item.price.toFixed(2) }}</div>
-                </div>
-              </div>
-            </el-carousel-item>
-          </el-carousel>
-        </div>
-      </div>
-
-      <!-- 底部操作栏 -->
-      <div class="order-complete-footer">
-        <el-button @click="goToUserCenter">查看我的订单</el-button>
-        <el-button type="primary" @click="continueShopping">继续购物</el-button>
       </div>
     </div>
   </div>
@@ -136,12 +50,10 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useOrderStore } from '../store/order'
-import { useProductStore } from '../store/product'
 import { useCartStore } from '../store/cart'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
 import CardSteps from '../layouts/CardSteps.vue'
-import { CopyDocument, Van, Goods, Star } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -149,7 +61,6 @@ const router = useRouter()
 const orderStore = useOrderStore()
 const cartStore = useCartStore()
 
-const productStore = useProductStore()
 const { currentOrder } = storeToRefs(orderStore)
 
 const {
@@ -158,92 +69,13 @@ const {
 // 购物车步骤条设置为第4步
 setActiveStep(3)
 
-// 默认地址信息
-const defaultDeliveryInfo = {
-  name: '张三',
-  phone: '138****1234',
-  address: '北京市朝阳区三里屯街道10号楼501室'
-}
-
-// 默认订单商品
-const defaultOrderItems = [
-  {
-    id: 1,
-    name: '2023新款连帽卫衣',
-    specs: '颜色：黑色；尺码：L',
-    image: 'https://picsum.photos/id/237/200/200',
-    price: 299,
-    quantity: 1
-  },
-  {
-    id: 2,
-    name: '休闲宽松牛仔裤',
-    specs: '颜色：蓝色；尺码：32',
-    image: 'https://picsum.photos/id/238/200/200',
-    price: 399,
-    quantity: 1
-  }
-]
 
 // 订单信息计算属性
 const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
 const paymentTime = computed(() => currentOrder.value?.paymentTime || new Date().toLocaleString())
 const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
 const paymentMethod = computed(() => currentOrder.value?.paymentMethod || '支付宝')
-const deliveryInfo = computed(() => currentOrder.value?.deliveryInfo || defaultDeliveryInfo)
-const orderItems = computed(() => currentOrder.value?.items || defaultOrderItems)
 
-// 推荐商品 - 从product store获取或使用默认数据
-const recommendedProducts = computed(() => {
-  if (productStore.productDatabase.length > 0) {
-    // 从所有商品中随机选择4个作为推荐商品
-    const shuffled = [...productStore.productDatabase].sort(() => 0.5 - Math.random())
-    return shuffled.slice(0, 4).map(product => ({
-      id: product.id,
-      name: product.name,
-      image: product.images[0],
-      price: product.price
-    }))
-  }
-  // 默认推荐商品
-  return [
-    {
-      id: 101,
-      name: '时尚休闲外套',
-      image: 'https://picsum.photos/id/239/300/300',
-      price: 459
-    },
-    {
-      id: 102,
-      name: '百搭T恤',
-      image: 'https://picsum.photos/id/240/300/300',
-      price: 129
-    },
-    {
-      id: 103,
-      name: '运动鞋',
-      image: 'https://picsum.photos/id/241/300/300',
-      price: 359
-    },
-    {
-      id: 104,
-      name: '时尚背包',
-      image: 'https://picsum.photos/id/242/300/300',
-      price: 199
-    }
-  ]
-})
-
-// 复制订单号
-const copyOrderNumber = () => {
-  navigator.clipboard.writeText(orderNumber.value)
-    .then(() => {
-      ElMessage.success('订单号已复制到剪贴板')
-    })
-    .catch(() => {
-      ElMessage.error('复制失败，请手动复制')
-    })
-}
 
 // 查看订单详情
 const viewOrderDetails = () => {
@@ -256,16 +88,6 @@ const continueShopping = () => {
   router.push('/')
 }
 
-// 查看商品详情
-const viewProduct = (productId: number) => {
-  // 实际项目中跳转到商品详情页
-  ElMessage.info(`查看商品ID: ${productId}`)
-}
-
-// 跳转到用户中心
-const goToUserCenter = () => {
-  router.push('/user')
-}
 </script>
 
 <style scoped>
@@ -285,7 +107,6 @@ const goToUserCenter = () => {
   border: 1px solid #fff;
   background-color: var(--light-card-bg);
   backdrop-filter: blur(2px);
-  overflow-y: auto;
 }
 
 .section-title {
@@ -296,6 +117,10 @@ const goToUserCenter = () => {
   align-items: center;
   gap: 8px;
   color: #333;
+}
+
+.success-section {
+  height: 100%;
 }
 
 .success-section,

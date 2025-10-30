@@ -12,26 +12,13 @@
         <div class="section-title">
           <el-icon><Document /></el-icon> 订单信息
         </div>
-        <div class="order-info">
-          <div class="info-item">
-            <span class="label">订单编号：</span>
-            <span class="value">{{ orderNumber }}</span>
-            <el-button type="text" size="small" @click="copyOrderNumber">
-              <el-icon><CopyDocument /></el-icon> 复制
-            </el-button>
-          </div>
-          <div class="info-item">
-            <span class="label">创建时间：</span>
-            <span class="value">{{ orderTime }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">支付金额：</span>
-            <span class="value amount">¥{{ orderAmount.toFixed(2) }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">支付方式：</span>
-            <span class="value">{{ getPaymentMethodName(paymentMethod) }}</span>
-          </div>
+        <div class="order-section-content">
+          <el-descriptions :column="2" :border="true">
+            <el-descriptions-item label="订单编号" label-class-name="order-label" content-class-name="order-content">{{ orderNumber }}</el-descriptions-item>
+            <el-descriptions-item label="创建时间" label-class-name="order-label" content-class-name="order-content">{{ orderTime }}</el-descriptions-item>
+            <el-descriptions-item label="支付金额" label-class-name="order-label" content-class-name="order-content">¥{{ orderAmount.toFixed(2) }}</el-descriptions-item>
+            <el-descriptions-item label="支付方式" label-class-name="order-label" content-class-name="order-content">{{ getPaymentMethodName(paymentMethod) }}</el-descriptions-item>
+          </el-descriptions>
         </div>
       </div>
 
@@ -90,6 +77,10 @@
             <p>请在 <span class="countdown">{{ countdown }}</span> 内完成支付</p>
             <p>付款后请勿关闭页面，等待系统自动跳转</p>
           </div>
+          <div class="payment-footer">
+            <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
+            <el-icon @click="completePayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
+          </div>
         </div>
       </div>
 
@@ -103,6 +94,10 @@
           <div class="qrcode-tips">
             <p>请在 <span class="countdown">{{ countdown }}</span> 内完成支付</p>
             <p>付款后请勿关闭页面，等待系统自动跳转</p>
+          </div>
+          <div class="payment-footer">
+            <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
+            <el-icon @click="completePayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
           </div>
         </div>
       </div>
@@ -119,11 +114,11 @@
             </el-form-item>
             <el-form-item label="有效期">
               <div class="expiry-inputs">
-                <el-select v-model="cardForm.expiryMonth" placeholder="月">
+                <el-select v-model="cardForm.expiryMonth" placeholder="月" style="min-width: 80px;">
                   <el-option v-for="m in 12" :key="m" :label="m.toString().padStart(2, '0')" :value="m.toString().padStart(2, '0')" />
                 </el-select>
                 <span class="separator">/</span>
-                <el-select v-model="cardForm.expiryYear" placeholder="年">
+                <el-select v-model="cardForm.expiryYear" placeholder="年" style="min-width: 80px;">
                   <el-option v-for="y in 10" :key="y" :label="(new Date().getFullYear() + y - 1).toString().slice(-2)" :value="(new Date().getFullYear() + y - 1).toString().slice(-2)" />
                 </el-select>
               </div>
@@ -132,14 +127,13 @@
               <el-input v-model="cardForm.cvv" placeholder="CVV" maxlength="3" />
             </el-form-item>
           </el-form>
+          <div class="payment-footer">
+            <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
+            <el-icon @click="completePayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
+          </div>
         </div>
       </div>
 
-      <!-- 底部操作栏 -->
-      <div class="payment-footer">
-        <el-button @click="goBack">返回订单确认</el-button>
-        <el-button type="primary" @click="completePayment">确认支付</el-button>
-      </div>
     </div>
   </div>
 </template>
@@ -153,7 +147,7 @@ import { useCartStore } from '../store/cart'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
 import CardSteps from '../layouts/CardSteps.vue';
-import { CreditCard, CopyDocument, Document } from '@element-plus/icons-vue'
+import { CreditCard, Document, ArrowRightBold, ArrowLeftBold } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -182,6 +176,14 @@ const {
   currentOrder
 } = storeToRefs(orderStore)
 
+// 确保cardForm有初始值
+if (!cardForm.value.expiryMonth) {
+  cardForm.value.expiryMonth = ''
+}
+if (!cardForm.value.expiryYear) {
+  cardForm.value.expiryYear = ''
+}
+
 // 倒计时清理函数引用
 const countdownCleanup = ref<(() => void) | null>(null)
 
@@ -190,16 +192,6 @@ const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
 const orderTime = computed(() => currentOrder.value?.orderTime || '')
 const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
 
-// 复制订单号
-const copyOrderNumber = () => {
-  navigator.clipboard.writeText(orderNumber.value)
-    .then(() => {
-      ElMessage.success('订单号已复制到剪贴板')
-    })
-    .catch(() => {
-      ElMessage.error('复制失败，请手动复制')
-    })
-}
 
 // 返回订单确认页面
 const goBack = () => {
@@ -276,6 +268,9 @@ onBeforeUnmount(() => {
   background-color: var(--light-card-bg);
   backdrop-filter: blur(2px);
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .section-title {
@@ -285,13 +280,10 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #333;
 }
 
 .order-info-section,
-.payment-method-section,
-.payment-qrcode-section,
-.credit-card-section {
+.payment-method-section {
   background: var(--light-card-bg);
   border-radius: 8px;
   padding: 20px;
@@ -299,12 +291,43 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* 订单信息 */
-.order-info {
-  padding: 15px;
+.payment-qrcode-section,
+.credit-card-section {
   background: var(--light-card-bg);
   border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  min-height: 0;
+  width: 100%;
 }
+
+.credit-card-section,
+.payment-qrcode-section {
+  margin-bottom: 0;
+  /* background-color: transparent; */
+  box-shadow: none;
+}
+
+/* 订单信息 */
+.order-section-content :deep(.el-descriptions .el-descriptions__body),
+.order-section-content :deep(.order-label),
+.order-section-content :deep(.order-content) {
+  background: transparent !important;
+}
+
+.order-section-content :deep(.order-label) {
+  color: #000000ce;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* .order-section-content :deep(.order-content) {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 10;
+} */
 
 .info-item {
   display: flex;
@@ -342,12 +365,12 @@ onBeforeUnmount(() => {
 .payment-method-item {
   border: 1px solid #eee;
   border-radius: 8px;
-  padding: 15px;
+  padding: 10px;
   transition: all 0.3s;
 }
 
 .payment-method-item:hover {
-  border-color: #409eff;
+  border-color: #000;
 }
 
 .method-content {
@@ -362,13 +385,16 @@ onBeforeUnmount(() => {
 }
 
 .method-name {
+  color: #000;
+  font-size: 16px;
   font-weight: 500;
   margin-bottom: 5px;
 }
 
 .method-desc {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
+  color: #000;
+  font-weight: 320;
 }
 
 /* 二维码支付 */
@@ -376,12 +402,15 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: 20px;
+  height: 100%;
+  position: relative;
 }
 
 .qrcode-title {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 400;
   margin-bottom: 20px;
 }
 
@@ -395,20 +424,28 @@ onBeforeUnmount(() => {
 
 .qrcode-tips {
   text-align: center;
-  color: #666;
   line-height: 1.6;
 }
 
-.countdown {
-  color: #e53935;
-  font-weight: 600;
+.qrcode-tips p {
   font-size: 16px;
+  font-weight: 320;
+}
+
+.countdown {
+  font-weight: 500;
+  font-size: 18px;
 }
 
 /* 信用卡表单 */
 .card-form {
   max-width: 500px;
   margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
 }
 
 .expiry-inputs {
@@ -424,12 +461,23 @@ onBeforeUnmount(() => {
 
 /* 底部操作栏 */
 .payment-footer {
+  gap: 10px;
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+  justify-content: flex-end;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: fit-content;
+}
+
+.footer-icon{
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.footer-icon:hover {
+  transform: translateY(-10px);
 }
 
 /* 响应式设计 */

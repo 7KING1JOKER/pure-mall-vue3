@@ -22,7 +22,7 @@
       <el-form-item label="所在地区" required>
         <div class="region-selects">
           <el-form-item prop="province" class="region-item">
-            <el-select v-model="addressForm.province" placeholder="省份">
+            <el-select v-model="addressForm.province" placeholder="省份" style="min-width: 100px;">
               <el-option label="北京市" value="北京市" />
               <el-option label="上海市" value="上海市" />
               <el-option label="广东省" value="广东省" />
@@ -32,7 +32,7 @@
           </el-form-item>
           
           <el-form-item prop="city" class="region-item">
-            <el-select v-model="addressForm.city" placeholder="城市">
+            <el-select v-model="addressForm.city" placeholder="城市" style="min-width: 100px;">
               <el-option label="北京市" value="北京市" />
               <el-option label="上海市" value="上海市" />
               <el-option label="广州市" value="广州市" />
@@ -42,7 +42,7 @@
           </el-form-item>
           
           <el-form-item prop="district" class="region-item">
-            <el-select v-model="addressForm.district" placeholder="区/县">
+            <el-select v-model="addressForm.district" placeholder="区/县" style="min-width: 100px;">
               <el-option label="朝阳区" value="朝阳区" />
               <el-option label="海淀区" value="海淀区" />
               <el-option label="东城区" value="东城区" />
