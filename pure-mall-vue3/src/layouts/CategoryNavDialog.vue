@@ -1,48 +1,44 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    title="商品分类"
-    width="90%"
-    :before-close="handleClose"
-    custom-class="category-nav-dialog"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
-  >
-    <div class="category-tags-container">
-      <!-- 全部分类 -->
-      <el-tag
-        :type="currentCategory.id === '' ? 'primary' : 'default'"
-        @click="selectCategory({ id: '', label: '全部商品', icon: 'Menu' })"
-        class="category-tag"
-      >
-        全部商品
-      </el-tag>
-      
-      <!-- 遍历所有分类和子分类 -->
-      <template v-for="category in categories" :key="category.id">
-        <el-tag
-          :type="currentCategory.id === category.id ? 'primary' : 'default'"
-          @click="selectCategory(category)"
-          class="category-tag"
-          v-if="category.children && category.children.length > 0"
-        >
-          {{ category.label }}
-        </el-tag>
-        
-        <template v-if="category.children && category.children.length > 0">
-          <el-tag
-            v-for="subCategory in category.children"
-            :key="subCategory.id"
-            :type="currentCategory.id === subCategory.id ? 'primary' : 'default'"
-            @click="selectCategory(subCategory)"
-            class="sub-category-tag"
-          >
-            {{ subCategory.label }}
-          </el-tag>
+  <div class="category-nav-dialog-container">
+    <el-dialog
+      v-model="dialogVisible"
+      title="商品分类" transition="fade"
+      width="100%" top="60px"
+      :before-close="handleClose"
+      modal-class="custom-category-mask"
+      custom-class="category-nav-dialog"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+    >
+      <div class="category-tags-container">
+        <!-- 遍历所有分类 -->
+        <template v-for="category in categories" :key="category.id">
+          <template v-if="category.children && category.children.length > 0">
+            <!-- 有子分类时显示子分类 -->
+            <el-tag
+              v-for="subCategory in category.children"
+              :key="subCategory.id"
+              :type="currentCategory.id === subCategory.id ? 'primary' : 'default'"
+              @click="selectCategory(subCategory)"
+              class="sub-category-tag"
+            >
+              {{ subCategory.label }}
+            </el-tag>
+          </template>
+          <template v-else>
+            <!-- 没有子分类时直接显示当前分类 -->
+            <el-tag
+              :type="currentCategory.id === category.id ? 'primary' : 'default'"
+              @click="selectCategory(category)"
+              class="sub-category-tag"
+            >
+              {{ category.label }}
+            </el-tag>
+          </template>
         </template>
-      </template>
-    </div>
-  </el-dialog>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -128,58 +124,34 @@ watch(() => props.modelValue, (newValue) => {
 }
 
 .category-tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.category-tag {
-  font-size: 14px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background-color: #f0f0f0;
-  border-color: #dcdfe6;
-}
-
-.category-tag:hover {
-  background-color: #e6f7ff;
-  border-color: #91d5ff;
-  color: #1890ff;
+  max-height: 400px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  text-align: left;
 }
 
 .sub-category-tag {
-  font-size: 13px;
-  padding: 6px 12px;
-  cursor: pointer;
+  display: inline-block;
+  width: fit-content;
+  white-space: nowrap;
+  color: #0000007e;
+  text-align: left;
+  padding-left: 20px;
   transition: all 0.3s ease;
-  background-color: #fafafa;
-  border-color: #dcdfe6;
-  margin-left: 15px;
 }
 
+/* 选中状态的样式 */
+.sub-category-tag.el-tag--primary {
+  color: #000;
+  font-weight: 400;
+  transition: all 0.3s ease;
+}
+
+/* 鼠标悬停效果 */
 .sub-category-tag:hover {
-  background-color: #e6f7ff;
-  border-color: #91d5ff;
-  color: #1890ff;
+  transform: translateY(-2px);
 }
 
-/* 自定义滚动条样式 */
-.category-tags-container::-webkit-scrollbar {
-  width: 6px;
-}
 
-.category-tags-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.category-tags-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.category-tags-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
 </style>

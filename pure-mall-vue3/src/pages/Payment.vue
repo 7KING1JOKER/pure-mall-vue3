@@ -219,6 +219,16 @@ const completePayment = () => {
 
   // 调用store中的支付方法
   storeCompletePayment()
+  
+  // 准备支付成功后的订单数据
+  const paymentSuccessData = {
+    paymentTime: new Date().toLocaleString(),
+    status: 'paid' as 'paid',
+    paymentMethod: getPaymentMethodName(paymentMethod.value)
+  }
+  
+  // 保存完整订单数据，供OrderDetail页面展示
+  orderStore.saveCompleteOrder(paymentSuccessData)
 
   // 模拟支付成功，实际项目中这里会调用支付API
   setTimeout(() => {

@@ -117,8 +117,6 @@ import { ShoppingBag, Notebook } from '@element-plus/icons-vue';
 import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
 import ProductSizeDialog from '../layouts/ProductSizeDialog.vue';
 
-
-
 import PcMenu from '../layouts/PcMenu.vue';
 import Footer from '../layouts/Footer.vue';
 

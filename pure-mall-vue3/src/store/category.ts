@@ -43,63 +43,28 @@ const categoryData: CategoryNode[] = [
     children: [
       { id: '21', label: '牛仔裤', icon: 'Star' },
       { id: '22', label: '休闲裤', icon: 'Goods' },
-      { id: '23', label: '运动裤', icon: 'TrendCharts' },
-      { id: '24', label: '短裤', icon: 'Gold' },
       { id: '25', label: '裙子', icon: 'Bell' },
-      { id: '26', label: '打底裤', icon: 'Suitcase' },
     ]
   },
   {
     id: '3',
     label: '鞋子',
-    icon: 'Soccer',
-    children: [
-      { id: '31', label: '运动鞋', icon: 'Cpu' },
-      { id: '32', label: '休闲鞋', icon: 'Camera' },
-      { id: '33', label: '靴子', icon: 'Navigation' },
-      { id: '34', label: '拖鞋', icon: 'Monitor' },
-      { id: '35', label: '凉鞋', icon: 'Sunny' },
-      { id: '36', label: '皮鞋', icon: 'Coins' },
-    ]
+    icon: 'Soccer'
   },
   {
     id: '4',
     label: '配饰',
-    icon: 'Glasses',
-    children: [
-      { id: '41', label: '帽子', icon: 'Iphone' },
-      { id: '42', label: '围巾', icon: 'Link' },
-      { id: '43', label: '手套', icon: 'Operation' },
-      { id: '44', label: '腰带', icon: 'Key' },
-      { id: '45', label: '墨镜', icon: 'Eye' },
-      { id: '46', label: '首饰', icon: 'Diamond' },
-    ]
+    icon: 'Glasses'
   },
   {
     id: '5',
     label: '内衣',
-    icon: 'User',
-    children: [
-      { id: '51', label: '文胸', icon: 'Heart' },
-      { id: '52', label: '内裤', icon: 'CirclePlus' },
-      { id: '53', label: '睡衣', icon: 'Moon' },
-      { id: '54', label: '保暖内衣', icon: 'Snowflake' },
-      { id: '55', label: '袜子', icon: 'Plus' },
-      { id: '56', label: '家居服', icon: 'HomeFilled' },
-    ]
+    icon: 'User'
   },
   {
     id: '6',
     label: '箱包',
-    icon: 'ShoppingBag',
-    children: [
-      { id: '61', label: '背包', icon: 'Package' },
-      { id: '62', label: '手提包', icon: 'Wallet' },
-      { id: '63', label: '斜挎包', icon: 'Flag' },
-      { id: '64', label: '钱包', icon: 'CreditCard' },
-      { id: '65', label: '旅行包', icon: 'Map' },
-      { id: '66', label: '电脑包', icon: 'Notebook' },
-    ]
+    icon: 'ShoppingBag'
   },
 ];
 
@@ -227,40 +192,37 @@ export const useCategoryStore = defineStore('category', {
       let sortedProducts = [...this.allProducts];
       
       // 根据当前选中的分类筛选商品
-      if (this.currentCategory.id && this.currentCategory.id !== '1' && this.currentCategory.id !== '2' && 
-          this.currentCategory.id !== '3' && this.currentCategory.id !== '4' && 
-          this.currentCategory.id !== '5' && this.currentCategory.id !== '6') {
+      if (this.currentCategory.id) {
         // 假设id格式为：大类(1-6)+子类(1-6)，如11代表T恤
         const categoryId = this.currentCategory.id;
         const categoryType = categoryId.charAt(0);
         const subCategoryId = categoryId.charAt(1);
         
-        // 根据分类ID筛选商品
-        if (categoryType === '1') {
-          // 上衣类
-          if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1001 && p.id <= 1004); // T恤
-          else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1005 && p.id <= 1008); // 衬衫
-          else if (subCategoryId === '3') sortedProducts = sortedProducts.filter(p => p.id >= 1009 && p.id <= 1012); // 卫衣
-          else if (subCategoryId === '4') sortedProducts = sortedProducts.filter(p => p.id >= 1013 && p.id <= 1016); // 毛衣
-          else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1017 && p.id <= 1018); // 夹克
-          else if (subCategoryId === '6') sortedProducts = sortedProducts.filter(p => p.id >= 1019 && p.id <= 1020); // 外套
-        } else if (categoryType === '2') {
-          // 下装类
-          if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1021 && p.id <= 1024); // 牛仔裤
-          else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1025 && p.id <= 1028); // 休闲裤
-          else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1029 && p.id <= 1032); // 裙子
-        } else if (categoryType === '3') {
-          // 鞋子类
-          sortedProducts = sortedProducts.filter(p => p.id >= 1033 && p.id <= 1036);
-        } else if (categoryType === '4') {
-          // 配饰类
-          sortedProducts = sortedProducts.filter(p => p.id >= 1037 && p.id <= 1040);
-        } else if (categoryType === '5') {
-          // 内衣类
-          sortedProducts = sortedProducts.filter(p => p.id >= 1041 && p.id <= 1044);
-        } else if (categoryType === '6') {
-          // 箱包类
-          sortedProducts = sortedProducts.filter(p => p.id >= 1045 && p.id <= 1048);
+        // 检查是否为一级分类（只有一个字符）
+        if (categoryId.length === 1) {
+          // 一级分类处理
+          if (categoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1001 && p.id <= 1020); // 上衣类
+          else if (categoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1021 && p.id <= 1032); // 下装类
+          else if (categoryId === '3') sortedProducts = sortedProducts.filter(p => p.id >= 1033 && p.id <= 1036); // 鞋子类
+          else if (categoryId === '4') sortedProducts = sortedProducts.filter(p => p.id >= 1037 && p.id <= 1040); // 配饰类
+          else if (categoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1041 && p.id <= 1044); // 内衣类
+          else if (categoryId === '6') sortedProducts = sortedProducts.filter(p => p.id >= 1045 && p.id <= 1048); // 箱包类
+        } else {
+          // 二级分类处理
+          if (categoryType === '1') {
+            // 上衣类
+            if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1001 && p.id <= 1004); // T恤
+            else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1005 && p.id <= 1008); // 衬衫
+            else if (subCategoryId === '3') sortedProducts = sortedProducts.filter(p => p.id >= 1009 && p.id <= 1012); // 卫衣
+            else if (subCategoryId === '4') sortedProducts = sortedProducts.filter(p => p.id >= 1013 && p.id <= 1016); // 毛衣
+            else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1017 && p.id <= 1018); // 夹克
+            else if (subCategoryId === '6') sortedProducts = sortedProducts.filter(p => p.id >= 1019 && p.id <= 1020); // 外套
+          } else if (categoryType === '2') {
+            // 下装类
+            if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1021 && p.id <= 1024); // 牛仔裤
+            else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1025 && p.id <= 1028); // 休闲裤
+            else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1029 && p.id <= 1032); // 裙子
+          }
         }
       }
       

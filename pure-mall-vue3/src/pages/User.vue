@@ -110,8 +110,8 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" width="120">
-            <template #default>
-              <el-button size="small" type="primary">查看</el-button>
+            <template #default="scope">
+              <el-button size="small" type="primary" @click="viewOrderDetail(scope.row.id)">查看</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -161,6 +161,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { 
   ElCard, 
   ElAvatar, 
@@ -192,12 +193,12 @@ import {
 import PcMenu from '../layouts/PcMenu.vue'
 import EditProfileDialog from '../layouts/EditProfileDialog.vue'
 import AddressDialog from '../layouts/AddressDialog.vue'
-
 import { useUserStore } from '../store/user'
 import { storeToRefs } from 'pinia'
 
 // 获取userStore中响应式数据
 const userStore = useUserStore()
+const router = useRouter()
 const {
   vip,
   activeTab,
@@ -241,6 +242,11 @@ const confirmDeleteAddress = (addressId) => {
 // 设置为默认地址
 const setAsDefault = (addressId) => {
   userStore.setDefaultAddress(addressId)
+}
+
+// 查看订单详情
+const viewOrderDetail = (orderNumber) => {
+  router.push({ path: `/order/${orderNumber}` })
 }
 
 

@@ -36,7 +36,20 @@ body {
   border-color: #000 !important;
 }
 
+.el-dialog .el-dialog__title{
+  padding-left: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
 
+.el-tag {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.el-tag .el-tag__content {
+  font-size: 12px;
+}
 /* 遮罩元素是挂载在 body 上的全局元素 */
 
 /* @register-dialog */
@@ -65,12 +78,6 @@ body {
   padding: 10px 0;
 }
 
-.product-size-dialog .el-dialog .el-dialog__title{
-  padding-left: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
 /* @product-details-dialog */
 .product-details-dialog .el-dialog {
   background-color: rgba(255, 255, 255);
@@ -81,8 +88,13 @@ body {
   padding: 10px 0;
 }
 
-.product-details-dialog .el-dialog .el-dialog__title{
-  padding-left: 20px;
-  font-size: 12px;
-  font-weight: 600;
+/* @category-nav-dialog-container */
+.category-nav-dialog-container .el-dialog {
+  background-color: rgba(255, 255, 255);
+  border-radius: 0;
+  padding: 10px 0;
+}
+
+.custom-category-mask {
+  background-color: transparent !important;
 }

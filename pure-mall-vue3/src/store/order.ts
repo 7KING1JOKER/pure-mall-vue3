@@ -80,25 +80,11 @@ export const useOrderStore = defineStore('order', {
       }
     ] as Address[],
 
+    // 订单全部相关状态
+    CompleteOrder: [] as Order[],
+
     // 订单商品相关状态
-    orderItems: [
-      {
-        id: 1,
-        name: '无线蓝牙降噪耳机',
-        spec: '黑色',
-        price: 299,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1606220588914-08f6c7f2a8d2?w=400'
-      },
-      {
-        id: 2,
-        name: '便携式咖啡机',
-        spec: '白色',
-        price: 399,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1556911220-f7d27ca5528e?w=400'
-      }
-    ] as OrderItem[],
+    orderItems: [] as OrderItem[],
 
     // 配送方式
     deliveryMethod: 'standard',
@@ -297,6 +283,62 @@ export const useOrderStore = defineStore('order', {
         expiryYear: '',
         cvv: ''
       };
+    },
+
+    // 存储完整订单数据（用于OrderDetail页面展示）
+    saveCompleteOrder(orderData: Partial<Order>) {
+      // 如果没有订单数据，使用当前订单或创建新订单
+      if (!orderData.orderNumber) {
+        if (!this.currentOrder) {
+          const newOrder = this.createOrder();
+          // 将新创建的订单添加到订单列表中
+          this.CompleteOrder.push(newOrder);
+          return newOrder;
+        }
+        orderData = this.currentOrder;
+      }
+
+      // 创建完整的订单对象
+      const completeOrder: Order = {
+        id: orderData.id || Date.now().toString(),
+        orderNumber: orderData.orderNumber || 'PO' + Date.now().toString().slice(-8),
+        orderTime: orderData.orderTime || new Date().toLocaleString(),
+        paymentTime: orderData.paymentTime || '',
+        orderAmount: orderData.orderAmount || this.totalAmount,
+        paymentMethod: orderData.paymentMethod || this.getPaymentMethodName(this.paymentMethod),
+        status: orderData.status || 'pending',
+        deliveryInfo: orderData.deliveryInfo || {
+          name: this.defaultAddress?.name || '',
+          phone: this.defaultAddress?.phone || '',
+          address: this.defaultAddress ? `${this.defaultAddress.province} ${this.defaultAddress.city} ${this.defaultAddress.district} ${this.defaultAddress.detail}` : ''
+        },
+        items: orderData.items || [...this.orderItems],
+        remark: orderData.remark || this.orderRemark
+      };
+
+      // 更新当前订单
+      this.currentOrder = completeOrder;
+      
+      // 检查是否已存在该订单，如果不存在则添加到订单列表
+      const existingOrderIndex = this.CompleteOrder.findIndex(order => order.orderNumber === completeOrder.orderNumber);
+      if (existingOrderIndex === -1) {
+        this.CompleteOrder.push(completeOrder);
+      } else {
+        // 更新已存在的订单
+        this.CompleteOrder[existingOrderIndex] = completeOrder;
+      }
+      
+      return completeOrder;
+    },
+
+    // 获取所有订单
+    getAllOrders() {
+      return this.CompleteOrder;
+    },
+
+    // 根据订单编号获取订单
+    getOrderByNumber(orderNumber: string) {
+      return this.CompleteOrder.find(order => order.orderNumber === orderNumber) || null;
     }
   }
 });

@@ -59,7 +59,6 @@ import PcMenu from '../layouts/PcMenu.vue'
 import Footer from '../layouts/Footer.vue'
 import ImageCard from '../components/ImageCard.vue'
 import Carousel from '../components/Carousel.vue'
-import Loading from '../layouts/Loading.vue'
 
 // data
 // 卡片数据

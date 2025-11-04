@@ -49,6 +49,13 @@ const routes = [
     name: 'User',
     component: () => import('@/pages/User.vue'),
     meta: { title: '个人' }
+  },
+  {
+    path: '/order/:orderNumber',
+    name: 'OrderDetail',
+    component: () => import('@/pages/OrderDetail.vue'),
+    props: true,
+    meta: { title: '订单详情' }
   }
 ]
 
@@ -58,7 +65,7 @@ const router = createRouter({
 })
 
 // 路由守卫，更新页面标题
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _, next) => {
   // 根据路由名称设置页面标题
   const titleMap: Record<string, string> = {
     Home: '首页',
@@ -68,9 +75,10 @@ router.beforeEach((to, from, next) => {
     Checkout: '结算',
     Payment: '支付',
     OrderComplete: '订单完成',
-    User: '个人中心'
+    User: '个人中心',
+    OrderDetail: '订单详情'
   }
-
+  
   document.title = `${titleMap[to.name as string] || '页面'} - Pure Mall`
   next()
 })
