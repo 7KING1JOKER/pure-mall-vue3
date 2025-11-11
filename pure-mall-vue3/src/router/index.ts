@@ -51,7 +51,7 @@ const routes = [
     meta: { title: '个人' }
   },
   {
-    path: '/order/:orderNumber',
+    path: '/order/:id',
     name: 'OrderDetail',
     component: () => import('@/pages/OrderDetail.vue'),
     props: true,

@@ -50,6 +50,53 @@ body {
 .el-tag .el-tag__content {
   font-size: 12px;
 }
+
+/* Element Plus 错误提示默认样式 */
+.el-form-item__error {
+  color: #333 !important; /* 错误提示文字颜色变为黑色 */
+}
+
+/* Element Plus 输入框清空按钮默认样式 */
+.el-input__clear {
+  color: #ffffff85 !important; /* 默认颜色 */
+  transition: all 0.3s ease !important;
+  animation-play-state: paused !important; /* 默认暂停动画 */
+}
+
+.el-input__clear:hover {
+  animation: rotateIcon 1s linear infinite !important; /* 持续旋转动画 */
+  animation-play-state: running !important; /* 鼠标悬停时播放动画 */
+}
+
+.el-input__clear:active {
+  transform: scale(0.95) !important; /* 点击时缩小一点 */
+  animation-play-state: paused !important; /* 点击时停止动画 */
+}
+
+/* Element Plus 密码显示切换按钮默认样式 */
+.el-input__password {
+  color: #ffffff85 !important;
+  transition: all 0.3s ease !important;
+}
+
+.el-input__password:hover {
+  color: #ffffff85 !important;
+}
+
+.el-input__password:active {
+  transform: scale(0.95) !important;
+}
+
+/* 旋转动画定义 */
+@keyframes rotateIcon {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* 遮罩元素是挂载在 body 上的全局元素 */
 
 /* @register-dialog */
@@ -98,3 +145,4 @@ body {
 .custom-category-mask {
   background-color: transparent !important;
 }
+

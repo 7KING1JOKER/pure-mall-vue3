@@ -38,6 +38,7 @@ export interface Order {
   };
   items: OrderItem[];
   remark?: string;
+  deliveryAddress?: string
 }
 
 // 配送方式接口定义
@@ -52,6 +53,28 @@ export interface PaymentMethod {
   value: string;
   label: string;
   desc: string;
+}
+
+// 从本地存储加载订单数据的辅助函数
+function loadOrdersFromStorage(): Order[] {
+  try {
+    const ordersData = localStorage.getItem('completeOrders');
+    return ordersData ? JSON.parse(ordersData) : [];
+  } catch (error) {
+    console.error('加载订单数据失败:', error);
+    return [];
+  }
+}
+
+// 从本地存储加载当前订单的辅助函数
+function loadCurrentOrderFromStorage(): Order | null {
+  try {
+    const currentOrderData = localStorage.getItem('currentOrder');
+    return currentOrderData ? JSON.parse(currentOrderData) : null;
+  } catch (error) {
+    console.error('加载当前订单数据失败:', error);
+    return null;
+  }
 }
 
 export const useOrderStore = defineStore('order', {
@@ -80,8 +103,8 @@ export const useOrderStore = defineStore('order', {
       }
     ] as Address[],
 
-    // 订单全部相关状态
-    CompleteOrder: [] as Order[],
+    // 订单全部相关状态 - 从本地存储加载
+    CompleteOrder: loadOrdersFromStorage(),
 
     // 订单商品相关状态
     orderItems: [] as OrderItem[],
@@ -116,8 +139,8 @@ export const useOrderStore = defineStore('order', {
       }
     ] as PaymentMethod[],
 
-    // 订单信息
-    currentOrder: null as Order | null,
+    // 订单信息 - 从本地存储加载
+    currentOrder: loadCurrentOrderFromStorage(),
 
     // 信用卡表单
     cardForm: {
@@ -183,12 +206,21 @@ export const useOrderStore = defineStore('order', {
     },
 
     // 创建订单
-    createOrder() {
-      // 重新计算总价和获取默认地址
-      const defaultAddr = this.addresses.find(addr => addr.isDefault) || this.addresses[0];
+    createOrder(selectedAddressId?: string) {
+      // 重新计算总价
       const subtotal = this.orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
       const deliveryFee = this.deliveryMethods.find(m => m.value === this.deliveryMethod)?.fee || 0;
       const totalAmount = subtotal + deliveryFee;
+      
+      // 获取选中的地址，如果没有指定则使用默认地址
+      let selectedAddr;
+      if (selectedAddressId) {
+        // 根据ID查找选中的地址
+        selectedAddr = this.addresses.find(addr => addr.id.toString() === selectedAddressId);
+      }
+      // 如果没有找到指定地址或没有指定ID，则使用默认地址或第一个地址
+      selectedAddr = selectedAddr || this.addresses.find(addr => addr.isDefault) || this.addresses[0];
+      
       
       const order: Order = {
         id: Date.now().toString(),
@@ -199,12 +231,15 @@ export const useOrderStore = defineStore('order', {
         paymentMethod: this.getPaymentMethodName(this.paymentMethod),
         status: 'pending',
         deliveryInfo: {
-          name: defaultAddr?.name || '',
-          phone: defaultAddr?.phone || '',
-          address: defaultAddr ? `${defaultAddr.province} ${defaultAddr.city} ${defaultAddr.district} ${defaultAddr.detail}` : ''
+          name: selectedAddr.name || '',
+          phone: selectedAddr.phone || '',
+          address: `${selectedAddr.province} ${selectedAddr.city} ${selectedAddr.district} ${selectedAddr.detail}`
         },
         items: [...this.orderItems],
-        remark: this.orderRemark
+        remark: this.orderRemark,
+
+        // 设置配送地址具体位置为默认地址
+        deliveryAddress: '广东省佛山市南海区华南师范大学南海校区'
       };
       
       this.currentOrder = order;
@@ -221,6 +256,19 @@ export const useOrderStore = defineStore('order', {
         this.currentOrder.status = 'paid';
         this.currentOrder.paymentTime = new Date().toLocaleString();
         this.currentOrder.paymentMethod = this.getPaymentMethodName(this.paymentMethod);
+        
+        // 保存到本地存储
+        this.saveCurrentOrderToStorage();
+        
+        // 检查是否已存在该订单，如果不存在则添加到订单列表
+        const existingOrderIndex = this.CompleteOrder.findIndex(order => order.orderNumber === this.currentOrder!.orderNumber);
+        if (existingOrderIndex === -1) {
+          this.CompleteOrder.push({...this.currentOrder});
+        } else {
+          // 更新已存在的订单
+          this.CompleteOrder[existingOrderIndex] = {...this.currentOrder};
+        }
+        this.saveOrdersToStorage();
       }
       
       return this.currentOrder;
@@ -285,6 +333,28 @@ export const useOrderStore = defineStore('order', {
       };
     },
 
+    // 保存订单数据到本地存储的辅助方法
+    saveOrdersToStorage() {
+      try {
+        localStorage.setItem('completeOrders', JSON.stringify(this.CompleteOrder));
+      } catch (error) {
+        console.error('保存订单数据失败:', error);
+      }
+    },
+    
+    // 保存当前订单到本地存储的辅助方法
+    saveCurrentOrderToStorage() {
+      try {
+        if (this.currentOrder) {
+          localStorage.setItem('currentOrder', JSON.stringify(this.currentOrder));
+        } else {
+          localStorage.removeItem('currentOrder');
+        }
+      } catch (error) {
+        console.error('保存当前订单数据失败:', error);
+      }
+    },
+
     // 存储完整订单数据（用于OrderDetail页面展示）
     saveCompleteOrder(orderData: Partial<Order>) {
       // 如果没有订单数据，使用当前订单或创建新订单
@@ -293,6 +363,8 @@ export const useOrderStore = defineStore('order', {
           const newOrder = this.createOrder();
           // 将新创建的订单添加到订单列表中
           this.CompleteOrder.push(newOrder);
+          // 保存到本地存储
+          this.saveOrdersToStorage();
           return newOrder;
         }
         orderData = this.currentOrder;
@@ -313,7 +385,9 @@ export const useOrderStore = defineStore('order', {
           address: this.defaultAddress ? `${this.defaultAddress.province} ${this.defaultAddress.city} ${this.defaultAddress.district} ${this.defaultAddress.detail}` : ''
         },
         items: orderData.items || [...this.orderItems],
-        remark: orderData.remark || this.orderRemark
+        remark: orderData.remark || this.orderRemark,
+        // 设置配送地址具体位置为默认地址
+        deliveryAddress: orderData.deliveryAddress || '广东省佛山市南海区华南师范大学南海校区'
       };
 
       // 更新当前订单
@@ -328,6 +402,10 @@ export const useOrderStore = defineStore('order', {
         this.CompleteOrder[existingOrderIndex] = completeOrder;
       }
       
+      // 保存到本地存储
+      this.saveOrdersToStorage();
+      this.saveCurrentOrderToStorage();
+      
       return completeOrder;
     },
 
@@ -338,7 +416,18 @@ export const useOrderStore = defineStore('order', {
 
     // 根据订单编号获取订单
     getOrderByNumber(orderNumber: string) {
-      return this.CompleteOrder.find(order => order.orderNumber === orderNumber) || null;
+      if (!orderNumber || typeof orderNumber !== 'string') {
+        console.error('无效的订单编号参数');
+        return null;
+      }
+      
+      const order = this.CompleteOrder.find(order => order.orderNumber === orderNumber);
+      if (!order) {
+        console.log(`未找到订单编号: ${orderNumber}`);
+        console.log('当前订单列表中有以下订单:', this.CompleteOrder.map(o => o.orderNumber));
+      }
+      
+      return order || null;
     }
   }
 });

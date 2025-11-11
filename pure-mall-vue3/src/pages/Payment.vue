@@ -228,12 +228,18 @@ const completePayment = () => {
   }
   
   // 保存完整订单数据，供OrderDetail页面展示
-  orderStore.saveCompleteOrder(paymentSuccessData)
-
-  // 模拟支付成功，实际项目中这里会调用支付API
-  setTimeout(() => {
-    router.push('/order-complete')
-  }, 2000)
+  const savedOrder = orderStore.saveCompleteOrder(paymentSuccessData)
+  
+  // 确保订单已保存再跳转
+  if (savedOrder) {
+    console.log('订单已保存:', savedOrder.orderNumber)
+    // 模拟支付成功，实际项目中这里会调用支付API
+    setTimeout(() => {
+      router.push('/order-complete')
+    }, 2000)
+  } else {
+    ElMessage.error('保存订单失败，请重试')
+  }
 }
 
 // 页面加载时启动倒计时
@@ -245,10 +251,6 @@ onMounted(() => {
     router.push('/cart')
   })
   
-  // 如果当前订单为空，创建一个默认订单
-  if (!currentOrder.value) {
-    orderStore.createOrder()
-  }
 })
 
 // 页面卸载前清除倒计时

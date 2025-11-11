@@ -343,6 +343,10 @@ onMounted(() => {
   max-width: 400px;
 }
 
+.input-container .el-icon {
+  color: #ffffff85;
+}
+
 /* 输入框样式 */
 .register-form :deep(.el-input) {
   --el-input-bg-color: transparent;
@@ -367,10 +371,6 @@ onMounted(() => {
   padding-left: 10px;
   color: #999;
   transition: color 0.3s;
-}
-
-.register-form :deep(.el-input.is-focus .el-input__prefix) {
-  color: #409eff;
 }
 
 /* 下划线容器 */
@@ -432,4 +432,5 @@ onMounted(() => {
   color: #ffffffb7;
   text-decoration-color: #333 !important;
 }
+
 </style>

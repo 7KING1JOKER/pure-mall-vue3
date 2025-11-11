@@ -6,7 +6,7 @@
       <div class="top-container">
         <!-- 面包屑导航 -->
         <el-breadcrumb separator="/" class="breadcrumb">
-          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item @click="handleAllClick">全部</el-breadcrumb-item>
           <el-breadcrumb-item @mouseenter="categoryStore.CategoryNavVisible = true">
             商品分类
           </el-breadcrumb-item>
@@ -94,6 +94,17 @@ const {
   initializeData,
   sortOptions
 } = categoryStore;
+
+// 点击"全部"面包屑项的处理函数
+const handleAllClick = () => {
+  // 重置当前分类为全部商品
+  categoryStore.currentCategory = {
+    id: '',
+    label: '全部商品'
+  };
+  // 重新加载商品数据
+  initializeData();
+};
 
 // 从store中解构响应式数据
 const { 

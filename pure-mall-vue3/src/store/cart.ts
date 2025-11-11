@@ -23,10 +23,15 @@ interface RecommendedProduct {
   image: string;
 }
 
-export const useCartStore = defineStore("cart", {
-  state: () => ({
-    // 购物车商品数据
-    cartItems: [
+// 从本地存储加载购物车数据的辅助函数
+function loadCartFromStorage(): CartItem[] {
+  try {
+    const cartData = localStorage.getItem('shoppingCart');
+    if (cartData) {
+      return JSON.parse(cartData);
+    }
+    // 如果没有本地存储数据，返回默认商品
+    return [
       {
         id: 1001,
         name: '纯棉宽松短袖T恤',
@@ -57,7 +62,20 @@ export const useCartStore = defineStore("cart", {
         image: 'https://images.unsplash.com/photo-1688404970273-4d83251d3686?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjh8fFdvbWVuJ3MlMjBULXNoaXJ0JTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600',
         selected: true
       }
-    ] as CartItem[],
+    ];
+  } catch (error) {
+    console.error('加载购物车数据失败:', error);
+    return [];
+  }
+}
+
+export const useCartStore = defineStore("cart", {
+  state: () => ({
+    // 购物车商品数据 - 优先从本地存储加载
+    cartItems: loadCartFromStorage(),
+    
+    // 用于结算的选中商品
+    selectedItemsForCheckout: [] as CartItem[],
     
     // 为您推荐商品
     recommendedProducts: [
@@ -204,7 +222,7 @@ export const useCartStore = defineStore("cart", {
     
     // 去购物
     goShopping() {
-      router.push('/');
+      router.push('/category');
     },
     
     // 结算
@@ -237,6 +255,11 @@ export const useCartStore = defineStore("cart", {
       } catch (error) {
         console.error('保存购物车数据失败:', error);
       }
+    },
+    
+    // 设置用于结算的选中商品
+    setSelectedItemsForCheckout(items: CartItem[]) {
+      this.selectedItemsForCheckout = items;
     }
   }
 });

@@ -407,6 +407,7 @@ watch(productId, () => {
   display: flex;
   width: 70%;
   bottom: 0;
+  gap: 0;
 }
 
 .product-gallery-item {
@@ -416,7 +417,7 @@ watch(productId, () => {
 .zoom-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .zoom-image:hover {

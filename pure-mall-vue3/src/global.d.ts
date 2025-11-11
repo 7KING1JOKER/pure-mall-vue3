@@ -93,3 +93,5 @@ declare module 'unplugin-vue-components/vite' {
   import { Plugin } from 'vite'
   export default function(options: any): Plugin
 }
+
+declare module 'sortablejs'

@@ -46,7 +46,7 @@
           <el-icon><Goods /></el-icon> 订单商品
         </div>
         <div class="order-items">
-          <div class="order-item" v-for="(item, index) in cartItems" :key="index">
+          <div class="order-item" v-for="(item, index) in selectedItemsForCheckout" :key="index">
             <div class="item-image">
               <el-image :src="item.image" fit="cover" class="product-img" />
             </div>
@@ -113,18 +113,21 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../store/cart'
 import { useUserStore } from '../store/user'
+import { useOrderStore } from '../store/order'
 import { storeToRefs } from 'pinia'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import PcMenu from '../layouts/PcMenu.vue'
-import { Location, Edit, Delete, Plus, Goods, Van, ChatLineRound, ArrowRightBold, ArrowLeftBold } from '@element-plus/icons-vue'
 import CardSteps from '../layouts/CardSteps.vue'
 import AddressDialog from '../layouts/AddressDialog.vue'
+
+import { Location, Edit, Delete, Plus, Goods, Van, ChatLineRound, ArrowRightBold, ArrowLeftBold } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
 // 使用stores
 const cartStore = useCartStore()
 const userStore = useUserStore()
+const orderStore = useOrderStore()
 
 // 本地选中的地址ID
 const selectedAddressId = ref<string>('')
@@ -155,7 +158,7 @@ const deliveryFee = ref(0)
 
 // 从cartStore中解构响应式数据
 const { 
-  cartItems,
+  selectedItemsForCheckout,
   totalAmount
 } = storeToRefs(cartStore)
 
@@ -164,7 +167,6 @@ const goBack = () => {
   router.push('/cart')
 }
 
-// 提交订单，进入支付页面
 // 确认删除地址
 const confirmDeleteAddress = (addressId: string) => {
   ElMessageBox.confirm(
@@ -182,10 +184,48 @@ const confirmDeleteAddress = (addressId: string) => {
   })
 }
 
-const proceedToPayment = () => {
-  // 提交成功后跳转到支付页面
-  router.push('/payment')
-}
+// 提交订单，进入支付页面
+  const proceedToPayment = () => {
+    // 验证是否已选择地址
+    if (!selectedAddressId.value) {
+      ElMessage.error('请选择收货地址')
+      return
+    }
+    
+    // 使用从购物车页面传递过来的选中商品
+    const selectedItems = selectedItemsForCheckout.value
+    
+    if (selectedItems.length === 0) {
+      ElMessage.error('请至少选择一件商品')
+      return
+    }
+    
+    // 准备订单商品数据 - 只同步已选中的商品
+    orderStore.syncCartItems(selectedItems)
+    // 设置配送方式
+    orderStore.deliveryMethod = deliveryMethod.value
+    // 设置订单备注
+    orderStore.orderRemark = orderRemark.value
+    
+    // 创建订单
+    const order = orderStore.createOrder(selectedAddressId.value)
+    
+    if (order) {
+      console.log('订单创建成功，即将清除购物车中已购买的商品')
+      // 清除购物车中的已选商品
+      cartStore.removeSelected()
+      // 保存购物车数据到本地存储，确保刷新后数据一致
+      cartStore.saveCartToStorage()
+      console.log('购物车数据已更新并保存到本地存储')
+      // 提交成功后跳转到支付页面
+      router.push('/payment')
+    } else {
+      ElMessageBox.alert('创建订单失败，请重试', '提示', {
+        confirmButtonText: '确定',
+        type: 'error'
+      })
+    }
+  }
 
 // 页面加载时的操作
 onMounted(() => {

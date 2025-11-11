@@ -10,10 +10,7 @@
       <div class="cart-content">
         <!-- 购物车为空的状态 -->
         <div v-if="cartItems.length === 0" class="empty-cart">
-          <el-empty description="您的购物车是空的" :image-size="200">
-            <template #image>
-              <img src="https://img.icons8.com/fluency/200/shopping-cart-empty.png" alt="empty cart">
-            </template>
+          <el-empty description="您的购物车是空的" :image-size="300" style="margin-top: 100px;">
             <el-button type="primary" @click="goShopping">去购物</el-button>
           </el-empty>
         </div>
@@ -102,7 +99,8 @@ import { Delete, Remove, Star, ArrowRightBold } from '@element-plus/icons-vue';
 import PcMenu from '../layouts/PcMenu.vue';
 import CardSteps from '../layouts/CardSteps.vue';
 import { onMounted } from 'vue';
-
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 
 // 使用购物车store
 const cartStore = useCartStore();
@@ -118,9 +116,29 @@ const {
   clearCart, 
   addToWishlist, 
   goShopping, 
-  checkout,
   setActiveStep
 } = cartStore;
+
+// 初始化路由
+const router = useRouter();
+
+// 自定义结算方法，添加清除已购买商品的功能
+const checkout = () => {
+  // 检查是否有选中商品
+  if (cartStore.selectedCount === 0) {
+    ElMessage.error('请至少选择一件商品进行结算');
+    return;
+  }
+  
+  // 获取选中的商品，用于传递给订单页面
+  const selectedItems = cartStore.cartItems.filter(item => item.selected);
+  
+  // 将选中的商品ID存储到cartStore中，供结算页面使用
+  cartStore.setSelectedItemsForCheckout(selectedItems);
+  
+  // 跳转到结算页面
+  router.push('/checkout');
+};
 
 onMounted(() => {
   console.log('购物车页面已加载')
@@ -304,9 +322,6 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* 响应式设计 */

@@ -79,8 +79,17 @@ const paymentMethod = computed(() => currentOrder.value?.paymentMethod || '支�
 
 // 查看订单详情
 const viewOrderDetails = () => {
-  // 实际项目中跳转到订单详情页
-  ElMessage.info('查看订单详情功能开发中')
+  // 跳转到订单详情页面，使用正确的路由名称和参数格式
+  if (currentOrder.value) {
+    // 使用订单编号作为ID参数
+    router.push({
+      name: 'OrderDetail',
+      params: { id: currentOrder.value.orderNumber }
+    })
+    console.log('跳转到订单详情，订单编号:', currentOrder.value.orderNumber)
+  } else {
+    ElMessage.error('无法获取订单信息')
+  }
 }
 
 // 继续购物

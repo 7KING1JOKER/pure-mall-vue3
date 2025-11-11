@@ -238,6 +238,10 @@ onMounted(() => {
   max-width: 400px;
 }
 
+.input-container .el-icon {
+  color: #ffffff85;
+}
+
 /* 输入框样式 */
 .login-form :deep(.el-input) {
   --el-input-bg-color: transparent;
@@ -262,10 +266,6 @@ onMounted(() => {
   padding-left: 10px;
   color: #999;
   transition: color 0.3s;
-}
-
-.login-form :deep(.el-input.is-focus .el-input__prefix) {
-  color: #409eff;
 }
 
 /* 下划线容器 */
@@ -307,6 +307,11 @@ onMounted(() => {
 .login-btn:hover {
   transform: translateY(-2px);
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* 错误提示样式 */
+.login-form :deep(.el-form-item__error) {
+  color: #333; /* 错误提示文字颜色变为黑色 */
 }
 </style>
 
