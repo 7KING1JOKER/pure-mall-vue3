@@ -55,10 +55,11 @@
         <div class="content-header">
           <div class="content-title">
             <!-- 动态元组件渲染图标 -->
-            <component 
-              :is="tabIcons[activeTab]"
-              class="el-icon"
-            />
+            <el-icon>
+              <component
+                :is="getIconComponent(tabIcons[activeTab])"
+              />
+            </el-icon>
             <span>{{ tabTitles[activeTab] }}</span>
           </div>
         </div>
@@ -95,23 +96,31 @@
       <!-- 我的订单 -->
       <div v-if="activeTab === 'orders'" class="orders-section" style="margin-top: 20px;">
         <el-table 
-          :data="orders" style="width: 100%" border="true"
+          :data="orderStore.CompleteOrder" style="width: 100%" border="true"
           :header-row-style="{ background: 'transparent' }"
         >
-          <el-table-column prop="id" label="订单号" width="180" />
-          <el-table-column prop="date" label="日期" width="120" />
-          <el-table-column prop="product" label="商品" width="250" />
-          <el-table-column prop="amount" label="金额" width="100" />
+          <el-table-column prop="orderNumber" label="订单号" width="180" />
+          <el-table-column prop="orderTime" label="下单时间" width="180" />
+          <el-table-column label="商品">
+            <template #default="scope">
+              <div v-for="(item, index) in scope.row.items" :key="index" class="order-item">
+                {{ item.name }} (x{{ item.quantity }})
+                <span v-if="index < scope.row.items.length - 1" class="order-item-separator">, </span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="orderAmount" label="订单金额" width="120" :formatter="(row) => `¥${row.orderAmount.toFixed(2)}`" />
           <el-table-column label="状态" width="120">
             <template #default="scope">
-              <el-tag :type="statusType(scope.row.status)" effect="dark">
-                {{ scope.row.status }}
+              <el-tag :type="getStatusType(scope.row.status)" effect="dark">
+                {{ getStatusText(scope.row.status) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="120">
+          <el-table-column label="操作" width="160">
             <template #default="scope">
-              <el-button size="small" type="primary" @click="viewOrderDetail(scope.row.id)">查看</el-button>
+              <el-button size="small" type="primary" @click="viewOrderDetail(scope.row.orderNumber)">查看</el-button>
+              <el-button size="small" type="danger" @click="confirmDeleteOrder(scope.row.orderNumber)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -149,9 +158,19 @@
 
       <!-- 我的收藏 -->
       <div v-if="activeTab === 'wishlist'">
-        <el-empty description="暂无收藏内容" :image-size="200">
-          <el-button type="primary">开始收藏</el-button>
-        </el-empty>
+        <div v-if="wishlistItems.length === 0" class="empty-wishlist">
+          <el-empty description="暂无收藏内容" :image-size="200">
+            <el-button type="primary" @click="router.push('/category')">开始收藏</el-button>
+          </el-empty>
+        </div>
+        <div v-else class="wishlist-container">
+          <div v-for="item in wishlistItems" :key="item.id" class="wishlist-item-list">
+            <div class="wishlist-item-wrapper">
+              <ProductCard :product="item" />
+              <el-icon class="delete-wishlist-btn" @click="confirmRemoveFromWishlist(item)"> <Close /> </el-icon>
+            </div>
+          </div>
+        </div>
       </div>
     </el-card>
   <EditProfileDialog v-model="userStore.EditProfileDialogVisible" />
@@ -163,23 +182,25 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { 
-  ElCard, 
-  ElAvatar, 
-  ElTag, 
-  ElMenu, 
-  ElMenuItem, 
-  ElIcon, 
-  ElButton, 
-  ElButtonGroup,
-  ElDescriptions, 
-  ElDescriptionsItem, 
-  ElTable, 
-  ElTableColumn, 
-  ElRow, 
-  ElCol,
-  ElEmpty,
-  ElMessageBox
-} from 'element-plus'
+   ElCard, 
+   ElAvatar, 
+   ElTag, 
+   ElMenu, 
+   ElMenuItem, 
+   ElIcon, 
+   ElButton, 
+   ElButtonGroup,
+   ElDescriptions, 
+   ElDescriptionsItem, 
+   ElTable, 
+   ElTableColumn, 
+   ElRow, 
+   ElCol,
+   ElEmpty,
+   ElMessageBox,
+   ElMessage
+  } from 'element-plus'
+
 import {
   User,
   ShoppingCart,
@@ -188,16 +209,23 @@ import {
   Edit,
   Plus,
   Delete,
-  Check
+  Check,
+  Close
 } from '@element-plus/icons-vue'
+
 import PcMenu from '../layouts/PcMenu.vue'
 import EditProfileDialog from '../layouts/EditProfileDialog.vue'
 import AddressDialog from '../layouts/AddressDialog.vue'
 import { useUserStore } from '../store/user'
+import { useCartStore } from '../store/cart'
+import { useOrderStore } from '../store/order'
 import { storeToRefs } from 'pinia'
+import ProductCard from '../components/ProductCard.vue'
 
-// 获取userStore中响应式数据
+// 获取store中的响应式数据
 const userStore = useUserStore()
+const cartStore = useCartStore()
+const orderStore = useOrderStore()
 const router = useRouter()
 const {
   vip,
@@ -206,10 +234,10 @@ const {
   tabTitles,
   basicInfo,
   memberInfo,
-  orders,
   addresses
 } = storeToRefs(userStore)
-const { statusType, handleMenuSelect } = userStore
+const { wishlistItems } = storeToRefs(cartStore)
+const { handleMenuSelect } = userStore
 
 // 地址管理相关方法
 // 添加新地址
@@ -244,11 +272,90 @@ const setAsDefault = (addressId) => {
   userStore.setDefaultAddress(addressId)
 }
 
+// 获取订单状态对应的类型
+const getStatusType = (status) => {
+  const statusMap = {
+    'pending': 'warning',
+    'paid': 'primary',
+    'shipped': 'info',
+    'delivered': 'success',
+    'cancelled': 'danger'
+  }
+  return statusMap[status] || 'default'
+}
+
+// 获取订单状态的中文文本
+const getStatusText = (status) => {
+  const statusMap = {
+    'pending': '待付款',
+    'paid': '已付款',
+    'shipped': '已发货',
+    'delivered': '已送达',
+    'cancelled': '已取消'
+  }
+  return statusMap[status] || status
+}
+
 // 查看订单详情
 const viewOrderDetail = (orderNumber) => {
   router.push({ path: `/order/${orderNumber}` })
 }
 
+// 确认删除订单
+const confirmDeleteOrder = (orderNumber) => {
+  ElMessageBox.confirm(
+    '确定要删除这个订单吗？此操作不可恢复。',
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    const result = orderStore.deleteOrder(orderNumber);
+    if (result) {
+      ElMessage.success('订单已成功删除');
+    } else {
+      ElMessage.error('删除订单失败，请稍后重试');
+    }
+  }).catch(() => {
+    // 取消删除，不做任何操作
+  })
+}
+
+// 从收藏夹移除商品
+const confirmRemoveFromWishlist = (item) => {
+  ElMessageBox.confirm(
+    `确定要从收藏夹移除「${item.name}」吗？`,
+    '移除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    // 使用cartStore的removeFromWishlist方法删除商品
+    cartStore.removeFromWishlist(item.id);
+  }).catch(() => {
+    // 取消移除，不做任何操作
+  })
+}
+
+// 添加到购物车
+const addToCart = (item) => {
+  cartStore.addToCart(item);
+}
+
+// 获取图标组件函数
+const getIconComponent = (iconName) => {
+  const iconMap = {
+    'User': User,
+    'ShoppingCart': ShoppingCart,
+    'Location': Location,
+    'Star': Star
+  }
+  return iconMap[iconName] || User
+}
 
 </script>
 
@@ -317,14 +424,23 @@ const viewOrderDetail = (orderNumber) => {
 }
 
 /* 我的订单部分样式优化 */
-.orders-section :deep(.el-table),
-.orders-section :deep(.el-table__body),
-/* 表头样式需要绑定header-row-style */
-.orders-section :deep(.el-table__header),
-.orders-section :deep(.el-table__row),
-.orders-section :deep(.el-table__cell) {
-  background: transparent !important;
-}
+  .orders-section :deep(.el-table),
+  .orders-section :deep(.el-table__body),
+  /* 表头样式需要绑定header-row-style */
+  .orders-section :deep(.el-table__header),
+  .orders-section :deep(.el-table__row),
+  .orders-section :deep(.el-table__cell) {
+    background: transparent !important;
+  }
+  
+  /* 订单商品列表样式 */
+  .order-item {
+    display: inline;
+  }
+  
+  .order-item-separator {
+    color: #606266;
+  }
 
 /* 地址管理部分样式优化 */
 .address-section :deep(.el-card) {
@@ -369,7 +485,51 @@ const viewOrderDetail = (orderNumber) => {
 
 .address-detail p {
   margin: 5px 0;
-  color: #606266;
+}
+
+/* 收藏夹样式 */
+.wishlist-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.wishlist-item-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* 当hover商品卡片容器时，商品卡片也有上移动画 */
+.wishlist-item-wrapper:hover .product-card {
+  transform: translateY(-5px);
+}
+
+.delete-wishlist-btn {
+  color: #ffffffaa;
+  position: absolute;
+  left: 210px;
+  top: 10px;
+  z-index: 10;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+/* 当hover商品卡片时，删除图标也有上移动画 */
+.wishlist-item-wrapper:hover .delete-wishlist-btn {
+  transform: translateY(-5px);
+  opacity: 1;
+}
+
+/* 调整收藏夹中ProductCard的大小 */
+.wishlist-item-wrapper :deep(.product-card) {
+  width: 240px;
+  height: 360px;
+}
+
+.empty-wishlist {
+  margin-top: 50px;
+  text-align: center;
 }
 
 /* 响应式设计 */

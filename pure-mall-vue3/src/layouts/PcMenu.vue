@@ -133,6 +133,8 @@ import {
 
 import RegisterDialog from '../layouts/RegisterDialog.vue'
 import LoginDialog from '../layouts/LoginDialog.vue'
+import { useUserStore } from '../store/user'
+import { storeToRefs } from 'pinia'
 
 // data
 
@@ -146,9 +148,12 @@ const drawerVisible = ref(false)
 const activeIndex = ref(route.path)
 const searchQuery = ref('') // 搜索关键词
 
-const isLoggedIn = ref(false) // 假设用户登录状态
 const registerDialogVisible = ref(false) // 注册弹窗状态
 const loginDialogVisible = ref(false) // 登录弹窗状态
+
+// 用户状态管理
+const userStore = useUserStore()
+const { isLoggedIn } = storeToRefs(userStore)
 console.log('当前路由路径:', activeIndex.value)
 
 // methods
@@ -189,7 +194,6 @@ const handleSelect = (index: string) => {
 // 处理用户点击
 const handleUserClick = () => {
   // 检查用户是否登录 - 这里应该是从全局状态获取
-  
   if (isLoggedIn.value) {
     router.push('/user')
   } else {
@@ -223,7 +227,7 @@ const handleRegisterCancel = () => {
 const handleLoginSuccess = (userData: { username: string }) => {
   console.log('登录成功:', userData)
   // 更新登录状态
-  isLoggedIn.value = true
+  userStore.login(userData.username, '')
   
   // 跳转到用户中心
   router.push('/user')

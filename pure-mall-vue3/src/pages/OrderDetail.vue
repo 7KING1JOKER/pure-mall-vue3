@@ -11,7 +11,7 @@
           <!-- 高德地图容器 -->
           <div id="mapContainer" class="map-container-element"></div>
           <div class="address-info">
-            <span v-if="currentOrder.deliveryAddress"> ({{ currentOrder.deliveryAddress }})</span>
+            <span v-if="currentOrder.deliveryAddress"> {{ currentOrder.deliveryAddress }}</span>
             <span v-else> 配送地址获取中... </span>
           </div>
         </div>
@@ -347,8 +347,15 @@ window.addEventListener('resize', handleResize);
   left: 0;
   right: 0;
   background: rgba(0, 0, 0, 0.1);
-  padding: 15px;
+  backdrop-filter: blur(2px);
+  padding: 12px;
 }
+.address-info span {
+  font-size: 16px;
+  font-weight: 350;
+  text-decoration: underline;
+}
+
 
 /* 右侧订单信息区域 */
 .order-list {

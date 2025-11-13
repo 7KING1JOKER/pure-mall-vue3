@@ -18,6 +18,7 @@ export const useUserStore = defineStore("user", {
 	state: () => ({
 		vip: '会员',
 		activeTab: 'profile',
+		isLoggedIn: JSON.parse(localStorage.getItem('isLoggedIn') || 'false'), // 从localStorage恢复登录状态
 		tabIcons: {
 			profile: 'User',
 			orders: 'ShoppingCart',
@@ -175,6 +176,22 @@ export const useUserStore = defineStore("user", {
 				addr.isDefault = addr.id === addressId
 			})
 			ElMessage.success('默认地址设置成功')
+		},
+		
+		// 登录相关方法
+		login(username: string, password: string) {
+			// 这里应该是实际的登录API调用
+			// 模拟登录成功
+			this.isLoggedIn = true
+			localStorage.setItem('isLoggedIn', 'true') // 保存到localStorage
+			ElMessage.success('登录成功')
+		},
+		
+		logout() {
+			// 模拟登出
+			this.isLoggedIn = false
+			localStorage.removeItem('isLoggedIn') // 从localStorage移除
+			ElMessage.success('已退出登录')
 		}
 	}
 })

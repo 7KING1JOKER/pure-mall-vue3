@@ -25,7 +25,7 @@
         <!-- 面包导航 -->
         <div class="product-breadcrumb">
           <el-breadcrumb separator="/" class="breadcrumb">
-            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/category' }">全部</el-breadcrumb-item>
             <!-- 父级分类路径 -->
             <el-breadcrumb-item v-if="productCategoryInfo.name" :to="{ path: '/category' }"
               @click=""
@@ -35,6 +35,7 @@
             <!-- 当前产品路径 -->
             <el-breadcrumb-item :to="{ path: `/product/${productId}` }" :replace="false">{{ product.name }}</el-breadcrumb-item>
           </el-breadcrumb>
+          <el-icon @click="router.push('/category')" class="breadcrumb-icon"> <ArrowRight /> </el-icon>
         </div>
 
         <!-- 商品标题、价格、销售量 -->
@@ -113,12 +114,13 @@ import { useRoute } from 'vue-router';
 import { useProductStore } from '../store/product';
 import { useCartStore } from '../store/cart';
 import { storeToRefs } from 'pinia';
-import { ShoppingBag, Notebook } from '@element-plus/icons-vue';
+import { ShoppingBag, Notebook, ArrowRight } from '@element-plus/icons-vue';
 import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
 import ProductSizeDialog from '../layouts/ProductSizeDialog.vue';
 
 import PcMenu from '../layouts/PcMenu.vue';
 import Footer from '../layouts/Footer.vue';
+import router from '../router';
 
 // 路由相关
 const route = useRoute();
@@ -243,6 +245,19 @@ watch(productId, () => {
 .product-breadcrumb {
   display: flex;
 }
+
+.breadcrumb-icon {
+  margin-right: 100px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.breadcrumb-icon:hover {
+  transform: translateX(-10px);
+}
+
+
 
 .product-info {
   backdrop-filter: blur(0.8px);

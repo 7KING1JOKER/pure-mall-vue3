@@ -69,6 +69,20 @@ function loadCartFromStorage(): CartItem[] {
   }
 }
 
+// 从本地存储加载收藏夹数据的辅助函数
+function loadWishlistFromStorage(): CartItem[] {
+  try {
+    const wishlistData = localStorage.getItem('wishlist');
+    if (wishlistData) {
+      return JSON.parse(wishlistData);
+    }
+    return [];
+  } catch (error) {
+    console.error('加载收藏夹数据失败:', error);
+    return [];
+  }
+}
+
 export const useCartStore = defineStore("cart", {
   state: () => ({
     // 购物车商品数据 - 优先从本地存储加载
@@ -109,8 +123,8 @@ export const useCartStore = defineStore("cart", {
       }
     ] as RecommendedProduct[],
 
-    // 收藏商品
-    wishlistItems: [] as CartItem[],  
+    // 收藏商品 - 优先从本地存储加载
+    wishlistItems: loadWishlistFromStorage(),  
     
     // 当前步骤（购物车流程）
     activeStep: 0
@@ -212,12 +226,39 @@ export const useCartStore = defineStore("cart", {
     
     // 添加到收藏夹
     addToWishlist(item: any) {
-      ElNotification({
-        title: '已添加到收藏',
-        message: `已将 "${item.name}" 添加到收藏夹`,
-        type: 'info',
-        duration: 2000
-      });
+      // 检查商品是否已在收藏夹中
+      const existingItem = this.wishlistItems.find(wishItem => wishItem.id === item.id);
+      
+      if (existingItem) {
+        ElNotification({
+          title: '已在收藏夹中',
+          message: `"${item.name}" 已在收藏夹中`,
+          type: 'warning',
+          duration: 2000
+        });
+      } else {
+        // 添加到收藏夹
+        this.wishlistItems.push({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          image: item.image || item.images?.[0] || '',
+          selected: false,
+          quantity: 1,
+          spec: '默认'
+        });
+        
+        // 保存到本地存储
+        this.saveWishlistToStorage();
+        
+        ElNotification({
+          title: '已添加到收藏',
+          message: `已将 "${item.name}" 添加到收藏夹`,
+          type: 'info',
+          duration: 2000
+        });
+      }
     },
     
     // 去购物
@@ -236,6 +277,24 @@ export const useCartStore = defineStore("cart", {
       router.push('/checkout');
     },
     
+    // 从收藏夹移除商品
+    removeFromWishlist(itemId: number) {
+      const index = this.wishlistItems.findIndex(item => item.id === itemId);
+      if (index !== -1) {
+        const removedItem = this.wishlistItems.splice(index, 1)[0];
+        
+        // 保存到本地存储
+        this.saveWishlistToStorage();
+        
+        ElNotification({
+          title: '已移除收藏',
+          message: `已将 "${removedItem.name}" 从收藏夹移除`,
+          type: 'info',
+          duration: 2000
+        });
+      }
+    },
+    
     // 从本地存储加载购物车数据
     loadCartFromStorage() {
       try {
@@ -248,12 +307,33 @@ export const useCartStore = defineStore("cart", {
       }
     },
     
+    // 从本地存储加载收藏夹数据
+    loadWishlistFromStorage() {
+      try {
+        const wishlistData = localStorage.getItem('wishlist');
+        if (wishlistData) {
+          this.wishlistItems = JSON.parse(wishlistData);
+        }
+      } catch (error) {
+        console.error('加载收藏夹数据失败:', error);
+      }
+    },
+    
     // 保存购物车数据到本地存储
     saveCartToStorage() {
       try {
         localStorage.setItem('shoppingCart', JSON.stringify(this.cartItems));
       } catch (error) {
         console.error('保存购物车数据失败:', error);
+      }
+    },
+    
+    // 保存收藏夹数据到本地存储
+    saveWishlistToStorage() {
+      try {
+        localStorage.setItem('wishlist', JSON.stringify(this.wishlistItems));
+      } catch (error) {
+        console.error('保存收藏夹数据失败:', error);
       }
     },
     

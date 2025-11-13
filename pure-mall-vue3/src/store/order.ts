@@ -428,6 +428,28 @@ export const useOrderStore = defineStore('order', {
       }
       
       return order || null;
+    },
+
+    // 根据订单编号删除订单
+    deleteOrder(orderNumber: string) {
+      if (!orderNumber || typeof orderNumber !== 'string') {
+        console.error('无效的订单编号参数');
+        return false;
+      }
+      
+      const orderIndex = this.CompleteOrder.findIndex(order => order.orderNumber === orderNumber);
+      if (orderIndex === -1) {
+        console.log(`未找到要删除的订单编号: ${orderNumber}`);
+        return false;
+      }
+      
+      // 删除订单
+      this.CompleteOrder.splice(orderIndex, 1);
+      
+      // 保存到本地存储
+      this.saveOrdersToStorage();
+      
+      return true;
     }
   }
 });
