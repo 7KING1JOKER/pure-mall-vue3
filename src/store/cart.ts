@@ -1,27 +1,7 @@
 import { defineStore } from "pinia";
 import { ElNotification, ElMessage } from "element-plus";
 import router from '../router/index.ts'
-
-// 购物车商品类型定义
-interface CartItem {
-  id: number;
-  name: string;
-  description: string;
-  spec: string;
-  price: number;
-  quantity: number;
-  image: string;
-  selected: boolean;
-}
-
-// 推荐商品类型定义
-interface RecommendedProduct {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-}
+import type { CartItem } from '@/api/interfaces';
 
 // 从本地存储加载购物车数据的辅助函数
 function loadCartFromStorage(): CartItem[] {
@@ -90,38 +70,6 @@ export const useCartStore = defineStore("cart", {
     
     // 用于结算的选中商品
     selectedItemsForCheckout: [] as CartItem[],
-    
-    // 为您推荐商品
-    recommendedProducts: [
-      {
-        id: 4,
-        name: '无线充电器',
-        description: '多设备同时充，智能快充',
-        price: 149,
-        image: 'https://images.unsplash.com/photo-1656185933032-923de7ef1b61?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      },
-      {
-        id: 5,
-        name: '桌面风扇',
-        description: '静音柔风，三档调节',
-        price: 79,
-        image: 'https://images.unsplash.com/photo-1656428005715-74cbf05fdefb?q=80&w=1603&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      },
-      {
-        id: 6,
-        name: '折叠蓝牙键盘',
-        description: '便携设计，智能连接',
-        price: 189,
-        image: 'https://images.unsplash.com/photo-1697022976761-67a1b0955cff?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      },
-      {
-        id: 7,
-        name: '便携水杯',
-        description: '食品级材质，防漏设计',
-        price: 59,
-        image: 'https://images.unsplash.com/photo-1591224823040-88dfe36bcab5?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      }
-    ] as RecommendedProduct[],
 
     // 收藏商品 - 优先从本地存储加载
     wishlistItems: loadWishlistFromStorage(),  
@@ -274,6 +222,13 @@ export const useCartStore = defineStore("cart", {
         return;
       }
       
+      // 获取选中的商品，用于传递给订单页面
+      const selectedItems = this.cartItems.filter(item => item.selected);
+      
+      // 将选中的商品ID存储到cartStore中，供结算页面使用
+      this.setSelectedItemsForCheckout(selectedItems);
+      
+      // 跳转到结算页面
       router.push('/checkout');
     },
     

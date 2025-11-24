@@ -1,59 +1,5 @@
 import { defineStore } from 'pinia';
-// 地址接口定义
-export interface Address {
-  id: number;
-  name: string;
-  phone: string;
-  province: string;
-  city: string;
-  district: string;
-  detail: string;
-  isDefault: boolean;
-}
-
-// 订单项接口定义
-export interface OrderItem {
-  id: number;
-  name: string;
-  spec: string;
-  price: number;
-  quantity: number;
-  image: string;
-  selected?: boolean;
-}
-
-// 订单接口定义
-export interface Order {
-  id: string;
-  orderNumber: string;
-  orderTime: string;
-  paymentTime: string;
-  orderAmount: number;
-  paymentMethod: string;
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
-  deliveryInfo: {
-    name: string;
-    phone: string;
-    address: string;
-  };
-  items: OrderItem[];
-  remark?: string;
-  deliveryAddress?: string
-}
-
-// 配送方式接口定义
-export interface DeliveryMethod {
-  value: string;
-  label: string;
-  fee: number;
-}
-
-// 支付方式接口定义
-export interface PaymentMethod {
-  value: string;
-  label: string;
-  desc: string;
-}
+import type { Address, Order, OrderItem, DeliveryMethod, PaymentMethod } from '@/api/interfaces';
 
 // 从本地存储加载订单数据的辅助函数
 function loadOrdersFromStorage(): Order[] {
@@ -216,7 +162,7 @@ export const useOrderStore = defineStore('order', {
       let selectedAddr;
       if (selectedAddressId) {
         // 根据ID查找选中的地址
-        selectedAddr = this.addresses.find(addr => addr.id.toString() === selectedAddressId);
+        selectedAddr = this.addresses.find(addr => addr.id && addr.id.toString() === selectedAddressId);
       }
       // 如果没有找到指定地址或没有指定ID，则使用默认地址或第一个地址
       selectedAddr = selectedAddr || this.addresses.find(addr => addr.isDefault) || this.addresses[0];

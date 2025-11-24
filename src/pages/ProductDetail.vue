@@ -11,11 +11,10 @@
           :interval="4000"
           direction="vertical"
           indicator-position="inside"
-          motion-blur="true"
           class="productDetail-carousel"
           >
           <el-carousel-item v-for="(image, index) in product.images" :key="index">
-            <el-image :src="image" fit="cover" class="gallery-image" />
+            <el-image :src="image || ''" fit="cover" class="gallery-image" :error="errorImageUrl" />
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -46,7 +45,7 @@
         
         <!-- 颜色选择 -->
         <div class="color-select">
-          <div class="color-text"> {{ selectedSpec ? product.specs.find(spec => spec.id === selectedSpec)?.name : '请选择颜色' }} </div>
+          <div class="color-text"> {{ selectedSpec ? product.specs?.find(spec => spec.id === selectedSpec)?.name : '请选择颜色' }} </div>
           <div class="color-options">
             <div 
               v-for="spec in product.specs" 
@@ -91,7 +90,7 @@
         <h1 class="zoom-title">缩放图</h1>
         <div class="product-gallery-zoom">
           <div v-for="(image, index) in product.images" :key="index" class="product-gallery-item">
-            <el-image :src="image" fit="contain" class="zoom-image" />
+            <el-image :src="image" fit="contain" class="zoom-image" :error="errorImageUrl" />
           </div>
         </div>
       </div>
@@ -183,6 +182,9 @@ const {
 onMounted(() => {
   loadProductDetail(productId.value);
 });
+
+// 图片加载错误时显示的URL
+const errorImageUrl = 'https://via.placeholder.com/800x800?text=图片加载失败';
 
 // 监听商品ID变化，重新加载商品详情
 watch(productId, () => {

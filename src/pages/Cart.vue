@@ -116,7 +116,7 @@ const {
   clearCart, 
   addToWishlist, 
   goShopping, 
-  setActiveStep
+  setActiveStep,
 } = cartStore;
 
 // 初始化路由

@@ -4,7 +4,7 @@
     @click="goToProductDetail"
   >
     <el-image 
-      :src="product.image"
+      :src="product.images[0] || ''"
       fit="cover"
       class="product-image"
     />

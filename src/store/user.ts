@@ -1,18 +1,6 @@
 import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
-
-// 地址类型定义
-interface Address {
-  id?: string;
-  name: string;
-  phone: string;
-  province: string;
-  city: string;
-  district: string;
-  street: string;
-  zip: string;
-  isDefault: boolean;
-}
+import type { Address } from '@/api/interfaces';
 
 export const useUserStore = defineStore("user", {
 	state: () => ({
@@ -122,25 +110,34 @@ export const useUserStore = defineStore("user", {
 		saveAddress(address: Address) {
 			if (this.isEditingAddress && address.id) {
 				// 更新现有地址
-				const index = this.addresses.findIndex(addr => addr.id === address.id)
-				if (index !== -1) {
-					// 如果设置为默认地址，需要将其他地址设为非默认
-					if (address.isDefault) {
-						this.addresses.forEach(addr => {
-							if (addr.id !== address.id) {
-								addr.isDefault = false
-							}
-						})
-					}
-					this.addresses[index] = { ...address, id: address.id! }
-					ElMessage.success('地址更新成功')
+			const index = this.addresses.findIndex(addr => addr.id === address.id)
+			if (index !== -1) {
+				// 如果设置为默认地址，需要将其他地址设为非默认
+				if (address.isDefault) {
+					this.addresses.forEach(addr => {
+						if (addr.id !== address.id) {
+							addr.isDefault = false
+						}
+					})
 				}
+				// 确保street和zip属性有值
+				const addressWithStreet = {
+					...address,
+					id: String(address.id),
+					street: address.street || '',
+					zip: address.zip || ''
+				}
+				this.addresses[index] = addressWithStreet
+				ElMessage.success('地址更新成功')
+			}
 			} else {
 				// 添加新地址
-				const newAddress = {
-					...address,
-					id: Date.now().toString() // 生成唯一ID
-				}
+			const newAddress = {
+				...address,
+				id: Date.now().toString(), // 生成唯一ID
+				street: address.street || '', // 确保street属性有值
+				zip: address.zip || '' // 确保zip属性有值
+			}
 				
 				// 如果设置为默认地址，需要将其他地址设为非默认
 				if (newAddress.isDefault) {
@@ -181,7 +178,8 @@ export const useUserStore = defineStore("user", {
 		// 登录相关方法
 		login(username: string, password: string) {
 			// 这里应该是实际的登录API调用
-			// 模拟登录成功
+			// 模拟登录成功 - 使用参数以避免未使用变量警告
+			console.log('Login attempt with:', username, 'and password length:', password.length);
 			this.isLoggedIn = true
 			localStorage.setItem('isLoggedIn', 'true') // 保存到localStorage
 			ElMessage.success('登录成功')

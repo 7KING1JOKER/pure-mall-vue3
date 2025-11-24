@@ -160,7 +160,7 @@ const rules = reactive<FormRules>({
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 8, message: '密码长度至少8位', trigger: 'blur' },
     { 
-      validator: (rule, value, callback) => {
+      validator: (_rule, value, callback) => {
         if (!/[A-Z]/.test(value)) {
           callback(new Error('至少包含一个大写字母'))
         } else if (!/[a-z]/.test(value)) {
@@ -177,7 +177,7 @@ const rules = reactive<FormRules>({
   confirmPassword: [
     { required: true, message: '请再次输入密码', trigger: 'blur' },
     { 
-      validator: (rule, value, callback) => {
+      validator: (_rule, value, callback) => {
         if (value !== formData.password) {
           callback(new Error('两次输入的密码不一致'))
         } else {

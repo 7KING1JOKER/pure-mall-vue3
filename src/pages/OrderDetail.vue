@@ -72,10 +72,6 @@
         <div class="order-amount">
           <div class="amount-item-container">
             <div class="amount-item">
-              <span class="amount-label">商品总价：</span>
-              <span class="amount-value">¥{{ subtotal.toFixed(2) }}</span>
-            </div>
-            <div class="amount-item">
               <span class="amount-label">订单总额：</span>
               <span class="amount-value total">¥{{ currentOrder.orderAmount.toFixed(2) }}</span>
             </div>
@@ -124,12 +120,6 @@ const orderId = computed(() => {
   }
   // 其次从params获取id，这是其他可能的跳转方式
   return route.params.id as string;
-});
-
-// 计算商品总价
-const subtotal = computed(() => {
-  if (!currentOrder.value) return 0;
-  return currentOrder.value.items.reduce((total, item) => total + (item.price * item.quantity), 0);
 });
 
 // 地图相关变量
