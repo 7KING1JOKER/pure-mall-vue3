@@ -43,11 +43,6 @@
           </div>
         </section>
 
-        <!-- 页脚区域 -->
-        <!-- <section class="scroll-section section-footer">
-          <Footer />
-        </section> -->
-
         <Footer />
       </div>
   </div>

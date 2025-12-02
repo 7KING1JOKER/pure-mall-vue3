@@ -1,27 +1,7 @@
 import { defineStore } from "pinia";
 import { ElNotification, ElMessage } from "element-plus";
 import router from '../router/index.ts'
-
-// 购物车商品类型定义
-interface CartItem {
-  id: number;
-  name: string;
-  description: string;
-  spec: string;
-  price: number;
-  quantity: number;
-  image: string;
-  selected: boolean;
-}
-
-// 推荐商品类型定义
-interface RecommendedProduct {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-}
+import type { CartItem, RecommendedProduct } from '../api/interfaces';
 
 // 从本地存储加载购物车数据的辅助函数
 function loadCartFromStorage(): CartItem[] {

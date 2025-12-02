@@ -5,7 +5,7 @@
             :title="product?.name || '商品详情'"
             v-model="productStore.productDetailsDialogVisible"
             top="0" width="25%"
-            transition="fade" open-delay="0.3s"
+            transition="fade" :open-delay="0.3"
         >
 
         <!-- 商品描述 -->

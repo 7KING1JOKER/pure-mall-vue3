@@ -1,22 +1,6 @@
 import { defineStore } from 'pinia';
 import { ElNotification } from 'element-plus';
-
-// 定义商品接口
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  sales: number;
-  image: string;
-}
-
-// 定义分类节点接口
-export interface CategoryNode {
-  id: string;
-  label: string;
-  icon: string;
-  children?: CategoryNode[];
-}
+import type { CategoryNode, Product } from '../api/interfaces';
 
 // 排序选项类型
 type SortType = 'default' | 'priceAsc' | 'priceDesc' | 'salesDesc' | 'newest';

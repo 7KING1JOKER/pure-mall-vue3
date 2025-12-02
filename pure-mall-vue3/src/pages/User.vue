@@ -157,7 +157,7 @@
       </div>
 
       <!-- 我的收藏 -->
-      <div v-if="activeTab === 'wishlist'">
+      <div v-if="activeTab === 'wishlist'" class="wishlist-section" style="margin-top: 20px;">
         <div v-if="wishlistItems.length === 0" class="empty-wishlist">
           <el-empty description="暂无收藏内容" :image-size="200">
             <el-button type="primary" @click="router.push('/category')">开始收藏</el-button>
@@ -173,8 +173,11 @@
         </div>
       </div>
     </el-card>
-  <EditProfileDialog v-model="userStore.EditProfileDialogVisible" />
-  <AddressDialog v-model="userStore.AddressDialogVisible" />
+
+    <!-- 编辑资料弹窗 -->
+    <EditProfileDialog v-model="userStore.EditProfileDialogVisible" />
+    <!--  -->
+    <AddressDialog v-model="userStore.AddressDialogVisible" />
   </div>
 </template>
 
@@ -424,23 +427,23 @@ const getIconComponent = (iconName) => {
 }
 
 /* 我的订单部分样式优化 */
-  .orders-section :deep(.el-table),
-  .orders-section :deep(.el-table__body),
-  /* 表头样式需要绑定header-row-style */
-  .orders-section :deep(.el-table__header),
-  .orders-section :deep(.el-table__row),
-  .orders-section :deep(.el-table__cell) {
-    background: transparent !important;
-  }
-  
-  /* 订单商品列表样式 */
-  .order-item {
-    display: inline;
-  }
-  
-  .order-item-separator {
-    color: #606266;
-  }
+.orders-section :deep(.el-table),
+.orders-section :deep(.el-table__body),
+/* 表头样式需要绑定header-row-style */
+.orders-section :deep(.el-table__header),
+.orders-section :deep(.el-table__row),
+.orders-section :deep(.el-table__cell) {
+  background: transparent !important;
+}
+
+/* 订单商品列表样式 */
+.order-item {
+  display: inline;
+}
+
+.order-item-separator {
+  color: #606266;
+}
 
 /* 地址管理部分样式优化 */
 .address-section :deep(.el-card) {
@@ -537,21 +540,82 @@ const getIconComponent = (iconName) => {
   .main-container {
     flex-direction: column;
     align-items: center;
-    height: auto;
+    padding: 20px;
+    gap: 20px;
   }
   
   .sidebar {
-    flex-direction: row;
-    width: 80%;
+    width: 90%;
   }
 
   .content-card {
-    overflow-y: hidden; /* 关闭滚动 */
     width: 90%;
+  }
+  
+  /* 移动端调整sidebar内容 */
+  .user-profile-header {
+    gap: 10px;
+  }
+  
+  .user-name {
+    font-size: 16px;
+  }
+  
+  .user-email {
+    font-size: 12px;
+  }
+  
+  .nav-menu .el-menu-item {
+    padding: 0 10px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+  }
+  
+  /* 调整content-card内容 */
+  .content-title {
+    font-size: 16px;
+    gap: 8px;
+  }
+  
+  .address-card {
+    margin-bottom: 15px;
+  }
+  
+  .address-detail p {
+    font-size: 14px;
+    margin: 3px 0;
+  }
+
+  .orders-section {
+    overflow-x: auto;
+  }
+
+  /* 调整收藏夹中ProductCard的大小 */
+  .wishlist-item-wrapper :deep(.product-card) {
+    width: 200px;
+    height: 300px;
+  }
+
+  .delete-wishlist-btn  {
+    left: 180px;
   }
 }
 
 @media (max-width: 768px) {
+  .main-container {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .sidebar {
+    width: 95%;
+  }
+  
+  .content-card {
+    width: 95%;
+  }
+  
   .el-col {
     width: 100%;
   }
@@ -559,6 +623,55 @@ const getIconComponent = (iconName) => {
   .content-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+  }
+  
+  /* 进一步减小移动端样式 */
+  .user-profile-card {
+    margin-bottom: 15px;
+  }
+  
+  .user-profile-header .el-avatar {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .user-name {
+    font-size: 14px;
+  }
+  
+  .user-email {
+    font-size: 11px;
+  }
+  
+  .nav-menu .el-menu-item {
+    padding: 0 8px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 13px;
+  }
+  
+  .content-title {
+    font-size: 14px;
+    gap: 6px;
+  }
+  
+  .address-detail p {
+    font-size: 13px;
+    margin: 2px 0;
+  }
+  
+  .address-header .address-name {
+    font-size: 14px;
+  }
+  
+  .el-button {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  
+  /* 收藏夹样式调整 */
+  .wishlist-container {
     gap: 15px;
   }
 }

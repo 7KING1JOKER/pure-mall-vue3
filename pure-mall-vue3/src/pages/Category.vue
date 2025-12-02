@@ -127,6 +127,7 @@ onMounted(() => {
   width: 100%;
   height: calc(100vh - 60px);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* 顶部容器样式 - 面包屑和筛选工具栏水平排列 */
@@ -183,36 +184,11 @@ onMounted(() => {
   gap: 20px;
 }
 
-
-.nav-header {
-  font-size: 18px;
-  font-weight: 600;
-  padding: 10px 0;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #eee;
-  color: #409eff;
-}
-
-.custom-tree-node {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  padding: 0 4px;
-}
-
-.custom-tree-node .el-icon {
-  margin-right: 8px;
-  color: #409eff;
-}
-
 .product-list {
   flex: 1;
   background: transparent;
   border-radius: 4px;
 }
-
-
 
 .product-grid {
   display: grid;
@@ -252,11 +228,6 @@ onMounted(() => {
   gap: 100px;
 }
 
-/* footer区域 */
-.section-footer {
-  height: 80vh;
-}
-
 /* 响应式设计 */
 @media (max-width: 992px) {
   .product-grid {
@@ -268,8 +239,6 @@ onMounted(() => {
   .category-main {
     flex-direction: column;
   }
-  
-
 }
 
 @media (max-width: 576px) {

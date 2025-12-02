@@ -1,18 +1,6 @@
 import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
-
-// 地址类型定义
-interface Address {
-  id?: string;
-  name: string;
-  phone: string;
-  province: string;
-  city: string;
-  district: string;
-  street: string;
-  zip: string;
-  isDefault: boolean;
-}
+import type { Address } from "../api/interfaces";
 
 export const useUserStore = defineStore("user", {
 	state: () => ({
@@ -104,6 +92,7 @@ export const useUserStore = defineStore("user", {
 				city: '',
 				district: '',
 				street: '',
+				detail: '',
 				zip: '',
 				isDefault: false
 			}
@@ -114,7 +103,7 @@ export const useUserStore = defineStore("user", {
 			const address = this.addresses.find(addr => addr.id === addressId)
 			if (address) {
 				this.isEditingAddress = true
-				this.currentAddress = { ...address }
+				this.currentAddress = { ...address, detail: address.street }
 				this.AddressDialogVisible = true
 			}
 		},

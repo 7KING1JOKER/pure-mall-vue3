@@ -40,7 +40,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 50px;
+  padding: 50px 25px;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -51,18 +51,19 @@
 .footer-content {
   height: 100%;
   width: 100%;
-  padding: 40px 20px;
+  padding: 30px 20px;
 }
 
 .footer-logo {
   text-align: center;
-  margin-bottom: 120px;
+  margin-bottom: 80px;
 }
 
 .footer-logo h1 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-family: fantasy;
-  font-weight: lighter
+  font-weight: lighter;
+  letter-spacing: 1px;
 }
 
 .footer-links {
@@ -70,36 +71,125 @@
   justify-content: space-around;
   flex-wrap: wrap;
   margin-bottom: 40px;
+  gap: 30px;
 }
 
 .link-group {
-  min-width: 200px;
+  min-width: 180px;
   margin-bottom: 30px;
+  padding: 0 15px;
 }
 
 .link-group h4 {
   font-size: 1.2rem;
   margin-bottom: 20px;
-  font-weight: 400;
+  font-weight: 500;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 10px;
+  padding-bottom: 12px;
+  letter-spacing: 0.5px;
 }
 
 .link-group a {
   display: block;
   color: #bdc3c7;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  line-height: 1.5;
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color 0.3s, transform 0.2s;
 }
 
 .link-group a:hover {
   color: white;
+  transform: translateX(3px);
 }
 
 .footer-copyright {
   text-align: center;
-  padding-top: 20px;
+  padding-top: 80px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* 移动端响应式设计 */
+@media (max-width: 768px) {
+  .section-footer {
+    padding: 20px 10px;
+  }
+  
+  .footer-content {
+    padding: 20px 10px;
+  }
+  
+  .footer-logo {
+    margin-bottom: 30px;
+  }
+  
+  .footer-logo h1 {
+    font-size: 1.8rem;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 0;
+  }
+  
+  .link-group {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    margin-bottom: 25px;
+    padding: 0;
+  }
+  
+  .link-group h4 {
+    font-size: 1.15rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+  
+  .link-group a {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  
+  .footer-copyright {
+    padding-top: 20px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-footer {
+    padding: 40px 15px;
+  }
+  
+  .footer-content {
+    padding: 20px 10px;
+  }
+  
+  .footer-logo h1 {
+    font-size: 1.6rem;
+  }
+  
+  .link-group h4 {
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+  }
+  
+  .link-group a {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  
+  .footer-copyright {
+    font-size: 0.85rem;
+    padding-top: 15px;
+  }
 }
 </style>

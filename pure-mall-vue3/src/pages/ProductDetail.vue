@@ -10,8 +10,6 @@
         <el-carousel
           :interval="4000"
           direction="vertical"
-          indicator-position="inside"
-          motion-blur="true"
           class="productDetail-carousel"
           >
           <el-carousel-item v-for="(image, index) in product.images" :key="index">
@@ -46,7 +44,7 @@
         
         <!-- 颜色选择 -->
         <div class="color-select">
-          <div class="color-text"> {{ selectedSpec ? product.specs.find(spec => spec.id === selectedSpec)?.name : '请选择颜色' }} </div>
+          <div class="color-text"> {{ selectedSpec && product.specs ? product.specs.find(spec => spec.id === selectedSpec)?.name : '请选择颜色' }} </div>
           <div class="color-options">
             <div 
               v-for="spec in product.specs" 
@@ -257,8 +255,6 @@ watch(productId, () => {
   transform: translateX(-10px);
 }
 
-
-
 .product-info {
   backdrop-filter: blur(0.8px);
   flex: 1;
@@ -439,10 +435,44 @@ watch(productId, () => {
   border: 1px solid #fff;
 }
 
-/* footer区域 */
-.section-footer {
-  height: 80vh;
+@media (max-width: 1442px) {
+  /* 调整产品信息的内边距 */
+  .product-info > * {
+    padding-top: 5px;
+  }
 }
 
+/* 响应式设计 - 在小屏幕上变为垂直排列 */
+@media (max-width: 768px) {
+  .product-detail-container {
+    margin-top: 52px;
+    height: calc(100vh - 52px);
+  }
+  
+  .product-detail-main {
+    display: flex;
+    flex-direction: column;
+    height: calc(2*(100vh - 52px));
+  }
+  
+  .product-detail-main > * {
+    width: 100%;
+    height: calc(100vh - 52px);
+    scroll-snap-align: start;
+  }
+  
+  
+  /* 调整面包屑图标位置 */
+  .breadcrumb-icon {
+    margin-right: 20px; /* 减小右侧间距 */
+    font-size: 20px; /* 减小图标大小 */
+  }
+  
+  /* 调整产品信息的内边距 */
+  .product-info > * {
+    padding: 10px;
+    padding-top: 15px;
+  }
+}
 
 </style>

@@ -24,55 +24,6 @@ declare module 'element-plus/dist/index.css' {
 
 // 商品数据库模块声明
 declare module '@/api/productDatabase' {
-  // 商品规格类型定义
-  export interface ProductSpec {
-    id: number;
-    name: string;
-    price: number;
-    stock: number;
-  }
-
-  // 商品参数类型定义
-  export interface ProductParam {
-    name: string;
-    value: string;
-  }
-
-  // 商品评价类型定义
-  export interface ProductReview {
-    id: number;
-    user: string;
-    avatar: string;
-    rating: number;
-    content: string;
-    date: string;
-    username?: string;
-    time?: string;
-    images?: string[];
-  }
-
-  // 推荐商品类型定义
-  export interface RelatedProduct {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-  }
-
-  // 商品类型定义
-  export interface Product {
-    id: number;
-    name: string;
-    brief: string;
-    price: number;
-    originalPrice?: number;
-    sales: number;
-    images: string[];
-    specs: ProductSpec[];
-    detail: string;
-    params: ProductParam[];
-    reviews: ProductReview[];
-  }
 
   // 商品数据库导出
   export const productDatabase: Product[];

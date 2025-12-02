@@ -45,7 +45,7 @@
 import { computed, watch, ref } from 'vue';
 import { useCategoryStore } from '../store/category';
 import { storeToRefs } from 'pinia';
-import type { CategoryNode } from '../store/category';
+import type { CategoryNode } from '../api/interfaces';
 
 // Props
 const props = defineProps<{

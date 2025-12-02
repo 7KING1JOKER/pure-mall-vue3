@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { productData } from "../store/category";
 import { productDatabase } from "@/api/productDatabase";
-import type { Product, RelatedProduct } from "@/api/productDatabase";
+import type { Product, RelatedProduct } from "../api/interfaces";
 
 export const useProductStore = defineStore("product", {
   state: () => ({
@@ -49,7 +49,7 @@ export const useProductStore = defineStore("product", {
     currentSpecStock: (state) => {
       if (!state.product || state.selectedSpec === null) return 0;
       
-      const spec = state.product.specs.find(s => s.id === state.selectedSpec);
+      const spec = state.product?.specs?.find(s => s.id === state.selectedSpec);
       return spec ? spec.stock : 0;
     }
   },
@@ -148,7 +148,7 @@ export const useProductStore = defineStore("product", {
             id: p.id,
             name: p.name,
             price: p.price,
-            image: p.image
+            image: p.images?.[0] || 'https://via.placeholder.com/300x300?text=暂无图片'
           }));
     },
     

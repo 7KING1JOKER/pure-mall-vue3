@@ -5,7 +5,7 @@
             title="尺码选择"
             v-model="productStore.productSizeDialogVisible"
             top="0" width="25%"
-            transition="fade" open-delay="0.3s"
+            transition="fade" :open-delay="0.3"
         >
         <!-- 尺码选择方块 -->
         <div class="size-squres">
