@@ -53,7 +53,7 @@
     <!-- 移动端汉堡菜单按钮 -->
     <div v-else class="mobile-menu-toggle">
       <el-button 
-        type="primary" 
+        type="primary"
         @click="drawerVisible = true"
         :icon="More"
         circle
@@ -226,9 +226,6 @@ const handleRegisterCancel = () => {
 // 登录成功处理
 const handleLoginSuccess = (userData: { username: string }) => {
   console.log('登录成功:', userData)
-  // 更新登录状态
-  userStore.login(userData.username, '')
-  
   // 跳转到用户中心
   router.push('/user')
 }

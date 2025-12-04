@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import { productData } from "../store/category";
 import { productDatabase } from "@/api/productDatabase";
 import type { Product, RelatedProduct } from "../api/interfaces";
+import request from "@/api/request";
 
 export const useProductStore = defineStore("product", {
   state: () => ({
@@ -41,7 +41,53 @@ export const useProductStore = defineStore("product", {
       { id: 2, size: 'M', detail: '178/95A' },
       { id: 3, size: 'L', detail: '181/98A' },
       { id: 4, size: 'XL', detail: '184/101A' },
-    ] 
+    ] ,
+
+    // 默认商品详情
+    defaultProduct: {
+      id: 0,
+      name: '精品',
+      brief: '高品质，舒适透气，时尚百搭',
+      price: 99, // 基于ID生成价格
+      sales: 500, // 基于ID生成销量
+      images: [
+        'https://via.placeholder.com/300x300?text=图片1',
+        'https://via.placeholder.com/300x300?text=图片2',
+        'https://via.placeholder.com/300x300?text=图片3',
+      ],
+      image: 'https://via.placeholder.com/300x300?text=暂无图片',
+      specs: [
+        { id: 1, name: '白色', price: 99, stock: 100 },
+        { id: 2, name: '黑色', price: 99, stock: 80 },
+        { id: 3, name: '灰色', price: 99, stock: 60 }
+      ],
+      detail: `<div style="padding: 20px;"><h2>产品详情</h2><p>本款采用优质面料制作，舒适透气，时尚百搭，适合各种场合穿着。</p><h3>产品特点</h3><ul><li>优质面料，舒适亲肤</li><li>时尚设计，百搭款式</li><li>精致做工，耐洗耐穿</li><li>多色可选，满足不同需求</li></ul></div>`,
+      params: [
+        { name: '材质', value: '优质面料' },
+        { name: '版型', value: '时尚版型' },
+        { name: '颜色', value: '白色/黑色/灰色' },
+        { name: '尺码', value: 'S/M/L/XL/XXL' },
+        { name: '适用季节', value: '四季通用' }
+      ],
+      reviews: [
+        {
+          id: 1,
+          user: '顾客甲',
+          avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=user',
+          rating: 5,
+          content: '质量很好，穿着舒适，非常满意！',
+          date: '2023-10-15'
+        },
+        {
+          id: 2,
+          user: '顾客乙',
+          avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=user',
+          rating: 4,
+          content: '整体不错，性价比高，推荐购买。',
+          date: '2023-10-10'
+        }
+      ]
+    }
   }),
   
   getters: {
@@ -56,100 +102,60 @@ export const useProductStore = defineStore("product", {
   
   actions: {
     // 加载商品详情
-    loadProductDetail(productId: number) {
+    async loadProductDetail(productId: number) {
       // 在实际项目中，这里应该调用API获取商品数据
-      // 这里使用模拟数据
-      let foundProduct = this.productDatabase.find((p: Product) => p.id === productId);
-      
-      // 如果没有找到商品，动态创建一个基于ID的商品详情
-      if (!foundProduct) {
-        // 从ID推断商品类型和名称（基于category.ts中的数据结构）
-        // const categoryType = Math.floor(productId / 1000); // 不再使用的变量
-        let productType = '服装';
-        let baseImage = 'https://via.placeholder.com/800x800?text=产品图片';
-        
-        // 根据ID范围设置不同的商品类型
-        if (productId >= 1001 && productId <= 1020) {
-          productType = '上衣';
-          baseImage = 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=987&auto=format&fit=crop';
-        } else if (productId >= 1021 && productId <= 1032) {
-          productType = '下装';
-          baseImage = 'https://images.unsplash.com/photo-1601747465107-1beb1c562334?q=80&w=987&auto=format&fit=crop';
-        } else if (productId >= 1033 && productId <= 1036) {
-          productType = '鞋子';
-          baseImage = 'https://images.unsplash.com/photo-1578314921455-34dd4626b38d?q=80&w=987&auto=format&fit=crop';
-        } else if (productId >= 1037 && productId <= 1040) {
-          productType = '配饰';
-          baseImage = 'https://images.unsplash.com/photo-1747257490779-5bdae916478f?q=80&w=987&auto=format&fit=crop';
-        } else if (productId >= 1041 && productId <= 1044) {
-          productType = '内衣';
-          baseImage = 'https://images.unsplash.com/photo-1640765937555-6f413ed1d936?q=80&w=987&auto=format&fit=crop';
-        } else if (productId >= 1045 && productId <= 1048) {
-          productType = '箱包';
-          baseImage = 'https://images.unsplash.com/photo-1541267732407-8f72c182cf11?q=80&w=987&auto=format&fit=crop';
+      try {
+        const response = await request.get(`/product/${productId}`);
+        // 检查后端响应格式
+        if (response && typeof response === 'object') {
+          console.log('后端响应格式:', response);
+          // 根据后端Response<T>类的格式，检查code字段
+          if (response.code === 200) {
+            console.log(response.data);
+            // 请求成功，使用response.data作为商品数据
+            this.product = response.data;
+          } else {
+            console.error('请求失败，状态码:', response.code);
+            // 这里可以添加错误处理逻辑，例如显示错误提示
+            // 失败显示默认商品详情
+            this.product = this.defaultProduct;
+          }
+        } else {
+          console.error('后端响应格式错误:', response);
+          // 这里可以添加错误处理逻辑，例如显示错误提示
         }
         
-        // 创建动态商品详情
-        foundProduct = {
-          id: productId,
-          name: `精品${productType} #${productId}`,
-          brief: `高品质${productType}，舒适透气，时尚百搭`,
-          price: 99 + Math.floor(productId % 100), // 基于ID生成价格
-          sales: 500 + Math.floor(productId % 500), // 基于ID生成销量
-          images: [baseImage, baseImage, baseImage],
-          specs: [
-            { id: 1, name: '白色', price: 99 + Math.floor(productId % 100), stock: 100 },
-            { id: 2, name: '黑色', price: 99 + Math.floor(productId % 100), stock: 80 },
-            { id: 3, name: '灰色', price: 99 + Math.floor(productId % 100), stock: 60 }
-          ],
-          detail: `<div style="padding: 20px;"><h2>产品详情</h2><p>本款${productType}采用优质面料制作，舒适透气，时尚百搭，适合各种场合穿着。</p><h3>产品特点</h3><ul><li>优质面料，舒适亲肤</li><li>时尚设计，百搭款式</li><li>精致做工，耐洗耐穿</li><li>多色可选，满足不同需求</li></ul></div>`,
-          params: [
-            { name: '材质', value: '优质面料' },
-            { name: '版型', value: '时尚版型' },
-            { name: '颜色', value: '白色/黑色/灰色' },
-            { name: '尺码', value: 'S/M/L/XL/XXL' },
-            { name: '适用季节', value: '四季通用' }
-          ],
-          reviews: [
-            {
-              id: 1,
-              user: '顾客甲',
-              avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=user' + productId,
-              rating: 5,
-              content: '质量很好，穿着舒适，非常满意！',
-              date: '2023-10-15'
-            },
-            {
-              id: 2,
-              user: '顾客乙',
-              avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=user' + (productId + 1),
-              rating: 4,
-              content: '整体不错，性价比高，推荐购买。',
-              date: '2023-10-10'
-            }
-          ]
-        };
+      } catch (error) {
+        console.error('加载商品详情失败:', error);
+        // 这里可以添加错误处理逻辑，例如显示错误提示
+      }
+      console.log("this.product:", this.product);
+      // 初始化未统一信息
+      if (this.product?.specs && this.product.specs.length > 0) {
+        this.selectedSpec = this.product.specs[0].id;
       }
       
-      // 设置当前商品
-      this.product = foundProduct;
-      // 初始化选中第一个规格
-      if (foundProduct.specs && foundProduct.specs.length > 0) {
-        this.selectedSpec = foundProduct.specs[0].id;
+      // 确保商品有images属性，若没有则创建包含3个当前图片的数组
+      if (this.product && this.product.image && (!this.product.images || this.product.images.length === 0)) {
+        this.product.images = [this.product.image, this.product.image, this.product.image];
+      }
+
+      if(this.product && !this.product.specs) {
+        this.product.specs = [
+          { id: 1, name: '白色', price: 99, stock: 100 },
+          { id: 2, name: '黑色', price: 99, stock: 80 },
+          { id: 3, name: '灰色', price: 99, stock: 60 }
+        ];
+        this.selectedSpec = this.product.specs[0].id;
       }
       
-      // 加载相关推荐商品（排除当前商品）
-        // 从productData中选择4个不同的商品作为推荐
-        const shuffledProducts = [...productData].sort(() => 0.5 - Math.random());
-        this.relatedProducts = shuffledProducts
-          .filter(p => p.id !== productId)
-          .slice(0, 4)
-          .map(p => ({
-            id: p.id,
-            name: p.name,
-            price: p.price,
-            image: p.images?.[0] || 'https://via.placeholder.com/300x300?text=暂无图片'
-          }));
+      if(this.product && !this.product?.detail) {
+        this.product.detail = `100% 棉 / 中温熨烫,不可干洗,需要时只可用非氯性漂白剂,平放晾干,温和机洗（最高温度30℃） 款号: 1263697001`; 
+      }
+
+      if(this.product) {
+        this.product.brief = `PURE致力于革新衣橱中的经典单品，而这款${this.product.name}便是品牌设计思路的体现。这款${this.product.name}在宽松的剪裁比例中，延续休闲的圆领设计，并注入细腻的针织肌理，构筑不凡的简约质感。\n\n- 休闲版型\n- 圆领设计\n- 短袖款式\n- 罗纹收边\n\n100%棉。不含配饰/可机洗\n\n尺码M码的后衣长为64厘米`;
+      }
     },
     
     // 切换展开 or 收起状态

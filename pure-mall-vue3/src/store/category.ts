@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { ElNotification } from 'element-plus';
 import type { CategoryNode, Product } from '../api/interfaces';
+import request from '@/api/request';
+
 
 // 排序选项类型
 type SortType = 'default' | 'priceAsc' | 'priceDesc' | 'salesDesc' | 'newest';
@@ -171,72 +173,118 @@ export const useCategoryStore = defineStore('category', {
 
   actions: {
     // 加载商品数据
-    loadProducts() {
-      // 从原始数据中获取所有商品
-      let sortedProducts = [...this.allProducts];
-      
-      // 根据当前选中的分类筛选商品
-      if (this.currentCategory.id) {
-        // 假设id格式为：大类(1-6)+子类(1-6)，如11代表T恤
-        const categoryId = this.currentCategory.id;
-        const categoryType = categoryId.charAt(0);
-        const subCategoryId = categoryId.charAt(1);
+    async loadProducts() {
+      try {
+        /**
+       * 获取商品列表
+       * @returns Promise<any>
+       */
+        const response = await request.get('/product/productList');
         
-        // 检查是否为一级分类（只有一个字符）
-        if (categoryId.length === 1) {
-          // 一级分类处理
-          if (categoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1001 && p.id <= 1020); // 上衣类
-          else if (categoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1021 && p.id <= 1032); // 下装类
-          else if (categoryId === '3') sortedProducts = sortedProducts.filter(p => p.id >= 1033 && p.id <= 1036); // 鞋子类
-          else if (categoryId === '4') sortedProducts = sortedProducts.filter(p => p.id >= 1037 && p.id <= 1040); // 配饰类
-          else if (categoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1041 && p.id <= 1044); // 内衣类
-          else if (categoryId === '6') sortedProducts = sortedProducts.filter(p => p.id >= 1045 && p.id <= 1048); // 箱包类
-        } else {
-          // 二级分类处理
-          if (categoryType === '1') {
-            // 上衣类
-            if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1001 && p.id <= 1004); // T恤
-            else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1005 && p.id <= 1008); // 衬衫
-            else if (subCategoryId === '3') sortedProducts = sortedProducts.filter(p => p.id >= 1009 && p.id <= 1012); // 卫衣
-            else if (subCategoryId === '4') sortedProducts = sortedProducts.filter(p => p.id >= 1013 && p.id <= 1016); // 毛衣
-            else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1017 && p.id <= 1018); // 夹克
-            else if (subCategoryId === '6') sortedProducts = sortedProducts.filter(p => p.id >= 1019 && p.id <= 1020); // 外套
-          } else if (categoryType === '2') {
-            // 下装类
-            if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1021 && p.id <= 1024); // 牛仔裤
-            else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1025 && p.id <= 1028); // 休闲裤
-            else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1029 && p.id <= 1032); // 裙子
+        // 检查后端响应格式
+        if (response && typeof response === 'object') {
+          console.log('后端响应格式:', response);
+          // 根据后端Response<T>类的格式，检查code字段
+          if (response.code === 200) {
+            console.log(response.data);
+            // 请求成功，使用response.data作为商品数据
+            let sortedProducts = [...response.data];
+            
+            // 根据当前选中的分类筛选商品
+            if (this.currentCategory.id) {
+              // 假设id格式为：大类(1-6)+子类(1-6)，如11代表T恤
+              const categoryId = this.currentCategory.id;
+              const categoryType = categoryId.charAt(0);
+              const subCategoryId = categoryId.charAt(1);
+              
+              // 检查是否为一级分类（只有一个字符）
+              if (categoryId.length === 1) {
+                // 一级分类处理
+                if (categoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1001 && p.id <= 1020); // 上衣类
+                else if (categoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1021 && p.id <= 1032); // 下装类
+                else if (categoryId === '3') sortedProducts = sortedProducts.filter(p => p.id >= 1033 && p.id <= 1036); // 鞋子类
+                else if (categoryId === '4') sortedProducts = sortedProducts.filter(p => p.id >= 1037 && p.id <= 1040); // 配饰类
+                else if (categoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1041 && p.id <= 1044); // 内衣类
+                else if (categoryId === '6') sortedProducts = sortedProducts.filter(p => p.id >= 1045 && p.id <= 1048); // 箱包类
+              } else {
+                // 二级分类处理
+                if (categoryType === '1') {
+                  // 上衣类
+                  if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1001 && p.id <= 1004); // T恤
+                  else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1005 && p.id <= 1008); // 衬衫
+                  else if (subCategoryId === '3') sortedProducts = sortedProducts.filter(p => p.id >= 1009 && p.id <= 1012); // 卫衣
+                  else if (subCategoryId === '4') sortedProducts = sortedProducts.filter(p => p.id >= 1013 && p.id <= 1016); // 毛衣
+                  else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1017 && p.id <= 1018); // 夹克
+                  else if (subCategoryId === '6') sortedProducts = sortedProducts.filter(p => p.id >= 1019 && p.id <= 1020); // 外套
+                } else if (categoryType === '2') {
+                  // 下装类
+                  if (subCategoryId === '1') sortedProducts = sortedProducts.filter(p => p.id >= 1021 && p.id <= 1024); // 牛仔裤
+                  else if (subCategoryId === '2') sortedProducts = sortedProducts.filter(p => p.id >= 1025 && p.id <= 1028); // 休闲裤
+                  else if (subCategoryId === '5') sortedProducts = sortedProducts.filter(p => p.id >= 1029 && p.id <= 1032); // 裙子
+                }
+              }
+            }
+            
+            // 根据排序方式对商品进行排序
+            switch(this.currentSort) {
+              case 'priceAsc':
+                sortedProducts.sort((a, b) => a.price - b.price);
+                break;
+              case 'priceDesc':
+                sortedProducts.sort((a, b) => b.price - a.price);
+                break;
+              case 'salesDesc':
+                sortedProducts.sort((a, b) => b.sales - a.sales);
+                break;
+              case 'newest':
+                // 假设id越大表示越新
+                sortedProducts.sort((a, b) => b.id - a.id);
+                break;
+              default:
+                // 综合排序，不做特殊处理
+                break;
+            }
+            
+            // 更新总商品数量
+            this.totalProducts = sortedProducts.length;
+            
+            // 实现分页逻辑
+            const startIndex = (this.currentPage - 1) * this.pageSize;
+            const endIndex = startIndex + this.pageSize;
+            this.displayProducts = sortedProducts.slice(startIndex, endIndex);
+          } else {
+            // 请求失败，显示错误信息
+            const errorMsg = response.message || '加载商品数据失败';
+            console.error('加载商品数据失败:', errorMsg);
+            ElNotification({
+              title: '加载失败',
+              message: errorMsg,
+              type: 'error',
+              duration: 3000
+            });
           }
+        } else {
+          // 响应格式不符合预期
+          console.error('加载商品数据失败: 响应格式错误', response);
+          ElNotification({
+            title: '加载失败',
+            message: '服务器响应格式错误',
+            type: 'error',
+            duration: 3000
+          });
         }
+      } catch (error) {
+        // 处理网络错误或其他异常
+        console.error('加载商品数据失败:', error);
+        let errorMsg = '网络请求失败，请检查网络连接';
+        
+        ElNotification({
+          title: '加载失败',
+          message: errorMsg,
+          type: 'error',
+          duration: 3000
+        });
       }
-      
-      // 根据排序方式对商品进行排序
-      switch(this.currentSort) {
-        case 'priceAsc':
-          sortedProducts.sort((a, b) => a.price - b.price);
-          break;
-        case 'priceDesc':
-          sortedProducts.sort((a, b) => b.price - a.price);
-          break;
-        case 'salesDesc':
-          sortedProducts.sort((a, b) => b.sales - a.sales);
-          break;
-        case 'newest':
-          // 假设id越大表示越新
-          sortedProducts.sort((a, b) => b.id - a.id);
-          break;
-        default:
-          // 综合排序，不做特殊处理
-          break;
-      }
-      
-      // 更新总商品数量
-      this.totalProducts = sortedProducts.length;
-      
-      // 实现分页逻辑
-      const startIndex = (this.currentPage - 1) * this.pageSize;
-      const endIndex = startIndex + this.pageSize;
-      this.displayProducts = sortedProducts.slice(startIndex, endIndex);
     },
     
     // 分类点击事件
@@ -289,8 +337,8 @@ export const useCategoryStore = defineStore('category', {
     },
     
     // 初始化数据
-    initializeData() {
-      this.loadProducts();
+    async initializeData() {
+      await this.loadProducts();
     }
   }
 });

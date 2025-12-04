@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
 import type { Address } from "../api/interfaces";
+import request from "@/api/request";
 
 export const useUserStore = defineStore("user", {
 	state: () => ({
@@ -168,12 +169,84 @@ export const useUserStore = defineStore("user", {
 		},
 		
 		// 登录相关方法
-		login(username: string, password: string) {
-			// 这里应该是实际的登录API调用
-			// 模拟登录成功
-			this.isLoggedIn = true
-			localStorage.setItem('isLoggedIn', 'true') // 保存到localStorage
-			ElMessage.success('登录成功')
+		async login(username: string, password: string): Promise<any> {
+			try {
+				console.log('前端发送的登录参数：', { username, password });
+				const response = await request.post('/user/login', { username, password });
+				// 登录成功，更新状态
+				this.isLoggedIn = true;
+				localStorage.setItem('isLoggedIn', 'true'); // 保存到localStorage
+				ElMessage.success(response.message || '登录成功');
+				return response;
+			} catch (error: any) {
+				// 处理请求错误
+				let errorMessage = '登录请求失败';
+				
+				// 从不同的错误结构中提取消息
+				if (error.response) {
+					// 有响应，但状态码非2xx
+					if (error.response.data?.message) {
+						// Spring Boot的异常响应结构
+						errorMessage = error.response.data.message;
+					} else if (error.response.data) {
+						// 其他响应结构
+						errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+					} else {
+						errorMessage = `请求失败：${error.response.status}`;
+					}
+				} else if (error.message) {
+					// 没有响应，使用axios的错误消息
+					errorMessage = error.message;
+				}
+				ElMessage.error(errorMessage);
+				throw error;
+			}
+		},
+		
+		/**
+		 * 用户注册
+		 * @param username 用户名
+		 * @param email 邮箱
+		 * @param password 密码
+		 * @param confirmPassword 确认密码
+		 * @returns Promise<any>
+		 */
+		async register(username: string, email: string, password: string, confirmPassword: string): Promise<any> {
+			try {
+				// 密码一致性检查
+				if (password !== confirmPassword) {
+					ElMessage.error('两次输入的密码不一致');
+					return Promise.reject(new Error('密码不一致'));
+				}
+				
+				const response = await request.post('/user/register', { username, email, password });
+				// 注册成功
+				ElMessage.success(response.message || '注册成功');
+				return response;
+			} catch (error: any) {
+				// 处理请求错误
+				let errorMessage = '注册请求失败';
+				
+				// 从不同的错误结构中提取消息
+				if (error.response) {
+					// 有响应，但状态码非2xx
+					if (error.response.data?.message) {
+						// Spring Boot的异常响应结构
+						errorMessage = error.response.data.message;
+					} else if (error.response.data) {
+						// 其他响应结构
+						errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+					} else {
+						errorMessage = `请求失败：${error.response.status}`;
+					}
+				} else if (error.message) {
+					// 没有响应，使用axios的错误消息
+					errorMessage = error.message;
+				}
+				
+				ElMessage.error(errorMessage);
+				throw error;
+			}
 		},
 		
 		logout() {

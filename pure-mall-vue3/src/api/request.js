@@ -5,7 +5,7 @@ import router from '@/router';
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API || '',
+  baseURL: import.meta.env.VITE_APP_BASE_API || 'http://localhost:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8'
@@ -13,27 +13,27 @@ const service = axios.create({
 });
 
 // 请求拦截器
-service.interceptors.request.use(
-  config => {
-    const userStore = useUserStore();
-    const token = userStore.token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  error => {
-    return Promise.reject(error);
-  }
-);
+ service.interceptors.request.use( 
+   config => { 
+     console.log('请求URL:', config.url);
+     console.log('请求参数:', config.data);
+     console.log('请求头:', config.headers);
+     return config; 
+   }, 
+   error => { 
+     return Promise.reject(error); 
+   } 
+ );
 
 // 响应拦截器
 service.interceptors.response.use(
   response => {
     const res = response.data;
-    if (res.code !== 200) {
-      ElMessage.error(res.message || '请求失败');
-      return Promise.reject(new Error(res.message || '请求失败'));
+    // 检查响应是否包含code字段，如果不包含则认为是直接返回的数据（如User对象）
+    if (res && typeof res === 'object' && 'code' in res) {
+      if (res.code !== 200) {
+        return Promise.reject(new Error(res.message || '请求失败'));
+      }
     }
     return res;
   },
@@ -54,10 +54,11 @@ service.interceptors.response.use(
           ElMessage.error('请求的资源不存在');
           break;
         case 500:
-          ElMessage.error('服务器内部错误');
+          // 不在这里显示错误消息，让具体的请求方法处理
           break;
         default:
-          ElMessage.error(error.response.data.message || '请求失败');
+          // 不在这里显示错误消息，让具体的请求方法处理
+          break;
       }
     } else if (error.request) {
       ElMessage.error('网络错误，请检查网络连接');
@@ -77,7 +78,7 @@ export default {
   put(url, data = {}, config = {}) {
     return service.put(url, data, config);
   },
-  delete(url, params = {}, config = {}) {
+  del(url, params = {}, config = {}) {
     return service.delete(url, { params, ...config });
   }
 };

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ElNotification, ElMessage } from "element-plus";
 import router from '../router/index.ts'
 import type { CartItem, RecommendedProduct } from '../api/interfaces';
+import { useUserStore } from './user';
 
 // 从本地存储加载购物车数据的辅助函数
 function loadCartFromStorage(): CartItem[] {
@@ -172,6 +173,19 @@ export const useCartStore = defineStore("cart", {
     
     // 添加商品到购物车
     addToCart(product: any) {
+      const userStore = useUserStore();
+      
+      // 检查登录状态
+      if (!userStore.isLoggedIn) {
+        ElNotification({
+          title: '请先登录',
+          message: '您需要登录后才能添加商品到购物车',
+          type: 'warning',
+          duration: 2000
+        });
+        return;
+      }
+      
       console.log("添加商品到购物车:", product);
 
       // 检查是否已在购物车中
@@ -206,6 +220,19 @@ export const useCartStore = defineStore("cart", {
     
     // 添加到收藏夹
     addToWishlist(item: any) {
+      const userStore = useUserStore();
+      
+      // 检查登录状态
+      if (!userStore.isLoggedIn) {
+        ElNotification({
+          title: '请先登录',
+          message: '您需要登录后才能添加商品到收藏夹',
+          type: 'warning',
+          duration: 2000
+        });
+        return;
+      }
+      
       // 检查商品是否已在收藏夹中
       const existingItem = this.wishlistItems.find(wishItem => wishItem.id === item.id);
       

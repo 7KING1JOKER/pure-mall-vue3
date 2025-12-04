@@ -15,45 +15,45 @@
         </div>
         
         <el-form ref="formRef" :model="formData" :rules="rules" class="login-form">
-          <el-form-item prop="loginUserName" class="prop-loginUserName">
+          <el-form-item prop="username" class="prop-username">
             <div class="input-container">
               <el-input 
-                v-model="formData.loginUserName" 
+                v-model="formData.username" 
                 placeholder="用户名"
                 size="large"
                 clearable
-                @input="updateUnderline('loginUserName')"
-                @focus="activeInput = 'loginUserName'"
-                @blur="(e: Event) => updateUnderline('loginUserName', e)"
+                @input="updateUnderline('username')"
+                @focus="activeInput = 'username'"
+                @blur="(e: Event) => updateUnderline('username', e)"
               >
                 <template #prefix>
                   <el-icon><User /></el-icon>
                 </template>
               </el-input>
-              <div class="input-underline" :class="{ active: activeInput === 'loginUserName' }">
-                <div class="dynamic-underline" :style="{ width: `${loginUserNameWidth}px` }"></div>
+              <div class="input-underline" :class="{ active: activeInput === 'username' }">
+                <div class="dynamic-underline" :style="{ width: `${usernameWidth}px` }"></div>
               </div>
             </div>
           </el-form-item>
           
-          <el-form-item prop="loginPassWord" class="prop-loginPassWord">
+          <el-form-item prop="password" class="prop-password">
             <div class="input-container">
               <el-input 
-                v-model="formData.loginPassWord" 
-                type="loginPassWord" 
+                v-model="formData.password" 
+                type="password" 
                 placeholder="密码"
                 size="large"
-                show-loginPassWord
-                @input="updateUnderline('loginPassWord')"
-                @focus="activeInput = 'loginPassWord'"
-                @blur="(e: Event) => updateUnderline('loginPassWord', e)"
+                show-password
+                @input="updateUnderline('password')"
+                @focus="activeInput = 'password'"
+                @blur="(e: Event) => updateUnderline('password', e)"
               >
                 <template #prefix>
                   <el-icon><Lock /></el-icon>
                 </template>
               </el-input>
-              <div class="input-underline" :class="{ active: activeInput === 'loginPassWord' }">
-                <div class="dynamic-underline" :style="{ width: `${loginPassWordWidth}px` }"></div>
+              <div class="input-underline" :class="{ active: activeInput === 'password' }">
+                <div class="dynamic-underline" :style="{ width: `${passwordWidth}px` }"></div>
               </div>
             </div>
           </el-form-item>
@@ -78,6 +78,10 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
 import { User,  Lock } from '@element-plus/icons-vue'
+import { useUserStore } from '../store/user'
+
+// 引入用户状态管理
+const userStore = useUserStore()
 
 const emit = defineEmits(['success', 'cancel'])
 
@@ -85,8 +89,8 @@ const visible = defineModel<boolean>('visible', { required: true })
 
 // 表单数据
 const formData = reactive({
-  loginUserName: '',
-  loginPassWord: ''
+  username: '',
+  password: ''
 })
 
 // 表单引用
@@ -94,11 +98,11 @@ const formRef = ref<FormInstance | null>(null)
 
 // 验证规则
 const rules = reactive<FormRules>({
-  loginUserName: [
+  username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 16, message: '用户名长度在3到16个字符', trigger: 'blur' }
   ],
-  loginPassWord: [
+  password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 8, message: '密码长度至少8位', trigger: 'blur' }
   ]
@@ -106,8 +110,8 @@ const rules = reactive<FormRules>({
 
 // 动态下划线相关状态
 const activeInput = ref('')
-const loginUserNameWidth = ref(0)
-const loginPassWordWidth = ref(0)
+const usernameWidth = ref(0)
+const passwordWidth = ref(0)
 
 // 创建测量元素
 const measureSpan = document.createElement('span')
@@ -130,16 +134,16 @@ const updateUnderline = (field: keyof typeof formData, event?: Event) => {
     // 如果输入框失去焦点且内容不为空，设置宽度为100%
     if (isBlurEvent && text && input) {
       const inputWidth = input.offsetWidth
-      if (field === 'loginUserName') loginUserNameWidth.value = inputWidth
+      if (field === 'username') usernameWidth.value = inputWidth
       // 密码框宽度稍微大一点: 额外的切换按钮 or 密码输入框的DOM结构不同
-      if (field === 'loginPassWord') loginPassWordWidth.value = inputWidth + 20
+      if (field === 'password') passwordWidth.value = inputWidth + 20
       return
     }
     
     // 文本为空时宽度为0
     if (!text) {
-      if (field === 'loginUserName') loginUserNameWidth.value = 0
-      if (field === 'loginPassWord') loginPassWordWidth.value = 0
+      if (field === 'username') usernameWidth.value = 0
+      if (field === 'password') passwordWidth.value = 0
       return
     }
     
@@ -154,8 +158,8 @@ const updateUnderline = (field: keyof typeof formData, event?: Event) => {
     const width = measureSpan.offsetWidth
     
     // 更新对应字段的下划线宽度
-    if (field === 'loginUserName') loginUserNameWidth.value = width
-    if (field === 'loginPassWord') loginPassWordWidth.value = width
+    if (field === 'username') usernameWidth.value = width
+    if (field === 'password') passwordWidth.value = width
   })
 }
 
@@ -164,10 +168,12 @@ const submit = async () => {
   const valid = await formRef.value?.validate()
   if (!valid) return
   
-  // 模拟API调用
-  try {
-    // 这里应该是实际的登录API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  // 调用登录API
+    try {
+      await userStore.login(
+        formData.username,
+        formData.password
+      )
     
     ElNotification({
       title: '登录成功',
@@ -177,7 +183,7 @@ const submit = async () => {
     
     // 通知父组件登录成功
     emit('success', {
-      loginUserName: formData.loginUserName
+      username: formData.username
     })
     
     // 清空表单
@@ -186,17 +192,13 @@ const submit = async () => {
     // 关闭弹窗
     visible.value = false
   } catch (error) {
-    ElNotification({
-      title: '登录失败',
-      message: '用户名或密码错误，请重试',
-      type: 'error'
-    })
+    // 错误已经在userStore.login中处理，这里可以不重复处理
   }
 }
 
 onMounted(() => {
-  updateUnderline('loginUserName')
-  updateUnderline('loginPassWord')
+  updateUnderline('username')
+  updateUnderline('password')
 })
 
 </script>

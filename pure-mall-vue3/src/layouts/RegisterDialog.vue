@@ -130,6 +130,10 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
 import { User, Message, Lock } from '@element-plus/icons-vue'
+import { useUserStore } from '../store/user.ts'
+
+// 引入userStore
+const userStore = useUserStore()
 
 const emit = defineEmits(['success', 'cancel', 'to-login'])
 
@@ -175,7 +179,7 @@ const rules = reactive<FormRules>({
     }
   ],
   confirmPassword: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' },
+  { required: true, message: '请再次输入密码', trigger: 'blur' },
     { 
       validator: (rule, value, callback) => {
         if (value !== formData.password) {
@@ -260,7 +264,12 @@ const submit = async () => {
   // 模拟API调用
   try {
     // 这里应该是实际的注册API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await userStore.register(
+      formData.username,
+      formData.email,
+      formData.password,
+      formData.confirmPassword
+    )
     
     ElNotification({
       title: '注册成功',
