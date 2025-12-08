@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import type { Address, OrderItem, Order, DeliveryMethod, PaymentMethod } from '../api/interfaces';
+import request from '@/api/request';
+import { useUserStore } from './user';
 
 // 从本地存储加载订单数据的辅助函数
 function loadOrdersFromStorage(): Order[] {
@@ -35,7 +37,9 @@ export const useOrderStore = defineStore('order', {
         city: '深圳市',
         district: '南山区',
         detail: '科技园南路XX号XX大厦XX室',
-        isDefault: true
+        isDefault: true,
+        street: '',
+        zip: ''
       },
       {
         id: 2,
@@ -45,9 +49,11 @@ export const useOrderStore = defineStore('order', {
         city: '广州市',
         district: '天河区',
         detail: '天河路XX号XX公寓XX室',
-        isDefault: false
+        isDefault: false,
+        street: '',
+        zip: ''
       }
-    ] as Address[],
+    ] as unknown as Address[],
 
     // 订单全部相关状态 - 从本地存储加载
     CompleteOrder: loadOrdersFromStorage(),
@@ -162,7 +168,7 @@ export const useOrderStore = defineStore('order', {
       let selectedAddr;
       if (selectedAddressId) {
         // 根据ID查找选中的地址
-        selectedAddr = this.addresses.find(addr => addr.id.toString() === selectedAddressId);
+        selectedAddr = this.addresses.find(addr => addr.id?.toString() === selectedAddressId);
       }
       // 如果没有找到指定地址或没有指定ID，则使用默认地址或第一个地址
       selectedAddr = selectedAddr || this.addresses.find(addr => addr.isDefault) || this.addresses[0];
@@ -355,11 +361,6 @@ export const useOrderStore = defineStore('order', {
       return completeOrder;
     },
 
-    // 获取所有订单
-    getAllOrders() {
-      return this.CompleteOrder;
-    },
-
     // 根据订单编号获取订单
     getOrderByNumber(orderNumber: string) {
       if (!orderNumber || typeof orderNumber !== 'string') {
@@ -376,26 +377,29 @@ export const useOrderStore = defineStore('order', {
       return order || null;
     },
 
-    // 根据订单编号删除订单
-    deleteOrder(orderNumber: string) {
-      if (!orderNumber || typeof orderNumber !== 'string') {
-        console.error('无效的订单编号参数');
+    /**
+     * 根据订单编号删除订单
+     * @param orderNumber 订单编号
+     * @returns Promise<boolean> 删除成功返回true，失败返回false
+     */
+    async deleteOrder(orderNumber: string): Promise<boolean> {
+      try {
+        // DELETE请求通常不需要请求体，所以只需要传递URL
+        const response = await request.del(`/order/${orderNumber}`, { orderNumber });
+        console.log('删除订单成功:', response);
+        
+        // 从userStore的orders数组中移除对应的订单
+        const userStore = useUserStore();
+        const orderIndex = userStore.orders.findIndex(order => order.orderNumber === orderNumber);
+        if (orderIndex !== -1) {
+          userStore.orders.splice(orderIndex, 1);
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('删除订单失败:', error);
         return false;
       }
-      
-      const orderIndex = this.CompleteOrder.findIndex(order => order.orderNumber === orderNumber);
-      if (orderIndex === -1) {
-        console.log(`未找到要删除的订单编号: ${orderNumber}`);
-        return false;
-      }
-      
-      // 删除订单
-      this.CompleteOrder.splice(orderIndex, 1);
-      
-      // 保存到本地存储
-      this.saveOrdersToStorage();
-      
-      return true;
     }
   }
 });

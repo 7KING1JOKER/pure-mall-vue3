@@ -15,9 +15,9 @@ const service = axios.create({
 // 请求拦截器
  service.interceptors.request.use( 
    config => { 
-     console.log('请求URL:', config.url);
-     console.log('请求参数:', config.data);
-     console.log('请求头:', config.headers);
+    //  console.log('请求URL:', config.url);
+    //  console.log('请求参数:', config.data);
+    //  console.log('请求头:', config.headers);
      return config; 
    }, 
    error => { 

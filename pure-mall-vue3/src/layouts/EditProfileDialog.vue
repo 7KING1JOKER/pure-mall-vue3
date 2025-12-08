@@ -11,13 +11,13 @@
         <el-input v-model="editForm.phone" class="input-style" placeholder="请输入手机号"></el-input>
       </el-form-item>
       <el-form-item label="性别" class="form-item">
-        <el-select v-model="editForm.gender" placeholder="请选择" class="input-style">
+        <el-select v-model="editForm.sex" placeholder="请选择" class="input-style">
           <el-option label="男" value="男" />
           <el-option label="女" value="女" />
         </el-select>
       </el-form-item>
       <el-form-item label="生日" class="form-item">
-        <el-date-picker v-model="editForm.birthday" type="date" placeholder="选择日期" class="input-style" />
+        <el-date-picker v-model="editForm.birthday" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" class="input-style" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -48,7 +48,7 @@ function infoToForm(infoArr) {
     if (item.label === '用户名') obj.username = item.value
     if (item.label === '邮箱') obj.email = item.value
     if (item.label === '手机') obj.phone = item.value
-    if (item.label === '性别') obj.gender = item.value
+    if (item.label === '性别') obj.sex = item.value
     if (item.label === '生日') obj.birthday = item.value
   })
   return obj
@@ -72,10 +72,14 @@ function saveProfile() {
     { label: '用户名', value: editForm.value.username },
     { label: '邮箱', value: editForm.value.email },
     { label: '手机', value: editForm.value.phone },
-    { label: '性别', value: editForm.value.gender },
+    { label: '性别', value: editForm.value.sex },
     { label: '生日', value: editForm.value.birthday }
   ]
   userStore.basicInfo = arr
+  
+  // 调用更新用户信息方法
+  userStore.updateUserInfo(userStore.username, editForm.value)
+
   emitClose()
 }
 </script>

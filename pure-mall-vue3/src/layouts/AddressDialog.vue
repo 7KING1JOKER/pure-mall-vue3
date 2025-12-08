@@ -62,8 +62,8 @@
         />
       </el-form-item>
       
-      <el-form-item label="邮政编码" prop="zip">
-        <el-input v-model="addressForm.zip" placeholder="请输入邮政编码" />
+      <el-form-item label="邮政编码" prop="postcode">
+        <el-input v-model="addressForm.postcode" placeholder="请输入邮政编码" />
       </el-form-item>
       
       <el-form-item>
@@ -107,14 +107,15 @@ const dialogVisible = computed({
 
 // 表单数据
 const addressForm = reactive({
-  id: '',
+  id: 0,
   name: '',
   phone: '',
   province: '',
   city: '',
   district: '',
   street: '',
-  zip: '',
+  detail: '',
+  postcode: '',
   isDefault: false
 })
 
@@ -141,7 +142,7 @@ const rules = reactive<FormRules>({
     { required: true, message: '请输入详细地址', trigger: 'blur' },
     { min: 5, max: 100, message: '长度在 5 到 100 个字符', trigger: 'blur' }
   ],
-  zip: [
+  postcode: [
     { required: true, message: '请输入邮政编码', trigger: 'blur' },
     { pattern: /^\d{6}$/, message: '请输入正确的邮政编码', trigger: 'blur' }
   ]
@@ -159,18 +160,39 @@ watch(() => userStore.currentAddress, (newAddress) => {
 const saveAddress = async () => {
   if (!addressFormRef.value) return
   
-  await addressFormRef.value.validate((valid, fields) => {
+  await addressFormRef.value.validate(async (valid, fields) => {
     if (valid) {
-      userStore.saveAddress({
-        ...addressForm,
-        id: addressForm.id || undefined // 如果是新地址，id为undefined
-      })
-      console.log('地址保存成功', userStore.addresses)
+      // 如果是新地址，获取已有的最大id并加1
+      if (!userStore.isEditingAddress) {
+        // 获取地址列表中的最大id
+        const maxId = userStore.addresses.length > 0 
+          ? Math.max(...userStore.addresses.map(addr => addr.id))
+          : 0;
+        // 新地址的id为最大id加1
+        addressForm.id = maxId + 1;
+      }
+      
+      addressForm.detail = addressForm.province + addressForm.city + addressForm.district + addressForm.street; // 将 detail 字段传入
+      
+      // 根据编辑状态调用不同的方法
+      try {
+        if (userStore.isEditingAddress) {
+          await userStore.updateAddress(userStore.username, addressForm);
+          console.log('更新地址成功:', userStore.username, addressForm);
+        } else {
+          await userStore.saveAddress(userStore.username, addressForm);
+          console.log('保存地址成功:', userStore.username, addressForm);
+        }
+        dialogVisible.value = false; // 保存成功后关闭对话框
+      } catch (error) {
+        console.error('保存地址失败:', error);
+        ElMessage.error('保存地址失败，请稍后重试');
+      }
     } else {
-      console.log('表单验证失败', fields)
-      ElMessage.error('请完善表单信息')
+      console.log('表单验证失败', fields);
+      ElMessage.error('请完善表单信息');
     }
-  })
+  });
 }
 </script>
 

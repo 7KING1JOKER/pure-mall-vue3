@@ -2,7 +2,35 @@
   --light-card-bg: rgba(255, 255, 255, 0.3);
   --dark-bg: #333
 }
+/* 阻止浏览器输入框自动填充和保存密码的高亮样式 */
+/* 针对Firefox */
+input:autofill,
+input:autofill:hover,
+input:autofill:focus,
+input:autofill:active {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: inherit !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+}
 
+/* 针对WebKit内核浏览器（Chrome, Edge, Safari） */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  /* 保持文本颜色与原始样式一致 */
+  -webkit-text-fill-color: inherit !important;
+  /* 透明化背景 */
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  /* 重置背景颜色 */
+  background-color: transparent !important;
+  /* 确保没有背景图像 */
+  background-image: none !important;
+  /* 禁用过渡效果，确保样式立即生效 */
+  transition: background-color 50000s ease-in-out 0s, color 50000s ease-in-out 0s !important;
+}
 
 html {
   /* 关闭浏览器右侧默认滑动条 */
@@ -43,6 +71,7 @@ body {
 }
 
 .el-tag {
+  color: #333 !important;
   border: none !important;
   background-color: transparent !important;
 }
@@ -51,6 +80,21 @@ body {
   font-size: 12px;
 }
 
+.el-button {
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  color: #333 !important;
+}
+
+.el-icon {
+  transition: all 0.3s ease;
+}
+
+.el-icon:hover {
+  transform: translateY(-6px);
+} 
 /* Element Plus 错误提示默认样式 */
 .el-form-item__error {
   color: #333 !important; /* 错误提示文字颜色变为黑色 */

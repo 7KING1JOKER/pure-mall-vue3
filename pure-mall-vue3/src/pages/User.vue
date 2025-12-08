@@ -9,8 +9,8 @@
           <div class="user-profile-header">
             <el-avatar :size="80" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
             <div class="user-info">
-              <div class="user-name">张明</div>
-              <div class="user-email">zhangming@example.com</div>
+              <div class="user-name"> {{ userStore.username }} </div>
+              <div class="user-email"> {{ userStore.email }} </div>
             </div>
           </div>
         </template>
@@ -21,7 +21,7 @@
             style="color: #333;"
         >
            {{ vip }} 
-        </el-tag>
+        </el-tag> 
       </el-card>
       
       <!-- 用户侧栏功能 -->
@@ -67,7 +67,7 @@
       
       <!-- 个人资料 -->
       <div v-if="activeTab === 'profile'" class="profile-section">
-        <el-descriptions title="基本信息" :column="2" border>
+        <el-descriptions title="基本信息" :column="2" :border="true">
           <el-descriptions-item
             v-for="(item, index) in basicInfo"
             :key="index"
@@ -78,42 +78,22 @@
             {{ item.value }}
           </el-descriptions-item>
         </el-descriptions>
-        
-        <el-descriptions title="会员信息" :column="2" border style="margin-top: 20px;">
-          <el-descriptions-item
-            v-for="(item, index) in memberInfo"
-            :key="index"
-            :label="item.label"
-            label-class-name="profile-label"
-            class-name="profile-content"
-          >
-            {{ item.value }}
-          </el-descriptions-item>
-        </el-descriptions>
-        <el-button type="primary" @click="userStore.EditProfileDialogVisible = true">修改资料</el-button>
+        <el-icon @click="userStore.EditProfileDialogVisible = true" style="margin-top: 20px;" class="edit-icon"> <Edit /> </el-icon>
       </div>
       
       <!-- 我的订单 -->
       <div v-if="activeTab === 'orders'" class="orders-section" style="margin-top: 20px;">
         <el-table 
-          :data="orderStore.CompleteOrder" style="width: 100%" border="true"
+          :data="userStore.orders" style="max-width: 100%; width: auto;" :border="true"
           :header-row-style="{ background: 'transparent' }"
         >
           <el-table-column prop="orderNumber" label="订单号" width="180" />
-          <el-table-column prop="orderTime" label="下单时间" width="180" />
-          <el-table-column label="商品">
-            <template #default="scope">
-              <div v-for="(item, index) in scope.row.items" :key="index" class="order-item">
-                {{ item.name }} (x{{ item.quantity }})
-                <span v-if="index < scope.row.items.length - 1" class="order-item-separator">, </span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="orderAmount" label="订单金额" width="120" :formatter="(row) => `¥${row.orderAmount.toFixed(2)}`" />
+          <el-table-column prop="createTime" label="下单时间" width="180" />
+          <el-table-column prop="orderAmount" label="订单金额" width="120" />
           <el-table-column label="状态" width="120">
             <template #default="scope">
-              <el-tag :type="getStatusType(scope.row.status)" effect="dark">
-                {{ getStatusText(scope.row.status) }}
+              <el-tag :type="userStore.statusType(scope.row.status)" effect="dark">
+                {{ scope.row.status }}
               </el-tag>
             </template>
           </el-table-column>
@@ -140,20 +120,18 @@
               <div class="address-detail">
                 <p>{{ address.province }} {{ address.city }} {{ address.district }}</p>
                 <p>{{ address.street }}</p>
-                <p>邮编：{{ address.zip }}</p>
+                <p>邮编：{{ address.postcode }}</p>
                 <p>电话：{{ address.phone }}</p>
               </div>
               <template #footer>
-                <el-button-group>
-                  <el-button type="primary" icon="Edit" text @click="editAddress(address.id)">编辑</el-button>
-                  <el-button type="danger" icon="Delete" text @click="confirmDeleteAddress(address.id)">删除</el-button>
-                  <el-button v-if="!address.isDefault" type="success" icon="Check" text @click="setAsDefault(address.id)">设为默认</el-button>
-                </el-button-group>
+                  <el-button type="primary" :icon="Edit" text @click="editAddress(address.id)"></el-button>
+                  <el-button type="danger" :icon="Delete" text @click="confirmDeleteAddress(address.id)"></el-button>
+                  <el-button v-if="!address.isDefault" type="success" :icon="Check" text @click="setAsDefault(address.id)">Default</el-button>
               </template>
             </el-card>
           </el-col>
         </el-row>
-        <el-button type="primary" icon="Plus" style="margin-top: 20px;" @click="addNewAddress">添加新地址</el-button>
+        <el-icon @click="addNewAddress" class="add-icon"> <DocumentAdd /> </el-icon>
       </div>
 
       <!-- 我的收藏 -->
@@ -176,7 +154,7 @@
 
     <!-- 编辑资料弹窗 -->
     <EditProfileDialog v-model="userStore.EditProfileDialogVisible" />
-    <!--  -->
+    <!-- 添加地址弹窗 -->
     <AddressDialog v-model="userStore.AddressDialogVisible" />
   </div>
 </template>
@@ -213,7 +191,8 @@ import {
   Plus,
   Delete,
   Check,
-  Close
+  Close,
+  DocumentAdd
 } from '@element-plus/icons-vue'
 
 import PcMenu from '../layouts/PcMenu.vue'
@@ -264,15 +243,16 @@ const confirmDeleteAddress = (addressId) => {
       type: 'warning'
     }
   ).then(() => {
-    userStore.deleteAddress(addressId)
+    userStore.deleteAddress(userStore.username, addressId)
   }).catch(() => {
     // 取消删除，不做任何操作
+    ElMessage.info('删除操作已取消')
   })
 }
 
 // 设置为默认地址
 const setAsDefault = (addressId) => {
-  userStore.setDefaultAddress(addressId)
+  userStore.setDefaultAddress(userStore.username, addressId)
 }
 
 // 获取订单状态对应的类型
@@ -314,8 +294,8 @@ const confirmDeleteOrder = (orderNumber) => {
       cancelButtonText: '取消',
       type: 'warning'
     }
-  ).then(() => {
-    const result = orderStore.deleteOrder(orderNumber);
+  ).then(async () => {
+    const result = await orderStore.deleteOrder(orderNumber);
     if (result) {
       ElMessage.success('订单已成功删除');
     } else {
@@ -426,6 +406,50 @@ const getIconComponent = (iconName) => {
   background: transparent !important;
 }
 
+.edit-icon, .add-icon {
+  position: relative;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.edit-icon::after {
+  content: 'Edit';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 5px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.add-icon::after {
+  content: 'Add';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 5px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.edit-icon:hover::after, .add-icon:hover::after {
+  opacity: 1;
+  visibility: visible;
+  margin-left: 8px;
+}
+
 /* 我的订单部分样式优化 */
 .orders-section :deep(.el-table),
 .orders-section :deep(.el-table__body),
@@ -434,6 +458,52 @@ const getIconComponent = (iconName) => {
 .orders-section :deep(.el-table__row),
 .orders-section :deep(.el-table__cell) {
   background: transparent !important;
+}
+
+/* 调整表格宽度以适应内容 */
+.orders-section :deep(.el-table) {
+  width: 100% !important;
+  max-width: 840px !important; /* 5列宽度总和：180+180+120+120+160=760，加上边框和内边距 */
+  table-layout: fixed;
+  box-sizing: border-box;
+  min-width: 0 !important;
+}
+
+/* 修复Element Plus表格内部宽度计算问题 */
+.orders-section :deep(.el-table__inner-wrapper) {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.orders-section :deep(.el-table__header-wrapper),
+.orders-section :deep(.el-table__body-wrapper) {
+  width: 100% !important;
+  overflow-x: hidden !important;
+  min-width: 0 !important;
+}
+
+/* 确保表头和表格内容对齐 */
+.orders-section :deep(.el-table__header),
+.orders-section :deep(.el-table__body) {
+  table-layout: fixed;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* 确保所有列的宽度总和等于表格宽度 */
+.orders-section :deep(.el-table__header-wrapper .el-table__header th.el-table__cell),
+.orders-section :deep(.el-table__body-wrapper .el-table__row td.el-table__cell) {
+  box-sizing: border-box;
+  min-width: 0 !important;
+}
+
+/* 阻止Element Plus表格的自动宽度调整 */
+.orders-section :deep(.el-table__column-resizer) {
+  display: none !important;
+}
+
+.orders-section :deep(.el-table__cell) {
+  color: #606266 !important;
 }
 
 /* 订单商品列表样式 */
@@ -447,9 +517,14 @@ const getIconComponent = (iconName) => {
 
 /* 地址管理部分样式优化 */
 .address-section :deep(.el-card) {
+  border-radius: 0 !important;
   background: transparent !important;
 }
 
+/* 增大地址卡片底部按钮图标大小 */
+.address-card :deep(.el-button) {
+  font-size: 20px; /* 可以根据需要调整大小 */
+}
 
 .content-card {
   flex: 1;

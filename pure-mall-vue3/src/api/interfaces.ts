@@ -5,7 +5,7 @@
 
 /*
  * @Description: 购物车商品类型定义
- * @used-address: @/store/cart.ts
+ * @Location: @/store/cart.ts
  */
 
 // 购物车商品类型定义
@@ -31,7 +31,7 @@ export interface RecommendedProduct {
 
 /*
  * @Description: 商品类型定义
- * @used-address: @/store/category.ts
+ * @Location: @/store/category.ts
  */
 
 // 定义商品接口
@@ -54,7 +54,7 @@ export interface CategoryNode {
 
 /*
  * @Description: 地址类型定义
- * @used-address: @/store/order.ts
+ * @Location: @/store/order.ts
  */
 
 
@@ -104,7 +104,7 @@ export interface PaymentMethod {
 
 /*
  * @Description: 商品类型定义
- * @used-address: @/store/product.ts
+ * @Location: @/store/product.ts
  */
 
   // 商品规格类型定义
@@ -160,19 +160,19 @@ export interface PaymentMethod {
 
 /*
  * @Description: 地址类型定义
- * @used-address: @/store/user.ts
+ * @Location: @/store/user.ts
  */
 
 // 地址类型定义
 export interface Address {
-  id?: string;
+  id: number;
   name: string;
   phone: string;
   province: string;
   city: string;
   district: string;
   street: string;
-  zip: string;
+  postcode: string;
   detail: string;
   isDefault: boolean;
 }

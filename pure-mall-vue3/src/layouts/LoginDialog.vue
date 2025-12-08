@@ -169,11 +169,14 @@ const submit = async () => {
   if (!valid) return
   
   // 调用登录API
-    try {
-      await userStore.login(
-        formData.username,
-        formData.password
-      )
+  try {
+    await userStore.login(
+      formData.username,
+      formData.password
+    )
+    
+    // 登录成功后，将用户名存储到userStore
+    userStore.username = formData.username
     
     ElNotification({
       title: '登录成功',

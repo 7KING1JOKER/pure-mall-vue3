@@ -5,6 +5,8 @@ import request from "@/api/request";
 
 export const useUserStore = defineStore("user", {
 	state: () => ({
+		username: '默认用户',
+		email: 'default@example.com',
 		vip: '会员',
 		activeTab: 'profile',
 		isLoggedIn: JSON.parse(localStorage.getItem('isLoggedIn') || 'false'), // 从localStorage恢复登录状态
@@ -22,44 +24,46 @@ export const useUserStore = defineStore("user", {
 		},
 		basicInfo: [
 			{ label: '用户名', value: '张明' },
-			{ label: '邮箱', value: 'zhangming@example.com' },
-			{ label: '手机', value: '13800138000' },
+			{ label: '邮箱', value: 'zhangsan@example.com' },
+			{ label: '手机号', value: '13800138000' },
 			{ label: '性别', value: '男' },
-			{ label: '生日', value: '1990-05-15' }
+			{ label: '出生日期', value: '1999-01-01' }
 		],
 		memberInfo: [
 			{ label: '会员等级', value: '黄金会员' },
-			{ label: '积分', value: '3,850 分' },
+			{ label: '积分', value: '3,000 分' },
 			{ label: '优惠券', value: '5 张可用' }
 		],
 		orders: [
-			{ id: '20230528001', date: '2023-05-28', product: 'Apple iPhone 14 Pro Max', amount: '¥8,999', status: '已完成' },
-			{ id: '20230527002', date: '2023-05-27', product: 'Samsung Galaxy S23 Ultra', amount: '¥7,899', status: '待发货' },
-			{ id: '20230525003', date: '2023-05-25', product: 'Sony WH-1000XM5 耳机', amount: '¥2,599', status: '已发货' },
-			{ id: '20230520004', date: '2023-05-20', product: 'MacBook Pro 14英寸', amount: '¥14,999', status: '已完成' },
-			{ id: '20230515005', date: '2023-05-15', product: 'Nike Air Jordan 1', amount: '¥1,299', status: '已取消' }
+			{ orderNumber: '20230528001', createTime: '2023-05-28 10:00:00', product: 'Apple iPhone 14 Pro Max', orderAmount: '¥8,999', status: '已完成' },
+			{ orderNumber: '20230527002', createTime: '2023-05-27 15:30:00', product: 'Samsung Galaxy S23 Ultra', orderAmount: '¥7,899', status: '待发货' },
+			{ orderNumber: '20230525003', createTime: '2023-05-25 09:15:00', product: 'Sony WH-1000XM5 耳机', orderAmount: '¥2,599', status: '已发货' },
+			{ orderNumber: '20230520004', createTime: '2023-05-20 12:45:00', product: 'MacBook Pro 14英寸', orderAmount: '¥14,999', status: '已完成' },
+			{ orderNumber: '20230515005', createTime: '2023-05-15 18:30:00', product: 'Nike Air Jordan 1', orderAmount: '¥1,299', status: '已取消' }
 		],
 		addresses: [
 			{
-				id: '1',
+				id: 1,
 				name: '张明 (家)',
 				phone: '13800138000',
 				province: '北京市',
 				city: '北京市',
 				district: '朝阳区',
 				street: '建国路88号现代城A座1508室',
-				zip: '100022',
+				detail: '北京市北京市朝阳区建国路88号现代城A座1508室',
+				postcode: '100022',
 				isDefault: true
 			},
 			{
-				id: '2',
+				id: 2,
 				name: '张明 (公司)',
 				phone: '13800138111',
 				province: '北京市',
 				city: '北京市',
 				district: '海淀区',
 				street: '中关村大街1号海龙大厦12层',
-				zip: '100080',
+				detail: '北京市北京市海淀区中关村大街1号海龙大厦12层',
+				postcode: '100080',
 				isDefault: false
 			}
 		],
@@ -87,6 +91,7 @@ export const useUserStore = defineStore("user", {
 		openAddAddressDialog() {
 			this.isEditingAddress = false
 			this.currentAddress = {
+				id: 0,
 				name: '',
 				phone: '',
 				province: '',
@@ -94,88 +99,300 @@ export const useUserStore = defineStore("user", {
 				district: '',
 				street: '',
 				detail: '',
-				zip: '',
+				postcode: '',
 				isDefault: false
 			}
 			this.AddressDialogVisible = true
 		},
 		// 打开编辑地址对话框
-		openEditAddressDialog(addressId: string) {
+		openEditAddressDialog(addressId: number) {
 			const address = this.addresses.find(addr => addr.id === addressId)
 			if (address) {
 				this.isEditingAddress = true
-				this.currentAddress = { ...address, detail: address.street }
+				this.currentAddress = address
 				this.AddressDialogVisible = true
 			}
 		},
-		// 保存地址（添加或更新）
-		saveAddress(address: Address) {
-			if (this.isEditingAddress && address.id) {
-				// 更新现有地址
-				const index = this.addresses.findIndex(addr => addr.id === address.id)
-				if (index !== -1) {
-					// 如果设置为默认地址，需要将其他地址设为非默认
-					if (address.isDefault) {
-						this.addresses.forEach(addr => {
-							if (addr.id !== address.id) {
-								addr.isDefault = false
-							}
-						})
-					}
-					this.addresses[index] = { ...address, id: address.id! }
-					ElMessage.success('地址更新成功')
-				}
-			} else {
+		/**
+		 * 添加地址
+		 * @param username 用户名
+		 * @param address 地址信息
+		 * @returns Promise<any>
+		 */
+		async saveAddress(username: string, address: Address): Promise<any> {
+			try {
 				// 添加新地址
-				const newAddress = {
-					...address,
-					id: Date.now().toString() // 生成唯一ID
+				const response = await request.post('/address/addAddress', address, {
+					params: { username: username }
+				});
+				// 添加到本地地址列表
+				this.addresses.push(response.data)
+				ElMessage.success('地址添加成功')
+				
+				this.AddressDialogVisible = false
+				this.currentAddress = null
+				return response;
+			} catch (error: any) {
+				// 处理请求错误
+				let errorMessage = '保存地址失败';
+				
+				if (error.response) {
+					if (error.response.data?.message) {
+						errorMessage = error.response.data.message;
+					} else if (error.response.data) {
+						errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+					} else {
+						errorMessage = `请求失败：${error.response.status}`;
+					}
+				} else if (error.message) {
+					errorMessage = error.message;
+				}
+				ElMessage.error(errorMessage);
+				throw error;
+			}
+		},
+		
+		/**
+		 * 更新地址
+		 * @param username 用户名
+		 * @param address 地址信息
+		 * @returns Promise<any>
+		 */
+		async updateAddress(username: string, address: Address): Promise<any> {
+			try {
+				if (!address.id) {
+					ElMessage.error('地址ID不能为空');
+					throw new Error('地址ID不能为空');
 				}
 				
-				// 如果设置为默认地址，需要将其他地址设为非默认
-				if (newAddress.isDefault) {
+				// 更新现有地址
+				const response = await request.put(`/address/updateAddress/${address.id}`, address, {
+					params: { username: username, addressId: address.id }
+				});
+				
+				// 更新本地地址列表
+				const index = this.addresses.findIndex(addr => addr.id === address.id)
+				if (index !== -1) {
+					this.addresses[index] = response.data
+				}
+				
+				// 如果设置为默认地址，更新其他地址的默认状态
+				if (address.isDefault) {
 					this.addresses.forEach(addr => {
-						addr.isDefault = false
+						if (addr.id !== address.id) {
+							addr.isDefault = false
+						}
 					})
 				}
 				
-				this.addresses.push(newAddress)
-				ElMessage.success('地址添加成功')
+				ElMessage.success('地址更新成功')
+				this.AddressDialogVisible = false
+				this.currentAddress = null
+				return response;
+			} catch (error: any) {
+				// 处理请求错误
+				let errorMessage = '更新地址失败';
+				
+				if (error.response) {
+					if (error.response.data?.message) {
+						errorMessage = error.response.data.message;
+					} else if (error.response.data) {
+						errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+					} else {
+						errorMessage = `请求失败：${error.response.status}`;
+					}
+				} else if (error.message) {
+					errorMessage = error.message;
+				}
+				ElMessage.error(errorMessage);
+				throw error;
 			}
-			
-			this.AddressDialogVisible = false
-			this.currentAddress = null
 		},
-		// 删除地址
-		deleteAddress(addressId: string) {
-			const index = this.addresses.findIndex(addr => addr.id === addressId)
-			if (index !== -1) {
-				// 如果删除的是默认地址，且还有其他地址，则将第一个地址设为默认
-				if (this.addresses[index].isDefault && this.addresses.length > 1) {
-					const newDefaultIndex = index === 0 ? 1 : 0
-					this.addresses[newDefaultIndex].isDefault = true
+		/**
+		 * 删除地址
+		 * @param username 用户名
+		 * @param addressId 地址ID
+		 * @returns Promise<any>
+		 */
+		async deleteAddress(username: string, addressId: number): Promise<any> {
+			try {
+				// 只传递username作为查询参数，addressId已经作为路径变量传递
+				const response = await request.del(`/address/deleteAddress/${addressId}`,
+					{ username, addressId }
+				);
+				console.log('删除地址请求参数:', { username, addressId });
+				console.log('删除地址响应信息:', response.message);
+				
+				// 从本地地址列表中删除
+				const index = this.addresses.findIndex(addr => addr.id === addressId)
+				if (index !== -1) {
+					this.addresses.splice(index, 1)
 				}
 				
-				this.addresses.splice(index, 1)
 				ElMessage.success('地址删除成功')
+				return response;
+			} catch (error: any) {
+				
+				// 处理请求错误
+				let errorMessage = '删除地址失败';
+				
+				if (error.response) {
+					if (error.response.data?.message) {
+						errorMessage = error.response.data.message;
+					} else if (error.response.data) {
+						errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+					} else {
+						errorMessage = `请求失败：${error.response.status}`;
+					}
+				} else if (error.message) {
+					errorMessage = error.message;
+				}
+				ElMessage.error(errorMessage);
+				throw error;
 			}
 		},
-		// 设置默认地址
-		setDefaultAddress(addressId: string) {
-			this.addresses.forEach(addr => {
-				addr.isDefault = addr.id === addressId
-			})
-			ElMessage.success('默认地址设置成功')
+
+		/**
+		 * 设置默认地址
+		 * @param addressId 地址ID
+		 * @returns Promise<any>
+		 */
+		async setDefaultAddress(username: string, addressId: number): Promise<any> {
+			try {
+				const response = await request.put(`/address/${addressId}/default`, username, {
+					params: { addressId: addressId }
+				});
+				
+				// 更新本地地址列表中的默认地址状态
+				this.addresses.forEach(addr => {
+					addr.isDefault = addr.id === addressId
+				})
+				
+				ElMessage.success('默认地址设置成功')
+				return response;
+			} catch (error: any) {
+				// 处理请求错误
+				let errorMessage = '设置默认地址失败';
+				
+				if (error.response) {
+					if (error.response.data?.message) {
+						errorMessage = error.response.data.message;
+					} else if (error.response.data) {
+						errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+					} else {
+						errorMessage = `请求失败：${error.response.status}`;
+					}
+				} else if (error.message) {
+					errorMessage = error.message;
+				}
+				ElMessage.error(errorMessage);
+				throw error;
+			}
 		},
 		
-		// 登录相关方法
+		async loadUserInfo(username: string) {
+			try {
+				const response = await request.get('/user/getInfo', { username });
+				// 更新用户信息状态
+				const data = response.data || {};
+				this.basicInfo = [
+					{ label: '用户名', value: data.username },
+					{ label: '邮箱', value: data.email },
+					{ label: '手机号', value: data.phone },
+					{ label: '性别', value: data.sex },
+					{ label: '出生日期', value: data.birthday }
+				];
+				console.log("loadBasicInfo:", this.basicInfo);
+				// 更新用户状态
+				this.username = data.username || '';
+				this.email = data.email || '';
+			} catch (error) {
+				ElMessage.error('获取用户信息失败');
+			}
+		},
+
+		async updateUserInfo(username: string, user: any) {
+			try {
+				console.log("updateUserInfo:", user);
+				// 将username作为查询参数，user作为请求体发送
+				const response = await request.put('/user/updateInfo', user, {
+					params: { username: username }
+				});
+				if (response.data) {
+					ElMessage.success('用户信息更新成功');
+					// 更新本地状态
+					await this.loadUserInfo(username);
+				}
+			} catch (error: any) {
+				// 处理请求错误
+				let errorMessage = '更新用户信息失败';
+				if (error.response) {
+					if (error.response.data?.message) {
+						errorMessage = error.response.data.message;
+					} else if (error.response.data) {
+						errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+					} else {
+						errorMessage = `请求失败：${error.response.status}`;
+					}
+				} else if (error.message) {
+					errorMessage = error.message;
+				}
+				ElMessage.error(errorMessage);
+				console.error(error);
+			}
+		},
+
+		async loadUserAddress(username: string) {
+			try {
+				const response = await request.get('/address/userAddressList', { username });
+				// 更新地址状态
+				this.addresses = response.data || [];
+				console.log("loadUserAddress:", this.addresses);
+			} catch (error) {
+				ElMessage.error('获取地址失败');
+			}
+		},
+
+		async loadUserOrders(username: string) {
+			try {
+				const response = await request.get('order/userOrders', { username });
+				// 更新订单状态
+				this.orders = response.data.orders || [];
+				console.log("loadUserOrders:", this.orders);
+			} catch (error) {
+				ElMessage.error('获取订单失败');
+			}
+		},
+
+		async loadUserData(username: string) {
+			try{
+				await Promise.all([
+					this.loadUserInfo(username),
+					this.loadUserAddress(username),
+					this.loadUserOrders(username)
+				]);
+			} catch (error) {
+				ElMessage.error('获取用户数据失败');
+			}
+		},
+
+		
+		/**
+		 * 用户登录
+		 * @param username 用户名
+		 * @param password 密码
+		 * @returns Promise<any>
+		 */
 		async login(username: string, password: string): Promise<any> {
 			try {
-				console.log('前端发送的登录参数：', { username, password });
 				const response = await request.post('/user/login', { username, password });
-				// 登录成功，更新状态
+				// 响应成功后加载用户数据
+				await this.loadUserData(username);
+
+				// 加载数据完毕，登录成功，更新状态
 				this.isLoggedIn = true;
 				localStorage.setItem('isLoggedIn', 'true'); // 保存到localStorage
+
 				ElMessage.success(response.message || '登录成功');
 				return response;
 			} catch (error: any) {
