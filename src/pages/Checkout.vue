@@ -17,8 +17,8 @@
           <div 
             v-for="address in addresses" 
             :key="address.id"
-            :class="['address-item', { 'active': address.id === selectedAddressId }]"
-            @click="selectAddress(address.id)"
+            :class="['address-item', { 'active': String(address.id) === selectedAddressId }]"
+            @click="selectAddress(String(address.id))"
           >
             <div class="address-info">
               <div class="name-phone">
@@ -32,7 +32,7 @@
               <el-button type="primary" text size="small" @click.stop="editAddress(address.id)">
                 <el-icon><Edit /></el-icon>
               </el-button>
-              <el-button type="danger" text size="small" @click.stop="confirmDeleteAddress(address.id)">
+              <el-button type="danger" text size="small" @click.stop="confirmDeleteAddress(String(address.id))">
                 <el-icon><Delete /></el-icon>
               </el-button>
             </div>
@@ -178,7 +178,7 @@ const confirmDeleteAddress = (addressId: string) => {
       type: 'warning'
     }
   ).then(() => {
-    deleteAddress(addressId)
+    deleteAddress(Number(addressId))
   }).catch(() => {
     // 取消删除，不做任何操作
   })

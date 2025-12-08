@@ -17,7 +17,7 @@
 
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
-import type { Product } from '../store/category';
+import type { Product } from '@/api/interfaces';
 
 const props = defineProps<{
   product: Product;

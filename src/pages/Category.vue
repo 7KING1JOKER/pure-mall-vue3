@@ -10,7 +10,7 @@
           <el-breadcrumb-item @mouseenter="categoryStore.CategoryNavVisible = true">
             商品分类
           </el-breadcrumb-item>
-          <el-breadcrumb-item v-if="currentCategory.id">{{ currentCategory.label }}</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="currentCategory?.id">{{ currentCategory.label }}</el-breadcrumb-item>
         </el-breadcrumb>
 
         <!-- 筛选工具栏 -->
@@ -97,11 +97,8 @@ const {
 
 // 点击"全部"面包屑项的处理函数
 const handleAllClick = () => {
-  // 重置当前分类为全部商品
-  categoryStore.currentCategory = {
-    id: '',
-    label: '全部商品'
-  };
+  // 重置当前分类为null，表示全部商品
+  categoryStore.currentCategory = null;
   // 重新加载商品数据
   initializeData();
 };

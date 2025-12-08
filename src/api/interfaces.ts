@@ -3,224 +3,219 @@
  * 包含项目中所有TypeScript接口定义
  */
 
-// 商品相关接口定义
-
-/**
- * 商品基本信息接口
- */
+// 商品相关接口
 export interface Product {
   id: number;
   name: string;
-  brief?: string;
+  brief: string;
   price: number;
-  originalPrice?: number;
+  originalPrice: number;
   sales: number;
-  images: string[];
-  specs?: ProductSpec[];
-  detail?: string;
-  params?: ProductParam[];
-  reviews?: ProductReview[];
+  categoryLabel: string;
+  detail: string;
+  status: number;
+  createTime: string;
+  updateTime: string;
+  images: ProductImage[];
+  specs: ProductSpec[];
 }
 
-/**
- * 商品规格接口
- */
+export interface ProductImage {
+  id: number;
+  productId: number;
+  imageUrl: string;
+  sort: number;
+}
+
 export interface ProductSpec {
   id: number;
+  productId: number;
   name: string;
   price: number;
   stock: number;
+  salesAmount: number;
+  color: string;
+  size: string;
+  createTime: string;
 }
 
-/**
- * 商品参数接口
- */
-export interface ProductParam {
-  name: string;
-  value: string;
-}
-
-/**
- * 商品评论接口
- */
 export interface ProductReview {
   id: number;
-  user: string;
-  avatar: string;
+  productId: number;
+  userId: number;
   rating: number;
   content: string;
-  date: string;
-  username?: string;
-  time?: string;
-  images?: string[];
+  createTime: string;
 }
 
-/**
- * 相关推荐商品接口
- */
-export interface RelatedProduct {
+export interface ProductParam {
+  pageNum: number;
+  pageSize: number;
+  categoryId?: number;
+  keyword?: string;
+  sortBy?: string;
+  orderBy?: string;
+}
+
+// 分类相关接口
+export interface CategoryNode {
   id: number;
   name: string;
-  price: number;
-  image: string;
+  parentId: number;
+  children: CategoryNode[];
+  icon?: string;
 }
 
-// 分类相关接口定义
-
-/**
- * 分类节点接口
- */
-export interface CategoryNode {
-  id: string;
+export interface Category {
+  id: number;
+  name: string;
   label: string;
-  icon: string;
-  children?: CategoryNode[];
+  icon?: string;
+  color?: string;
+  children?: Category[];
 }
 
-/**
- * 排序选项类型
- */
-export type SortType = 'default' | 'priceAsc' | 'priceDesc' | 'salesDesc' | 'newest';
+export type SortType = 'price_asc' | 'price_desc' | 'sales_desc' | 'latest';
 
-// 地址相关接口定义
-
-/**
- * 地址接口
- */
+// 地址相关接口
 export interface Address {
-  id?: string | number;
+  id: number;
+  userId: number;
   name: string;
   phone: string;
   province: string;
   city: string;
   district: string;
-  detail?: string;
-  street?: string;
-  zip?: string;
+  street: string;
+  postcode: string;
+  detail: string;
   isDefault: boolean;
+  createTime: string;
+  updateTime: string;
 }
 
-// 购物车相关接口定义
+// 购物车相关接口
+export interface Cart {
+  id: number;
+  userId: number;
+  createTime: string;
+  updateTime: string;
+}
 
-/**
- * 购物车项接口
- */
 export interface CartItem {
   id: number;
-  productId?: number;
+  cartId: number;
+  productId: number;
+  specId: number;
   name: string;
-  description?: string;
-  spec: string;
-  price: number;
+  imageUrl: string;
+  image?: string; // 别名，用于组件中直接访问
+  description?: string; // 商品描述
+  spec?: string; // 商品规格
   quantity: number;
-  image: string;
-  selected: boolean;
+  selected: number | boolean; // 支持数字和布尔值
+  price: number;
+  createTime: string;
+  updateTime: string;
 }
 
-// 订单相关接口定义
-
-/**
- * 订单项接口
- */
+// 订单相关接口
 export interface OrderItem {
   id: number;
+  orderId: number;
+  productId: number;
+  specId: number;
   name: string;
   spec: string;
+  imageUrl: string;
+  image: string;
   price: number;
   quantity: number;
-  image: string;
-  selected?: boolean;
-}
-
-/**
- * 订单接口
- */
-export interface Order {
-  id: string;
-  orderNumber: string;
-  orderTime: string;
-  paymentTime: string;
-  orderAmount: number;
-  paymentMethod: string;
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
-  deliveryInfo: {
-    name: string;
-    phone: string;
-    address: string;
-  };
-  items: OrderItem[];
-  remark?: string;
-  deliveryAddress?: string;
-}
-
-/**
- * 配送方式接口
- */
-export interface DeliveryMethod {
-  value: string;
-  label: string;
-  fee: number;
-}
-
-/**
- * 支付方式接口
- */
-export interface PaymentMethod {
-  value: string;
-  label: string;
-  desc: string;
-}
-
-// 收藏夹相关接口定义
-
-/**
- * 收藏夹项接口
- */
-export interface WishlistItem {
-  id: number;
-  productId: number;
-  name: string;
-  image: string;
-  price: number;
   selected: boolean;
 }
 
-// API响应接口
+export interface Order {
+  id: number | string; // 支持number和string类型
+  orderNumber: string;
+  userId?: number;
+  orderTime: string;
+  paymentTime?: string;
+  deliveryTime?: string;
+  receiveTime?: string;
+  orderAmount: number;
+  paymentMethod: string;
+  status: string;
+  receiverName?: string;
+  receiverPhone?: string;
+  receiverAddress: string;
+  deliveryAddress?: string; // 别名，用于组件中直接访问
+  remark?: string;
+  createTime: string;
+  updateTime: string;
+  orderItems: OrderItem[];
+  items?: OrderItem[]; // 别名，用于组件中直接访问
+  addressId?: number; // 添加addressId属性
+  deliveryMethod?: string; // 添加配送方式属性
+  totalAmount?: number; // 别名，用于组件中直接访问
+}
 
-/**
- * 通用API响应接口
- */
-export interface ApiResponse<T = any> {
+export type DeliveryMethod = 'standard' | 'express';
+export type PaymentMethod = 'alipay' | 'wechat' | 'card';
+
+// 收藏夹相关接口
+export interface Wishlist {
+  id: number;
+  userId: number;
+  createTime: string;
+  wishListItems?: Product[];
+}
+
+export interface WishlistItem {
+  id: number;
+  wishlistId: number;
+  productId: number;
+  createTime: string;
+}
+
+// 通用API响应接口
+export interface ApiResponse<T> {
   code: number;
   message: string;
-  data?: T;
+  data: T;
 }
 
 // 用户相关接口
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+  email: string;
+  phone: string;
+  avatar: string;
+  createTime: string;
+  lastLogin: string;
+  status: number;
+}
 
-/**
- * 用户基本信息接口
- */
 export interface UserBasicInfo {
-  label: string;
-  value: string;
+  id: number;
+  username: string;
+  avatar: string;
+  phone: string;
 }
 
-/**
- * 会员信息接口
- */
 export interface MemberInfo {
-  label: string;
-  value: string;
+  point: number;
+  level: number;
+  couponCount: number;
+  orderCount: number;
 }
 
-/**
- * 订单列表项接口
- */
 export interface OrderListItem {
-  id: string;
-  date: string;
-  product: string;
-  amount: string;
+  id: number;
+  orderNumber: string;
+  orderTime: string;
+  orderAmount: number;
   status: string;
+  orderItems: OrderItem[];
 }

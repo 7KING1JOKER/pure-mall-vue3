@@ -1,5 +1,5 @@
 /**
- * 商品数据库
+ * 商品前端mock数据库
  * 包含所有商品的详细信息，符合Product接口规范
  */
 import { productData } from "../store/category";

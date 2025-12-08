@@ -36,6 +36,13 @@ declare module '@/api/productDatabase' {
   export function getProductsByCategory(categoryType: number): Product[];
 }
 
+declare module './request' {
+  export function get<T = any>(url: string, params?: any): Promise<T>;
+  export function post<T = any>(url: string, data?: any): Promise<T>;
+  export function put<T = any>(url: string, data?: any): Promise<T>;
+  export function del<T = any>(url: string, params?: any): Promise<T>;
+}
+
 // 解决 unplugin-auto-import 的类型问题
 declare module 'unplugin-auto-import/vite' {
   import { Plugin } from 'vite'

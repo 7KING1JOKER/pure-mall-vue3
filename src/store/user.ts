@@ -1,195 +1,406 @@
 import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
-import type { Address } from '@/api/interfaces';
+import type { Address, User } from '../api/interfaces';
+import {
+  login as loginApi,
+  register as registerApi,
+  getUserInfo,
+  updateUserInfo,
+  changePassword,
+  uploadAvatar,
+  logout as logoutApi
+} from '../api/user';
+import {
+  getAddressList,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress as setDefaultAddressApi
+} from '../api/address';
 
 export const useUserStore = defineStore("user", {
-	state: () => ({
-		vip: '会员',
-		activeTab: 'profile',
-		isLoggedIn: JSON.parse(localStorage.getItem('isLoggedIn') || 'false'), // 从localStorage恢复登录状态
-		tabIcons: {
-			profile: 'User',
-			orders: 'ShoppingCart',
-			address: 'Location',
-			wishlist: 'Star'
-		},
-		tabTitles: {
-			profile: '个人资料',
-			orders: '我的订单',
-			address: '地址管理',
-			wishlist: '我的收藏'
-		},
-		basicInfo: [
-			{ label: '用户名', value: '张明' },
-			{ label: '邮箱', value: 'zhangming@example.com' },
-			{ label: '手机', value: '13800138000' },
-			{ label: '性别', value: '男' },
-			{ label: '生日', value: '1990-05-15' }
-		],
-		memberInfo: [
-			{ label: '会员等级', value: '黄金会员' },
-			{ label: '积分', value: '3,850 分' },
-			{ label: '优惠券', value: '5 张可用' }
-		],
-		orders: [
-			{ id: '20230528001', date: '2023-05-28', product: 'Apple iPhone 14 Pro Max', amount: '¥8,999', status: '已完成' },
-			{ id: '20230527002', date: '2023-05-27', product: 'Samsung Galaxy S23 Ultra', amount: '¥7,899', status: '待发货' },
-			{ id: '20230525003', date: '2023-05-25', product: 'Sony WH-1000XM5 耳机', amount: '¥2,599', status: '已发货' },
-			{ id: '20230520004', date: '2023-05-20', product: 'MacBook Pro 14英寸', amount: '¥14,999', status: '已完成' },
-			{ id: '20230515005', date: '2023-05-15', product: 'Nike Air Jordan 1', amount: '¥1,299', status: '已取消' }
-		],
-		addresses: [
-			{
-				id: '1',
-				name: '张明 (家)',
-				phone: '13800138000',
-				province: '北京市',
-				city: '北京市',
-				district: '朝阳区',
-				street: '建国路88号现代城A座1508室',
-				zip: '100022',
-				isDefault: true
-			},
-			{
-				id: '2',
-				name: '张明 (公司)',
-				phone: '13800138111',
-				province: '北京市',
-				city: '北京市',
-				district: '海淀区',
-				street: '中关村大街1号海龙大厦12层',
-				zip: '100080',
-				isDefault: false
-			}
-		],
-        EditProfileDialogVisible: false,
-        // 地址对话框相关状态
-        AddressDialogVisible: false,
-        currentAddress: null as Address | null,
-        isEditingAddress: false
-	}),
-	actions: {
-		statusType(status: string) {
-			const map: Record<string, string> = {
-				'已完成': 'success',
-				'待发货': 'warning',
-				'已发货': '',
-				'已取消': 'danger'
-			}
-			return map[status] || 'info'
-		},
-		handleMenuSelect(index:string) {
-			this.activeTab = index
-		},
-		// 地址管理相关方法
-		// 打开添加地址对话框
-		openAddAddressDialog() {
-			this.isEditingAddress = false
-			this.currentAddress = {
-				name: '',
-				phone: '',
-				province: '',
-				city: '',
-				district: '',
-				street: '',
-				zip: '',
-				isDefault: false
-			}
-			this.AddressDialogVisible = true
-		},
-		// 打开编辑地址对话框
-		openEditAddressDialog(addressId: string) {
-			const address = this.addresses.find(addr => addr.id === addressId)
-			if (address) {
-				this.isEditingAddress = true
-				this.currentAddress = { ...address }
-				this.AddressDialogVisible = true
-			}
-		},
-		// 保存地址（添加或更新）
-		saveAddress(address: Address) {
-			if (this.isEditingAddress && address.id) {
-				// 更新现有地址
-			const index = this.addresses.findIndex(addr => addr.id === address.id)
-			if (index !== -1) {
-				// 如果设置为默认地址，需要将其他地址设为非默认
-				if (address.isDefault) {
-					this.addresses.forEach(addr => {
-						if (addr.id !== address.id) {
-							addr.isDefault = false
-						}
-					})
-				}
-				// 确保street和zip属性有值
-				const addressWithStreet = {
-					...address,
-					id: String(address.id),
-					street: address.street || '',
-					zip: address.zip || ''
-				}
-				this.addresses[index] = addressWithStreet
-				ElMessage.success('地址更新成功')
-			}
-			} else {
-				// 添加新地址
-			const newAddress = {
-				...address,
-				id: Date.now().toString(), // 生成唯一ID
-				street: address.street || '', // 确保street属性有值
-				zip: address.zip || '' // 确保zip属性有值
-			}
-				
-				// 如果设置为默认地址，需要将其他地址设为非默认
-				if (newAddress.isDefault) {
-					this.addresses.forEach(addr => {
-						addr.isDefault = false
-					})
-				}
-				
-				this.addresses.push(newAddress)
-				ElMessage.success('地址添加成功')
-			}
-			
-			this.AddressDialogVisible = false
-			this.currentAddress = null
-		},
-		// 删除地址
-		deleteAddress(addressId: string) {
-			const index = this.addresses.findIndex(addr => addr.id === addressId)
-			if (index !== -1) {
-				// 如果删除的是默认地址，且还有其他地址，则将第一个地址设为默认
-				if (this.addresses[index].isDefault && this.addresses.length > 1) {
-					const newDefaultIndex = index === 0 ? 1 : 0
-					this.addresses[newDefaultIndex].isDefault = true
-				}
-				
-				this.addresses.splice(index, 1)
-				ElMessage.success('地址删除成功')
-			}
-		},
-		// 设置默认地址
-		setDefaultAddress(addressId: string) {
-			this.addresses.forEach(addr => {
-				addr.isDefault = addr.id === addressId
-			})
-			ElMessage.success('默认地址设置成功')
-		},
-		
-		// 登录相关方法
-		login(username: string, password: string) {
-			// 这里应该是实际的登录API调用
-			// 模拟登录成功 - 使用参数以避免未使用变量警告
-			console.log('Login attempt with:', username, 'and password length:', password.length);
-			this.isLoggedIn = true
-			localStorage.setItem('isLoggedIn', 'true') // 保存到localStorage
-			ElMessage.success('登录成功')
-		},
-		
-		logout() {
-			// 模拟登出
-			this.isLoggedIn = false
-			localStorage.removeItem('isLoggedIn') // 从localStorage移除
-			ElMessage.success('已退出登录')
-		}
-	}
-})
+  state: () => ({
+    vip: '会员',
+    activeTab: 'profile',
+    isLoggedIn: false,
+    token: localStorage.getItem('token') || '',
+    userInfo: null as User | null,
+    tabIcons: {
+      profile: 'User',
+      orders: 'ShoppingCart',
+      address: 'Location',
+      wishlist: 'Star'
+    },
+    tabTitles: {
+      profile: '个人资料',
+      orders: '我的订单',
+      address: '地址管理',
+      wishlist: '我的收藏'
+    },
+    addresses: [] as Address[],
+    EditProfileDialogVisible: false,
+    AddressDialogVisible: false,
+    currentAddress: null as Address | null,
+    isEditingAddress: false,
+    loading: false,
+    error: null as string | null
+  }),
+
+  getters: {
+    // 获取默认地址
+    defaultAddress(): Address | null {
+      return this.addresses.find(addr => addr.isDefault) || null;
+    },
+    
+    // 获取用户基本信息
+    basicInfo(): Array<{label: string, value: string}> {
+      if (!this.userInfo) {
+        return [];
+      }
+      return [
+        { label: '用户名', value: this.userInfo.username || '' },
+        { label: '邮箱', value: this.userInfo.email || '' },
+        { label: '手机', value: this.userInfo.phone || '' },
+        { label: '注册时间', value: this.userInfo.createTime ? new Date(this.userInfo.createTime).toLocaleDateString() : '' },
+        { label: '最后登录', value: this.userInfo.lastLogin ? new Date(this.userInfo.lastLogin).toLocaleDateString() : '' }
+      ];
+    },
+    
+    // 获取会员信息
+    memberInfo(): Array<{label: string, value: string}> {
+      // 会员信息将从其他API获取，这里提供默认值
+      return [
+        { label: '会员等级', value: '普通会员' },
+        { label: '积分', value: '0 分' },
+        { label: '优惠券', value: '0 张可用' }
+      ];
+    }
+  },
+
+  actions: {
+    // 初始化用户状态
+    async initializeUser() {
+      if (this.token) {
+        await this.fetchUserInfo();
+        await this.fetchAddressList();
+      }
+    },
+    
+    // 登录
+    async login(username: string, password: string) {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await loginApi({ username, password });
+        
+        if (response && response.code === 200 && response.data) {
+          this.isLoggedIn = true;
+          this.token = response.data.token;
+          localStorage.setItem('token', this.token);
+          
+          // 登录成功后获取用户信息
+          await this.fetchUserInfo();
+          await this.fetchAddressList();
+          
+          ElMessage.success('登录成功');
+          return true;
+        } else {
+          this.error = (response as any && response.message) || '登录失败';
+          ElMessage.error(this.error || '操作失败');
+          return false;
+        }
+      } catch (err) {
+        this.error = '网络错误，请稍后重试';
+        ElMessage.error(this.error || '操作失败');
+        console.error('登录失败:', err);
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 注册
+    async register(userData: {username: string, password: string, email: string, phone: string}) {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await registerApi(userData);
+        const resp = response as any;
+        
+        if (resp && resp.code === 200) {
+          ElMessage.success('注册成功，请登录');
+          return true;
+        } else {
+          this.error = (resp && resp.message) || '注册失败';
+          ElMessage.error(this.error || '操作失败');
+          return false;
+        }
+      } catch (err) {
+        this.error = '网络错误，请稍后重试';
+        ElMessage.error(this.error || '操作失败');
+        console.error('注册失败:', err);
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 登出
+    async logout() {
+      try {
+        // 调用登出API
+        await logoutApi();
+      } catch (error) {
+        console.error('登出API调用失败:', error);
+      } finally {
+        // 清除本地状态
+        this.isLoggedIn = false;
+        this.token = '';
+        this.userInfo = null;
+        this.addresses = [];
+        localStorage.removeItem('token');
+        ElMessage.success('已退出登录');
+      }
+    },
+    
+    // 获取用户信息
+    async fetchUserInfo() {
+      try {
+        const response = await getUserInfo();
+        const resp = response as any;
+        if (resp && resp.code === 200 && resp.data) {
+          this.userInfo = resp.data;
+        } else {
+          // 失败时清除token，强制登出
+          this.logout();
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+        // 失败时清除token，强制登出
+        this.logout();
+      }
+    },
+    
+    // 更新用户信息
+    async updateUserInfoAction(userData: Partial<User>) {
+      try {
+        this.loading = true;
+        const response = await updateUserInfo(userData);
+        const resp = response as any;
+        
+        if (resp && resp.code === 200) {
+          await this.fetchUserInfo(); // 重新获取最新信息
+          ElMessage.success('个人信息更新成功');
+          return true;
+        } else {
+          ElMessage.error((resp && resp.message) || '更新失败');
+          return false;
+        }
+      } catch (error) {
+        console.error('更新用户信息失败:', error);
+        ElMessage.error('网络错误，请稍后重试');
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 修改密码
+    async changePasswordAction(oldPassword: string, newPassword: string, confirmPassword: string) {
+      try {
+        this.loading = true;
+        const response = await changePassword({ oldPassword, newPassword, confirmPassword });
+        const resp = response as any;
+        
+        if (resp && resp.code === 200) {
+          ElMessage.success('密码修改成功');
+          return true;
+        } else {
+          ElMessage.error((resp && resp.message) || '密码修改失败');
+          return false;
+        }
+      } catch (error) {
+        console.error('修改密码失败:', error);
+        ElMessage.error('网络错误，请稍后重试');
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 上传头像
+    async uploadAvatarAction(formData: FormData) {
+      try {
+        this.loading = true;
+        const response = await uploadAvatar(formData);
+        const resp = response as any;
+        
+        if (resp && resp.code === 200 && resp.data) {
+          if (this.userInfo) {
+            this.userInfo.avatar = resp.data.avatarUrl;
+          }
+          ElMessage.success('头像上传成功');
+          return resp.data.avatarUrl;
+        } else {
+          ElMessage.error((resp && resp.message) || '头像上传失败');
+          return null;
+        }
+      } catch (error) {
+        console.error('上传头像失败:', error);
+        ElMessage.error('网络错误，请稍后重试');
+        return null;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 获取地址列表
+    async fetchAddressList() {
+      try {
+        const response = await getAddressList();
+        const resp = response as any;
+        if (resp && resp.code === 200 && resp.data) {
+          this.addresses = Array.isArray(resp.data) ? resp.data : [];
+        }
+      } catch (error) {
+        console.error('获取地址列表失败:', error);
+      }
+    },
+    
+    // 打开添加地址对话框
+    openAddAddressDialog() {
+      this.isEditingAddress = false;
+      this.currentAddress = {
+        id: 0,
+        userId: 0,
+        name: '',
+        phone: '',
+        province: '',
+        city: '',
+        district: '',
+        street: '',
+        postcode: '',
+        detail: '',
+        isDefault: false,
+        createTime: '',
+        updateTime: ''
+      };
+      this.AddressDialogVisible = true;
+    },
+    
+    // 打开编辑地址对话框
+    openEditAddressDialog(addressId: number) {
+      const address = this.addresses.find(addr => addr.id === addressId);
+      if (address) {
+        this.isEditingAddress = true;
+        this.currentAddress = { ...address };
+        this.AddressDialogVisible = true;
+      }
+    },
+    
+    // 保存地址（添加或更新）
+    async saveAddress(address: Address) {
+      try {
+        this.loading = true;
+        
+        let response;
+        if (this.isEditingAddress && address.id) {
+          // 更新现有地址
+          response = await updateAddress(address.id, address);
+        } else {
+          // 添加新地址
+          // 从响应中获取新地址的ID和时间戳
+          response = await addAddress(address);
+        }
+        
+        const resp = response as any;
+        if (resp && resp.code === 200) {
+          // 重新获取地址列表
+          await this.fetchAddressList();
+          ElMessage.success(this.isEditingAddress ? '地址更新成功' : '地址添加成功');
+          
+          this.AddressDialogVisible = false;
+          this.currentAddress = null;
+          return true;
+        } else {
+          ElMessage.error((resp && resp.message) || '操作失败');
+          return false;
+        }
+      } catch (error) {
+        console.error('保存地址失败:', error);
+        ElMessage.error('网络错误，请稍后重试');
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 删除地址
+    async deleteAddress(addressId: number) {
+      try {
+        this.loading = true;
+        const response = await deleteAddress(addressId);
+        const resp = response as any;
+        
+        if (resp && resp.code === 200) {
+          // 重新获取地址列表
+          await this.fetchAddressList();
+          ElMessage.success('地址删除成功');
+          return true;
+        } else {
+          ElMessage.error((resp && resp.message) || '删除失败');
+          return false;
+        }
+      } catch (error) {
+        console.error('删除地址失败:', error);
+        ElMessage.error('网络错误，请稍后重试');
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 设置默认地址
+    async setDefaultAddress(addressId: number) {
+      try {
+        this.loading = true;
+        const response = await setDefaultAddressApi(addressId);
+        const resp = response as any;
+        
+        if (resp && resp.code === 200) {
+          // 重新获取地址列表
+          await this.fetchAddressList();
+          ElMessage.success('默认地址设置成功');
+          return true;
+        } else {
+          ElMessage.error((resp && resp.message) || '设置失败');
+          return false;
+        }
+      } catch (error) {
+        console.error('设置默认地址失败:', error);
+        ElMessage.error('网络错误，请稍后重试');
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    // 处理菜单选择
+    handleMenuSelect(index: string) {
+      this.activeTab = index;
+    },
+    
+    // 获取订单状态样式类型
+    statusType(status: string): string {
+      const map: Record<string, string> = {
+        '已完成': 'success',
+        '待发货': 'warning',
+        '已发货': '',
+        '已取消': 'danger'
+      };
+      return map[status] || 'info';
+    }
+  }
+});

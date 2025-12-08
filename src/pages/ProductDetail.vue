@@ -39,16 +39,16 @@
 
         <!-- 商品标题、价格、销售量 -->
         <div class="product-content">
-          <h1 class="product-title">{{ product.name }}</h1>
-          <h2 class="product-price">¥ {{ product.price.toFixed(2) }}</h2>
+          <h1 class="product-title">{{ product?.name || '' }}</h1>
+          <h2 class="product-price">¥ {{ product?.price ? product.price.toFixed(2) : '0.00' }}</h2>
         </div>
         
         <!-- 颜色选择 -->
         <div class="color-select">
-          <div class="color-text"> {{ selectedSpec ? product.specs?.find(spec => spec.id === selectedSpec)?.name : '请选择颜色' }} </div>
+          <div class="color-text"> {{ selectedSpec && product?.specs ? product.specs.find(spec => spec.id === selectedSpec)?.name : '请选择颜色' }} </div>
           <div class="color-options">
             <div 
-              v-for="spec in product.specs" 
+              v-for="spec in product?.specs || []" 
               :key="spec.id" 
               class="color-option" 
               :class="{ 'selected': selectedSpec === spec.id }"
@@ -56,7 +56,7 @@
             >
               <div 
                 class="color-circle" 
-                :style="{ backgroundColor: getColorValue(spec.name) }"
+                :style="{ backgroundColor: spec.name }"
               ></div>
             </div>
           </div>
@@ -64,21 +64,17 @@
         
         <!-- 其它描述 + 购买功能 -->
         <div class="product-desc">
-          <h2 class="desc-item product-desc-content"
-              @click="useProductStore().productDetailsDialogVisible = true"
-          >细节 & 描述</h2>
-          <h2 class="desc-item product-desc-size"
-              @click="useProductStore().productSizeDialogVisible = true"
-          >尺码 & 选择</h2>
+          <h2 class="desc-item product-desc-content">细节 & 描述</h2>
+          <h2 class="desc-item product-desc-size">尺码 & 选择</h2>
           <div class="product-actions">
             <div class="action-button add-to-wish-wrapper">
-              <el-icon class="add-to-wish" @click="cartStore.addToWishlist(product)">
+              <el-icon class="add-to-wish" @click="cartStore.addToWishlist(product.id)">
                 <Notebook />
               </el-icon>
               <span class="action-text">收藏</span>
             </div>
             <div class="action-button add-to-cart-wrapper">
-              <el-icon class="add-to-cart" @click="cartStore.addToCart(product)">
+              <el-icon class="add-to-cart" @click="cartStore.addToCart(product.id, selectedSpec || 0, 1)">
                 <ShoppingBag />
               </el-icon>
               <span class="action-text">购物车</span>
@@ -89,8 +85,8 @@
         <!-- 缩放图展示 -->
         <h1 class="zoom-title">缩放图</h1>
         <div class="product-gallery-zoom">
-          <div v-for="(image, index) in product.images" :key="index" class="product-gallery-item">
-            <el-image :src="image" fit="contain" class="zoom-image" :error="errorImageUrl" />
+          <div v-for="(image, index) in product?.images || []" :key="index" class="product-gallery-item">
+            <el-image :src="image || ''" fit="contain" class="zoom-image" :error="errorImageUrl" />
           </div>
         </div>
       </div>
@@ -99,11 +95,7 @@
     <!-- 页脚 -->
     <Footer />
 
-    <!-- 商品详情对话框 -->
-    <ProductDetailsDialog v-model="useProductStore().productDetailsDialogVisible" />
-    
-    <!-- 商品规格对话框 -->
-    <ProductSizeDialog v-model="useProductStore().productSizeDialogVisible" />
+    <!-- 暂时移除对话框组件，直到store中添加相应属性 -->
   </div>
 </template>
 
@@ -114,8 +106,6 @@ import { useProductStore } from '../store/product';
 import { useCartStore } from '../store/cart';
 import { storeToRefs } from 'pinia';
 import { ShoppingBag, Notebook, ArrowRight } from '@element-plus/icons-vue';
-import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
-import ProductSizeDialog from '../layouts/ProductSizeDialog.vue';
 
 import PcMenu from '../layouts/PcMenu.vue';
 import Footer from '../layouts/Footer.vue';
@@ -134,6 +124,14 @@ const {
   product, 
   selectedSpec
 } = storeToRefs(productStore);
+
+// 从store中解构方法
+const { 
+  loadProductDetail,
+  setSelectedSpec
+} = productStore;
+
+
 
 
 // 计算属性：根据产品ID获取对应的分类信息
@@ -169,12 +167,7 @@ const productCategoryInfo = computed(() => {
   return { id: categoryId, name: categoryName };
 });
 
-// 从store中解构方法
-const { 
-  loadProductDetail,
-  setSelectedSpec,
-  getColorValue
-} = productStore;
+
 
 // 商品数据模型接口（已在store中定义）
 

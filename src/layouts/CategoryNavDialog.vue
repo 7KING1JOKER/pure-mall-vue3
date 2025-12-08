@@ -18,7 +18,7 @@
             <el-tag
               v-for="subCategory in category.children"
               :key="subCategory.id"
-              :type="currentCategory.id === subCategory.id ? 'primary' : 'default'"
+              :type="currentCategory?.id === subCategory.id ? 'primary' : 'default'"
               @click="selectCategory(subCategory)"
               class="sub-category-tag"
             >
@@ -28,7 +28,7 @@
           <template v-else>
             <!-- 没有子分类时直接显示当前分类 -->
             <el-tag
-              :type="currentCategory.id === category.id ? 'primary' : 'default'"
+              :type="currentCategory?.id === category.id ? 'primary' : 'default'"
               @click="selectCategory(category)"
               class="sub-category-tag"
             >
@@ -45,7 +45,9 @@
 import { computed, watch, ref } from 'vue';
 import { useCategoryStore } from '../store/category';
 import { storeToRefs } from 'pinia';
-import type { CategoryNode } from '../store/category';
+import type { Category } from '../store/category';
+
+
 
 // Props
 const props = defineProps<{
@@ -94,7 +96,7 @@ const handleMouseLeave = () => {
 };
 
 // 选择分类
-const selectCategory = (category: CategoryNode) => {
+const selectCategory = (category: Category) => {
   // 调用store的方法来选择分类并加载商品
   handleNodeClick(category);
   // 关闭对话框

@@ -107,7 +107,7 @@ const dialogVisible = computed({
 
 // 表单数据
 const addressForm = reactive({
-  id: '',
+  id: 0,
   name: '',
   phone: '',
   province: '',
@@ -163,7 +163,12 @@ const saveAddress = async () => {
     if (valid) {
       userStore.saveAddress({
         ...addressForm,
-        id: addressForm.id || undefined // 如果是新地址，id为undefined
+        id: addressForm.id || 0, // 如果是新地址，id为0
+        userId: userStore.userInfo?.id || 0, // 从用户信息中取 userId
+        postcode: addressForm.zip, // 将 zip 字段映射到 postcode
+        detail: addressForm.street, // 将 street 字段映射到 detail
+        createTime: addressForm.id ? '' : new Date().toISOString(), // 新地址添加创建时间
+        updateTime: new Date().toISOString() // 更新时间
       })
       console.log('地址保存成功', userStore.addresses)
     } else {
