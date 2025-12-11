@@ -317,6 +317,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+
 /* 对话框内容容器 */
 .register-content {
   padding: 20px;
@@ -372,13 +374,14 @@ onMounted(() => {
   line-height: 48px;
   font-size: 0.95rem;
   text-align: left;
+  color: #ffffffd4 !important;
 }
 
 .register-form :deep(.el-input__prefix) {
   display: flex;
   align-items: center;
   padding-left: 10px;
-  color: #999;
+  color: #fff;
   transition: color 0.3s;
 }
 

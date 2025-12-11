@@ -83,18 +83,17 @@ body {
 .el-button {
   align-items: center !important;
   justify-content: center !important;
+  border: none !important;
   border-radius: 0 !important;
-  background-color: transparent !important;
-  color: #333 !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: 10px;
 }
 
 .el-icon {
+  color: #000 !important;
   transition: all 0.3s ease;
 }
-
-.el-icon:hover {
-  transform: translateY(-6px);
-} 
+ 
 /* Element Plus 错误提示默认样式 */
 .el-form-item__error {
   color: #333 !important; /* 错误提示文字颜色变为黑色 */

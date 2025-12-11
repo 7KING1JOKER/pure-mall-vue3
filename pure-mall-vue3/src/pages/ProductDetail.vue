@@ -33,7 +33,7 @@
             <!-- 当前产品路径 -->
             <el-breadcrumb-item :to="{ path: `/product/${productId}` }" :replace="false">{{ product.name }}</el-breadcrumb-item>
           </el-breadcrumb>
-          <el-icon @click="router.push('/category')" class="breadcrumb-icon"> <ArrowRight /> </el-icon>
+          <el-icon @click="$router.push('/category')" class="breadcrumb-icon"> <ArrowRight /> </el-icon>
         </div>
 
         <!-- 商品标题、价格、销售量 -->
@@ -71,7 +71,7 @@
           >尺码 & 选择</h2>
           <div class="product-actions">
             <div class="action-button add-to-wish-wrapper">
-              <el-icon class="add-to-wish" @click="cartStore.addToWishlist(product)">
+              <el-icon class="add-to-wish" @click="addToWishlist(product)">
                 <Notebook />
               </el-icon>
               <span class="action-text">收藏</span>
@@ -111,6 +111,7 @@ import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useProductStore } from '../store/product';
 import { useCartStore } from '../store/cart';
+import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
 import { ShoppingBag, Notebook, ArrowRight } from '@element-plus/icons-vue';
 import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
@@ -118,7 +119,6 @@ import ProductSizeDialog from '../layouts/ProductSizeDialog.vue';
 
 import PcMenu from '../layouts/PcMenu.vue';
 import Footer from '../layouts/Footer.vue';
-import router from '../router';
 
 // 路由相关
 const route = useRoute();
@@ -127,6 +127,7 @@ const productId = computed(() => Number(route.params.id));
 // 使用store
 const productStore = useProductStore();
 const cartStore = useCartStore();
+const userStore = useUserStore();
 
 // 从store中解构响应式数据
 const { 
@@ -175,7 +176,14 @@ const {
   getColorValue
 } = productStore;
 
-// 商品数据模型接口（已在store中定义）
+
+// 添加到收藏夹方法
+const addToWishlist = (item: any) => {
+  userStore.addToWishlistItem(userStore.username, item.id);
+
+  userStore.addToWishlist(item);
+};
+
 
 // 初始化时加载商品详情
 onMounted(() => {

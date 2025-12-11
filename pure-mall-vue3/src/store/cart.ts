@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ElNotification, ElMessage } from "element-plus";
 import router from '../router/index.ts'
-import type { CartItem, RecommendedProduct } from '../api/interfaces';
+import type { CartItem,  RecommendedProduct } from '../api/interfaces';
 import { useUserStore } from './user';
 
 // 从本地存储加载购物车数据的辅助函数
@@ -50,19 +50,6 @@ function loadCartFromStorage(): CartItem[] {
   }
 }
 
-// 从本地存储加载收藏夹数据的辅助函数
-function loadWishlistFromStorage(): CartItem[] {
-  try {
-    const wishlistData = localStorage.getItem('wishlist');
-    if (wishlistData) {
-      return JSON.parse(wishlistData);
-    }
-    return [];
-  } catch (error) {
-    console.error('加载收藏夹数据失败:', error);
-    return [];
-  }
-}
 
 export const useCartStore = defineStore("cart", {
   state: () => ({
@@ -103,9 +90,6 @@ export const useCartStore = defineStore("cart", {
         image: 'https://images.unsplash.com/photo-1591224823040-88dfe36bcab5?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
       }
     ] as RecommendedProduct[],
-
-    // 收藏商品 - 优先从本地存储加载
-    wishlistItems: loadWishlistFromStorage(),  
     
     // 当前步骤（购物车流程）
     activeStep: 0
@@ -218,55 +202,6 @@ export const useCartStore = defineStore("cart", {
       });
     },
     
-    // 添加到收藏夹
-    addToWishlist(item: any) {
-      const userStore = useUserStore();
-      
-      // 检查登录状态
-      if (!userStore.isLoggedIn) {
-        ElNotification({
-          title: '请先登录',
-          message: '您需要登录后才能添加商品到收藏夹',
-          type: 'warning',
-          duration: 2000
-        });
-        return;
-      }
-      
-      // 检查商品是否已在收藏夹中
-      const existingItem = this.wishlistItems.find(wishItem => wishItem.id === item.id);
-      
-      if (existingItem) {
-        ElNotification({
-          title: '已在收藏夹中',
-          message: `"${item.name}" 已在收藏夹中`,
-          type: 'warning',
-          duration: 2000
-        });
-      } else {
-        // 添加到收藏夹
-        this.wishlistItems.push({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          price: item.price,
-          image: item.image || item.images?.[0] || '',
-          selected: false,
-          quantity: 1,
-          spec: '默认'
-        });
-        
-        // 保存到本地存储
-        this.saveWishlistToStorage();
-        
-        ElNotification({
-          title: '已添加到收藏',
-          message: `已将 "${item.name}" 添加到收藏夹`,
-          type: 'info',
-          duration: 2000
-        });
-      }
-    },
     
     // 去购物
     goShopping() {
@@ -284,23 +219,6 @@ export const useCartStore = defineStore("cart", {
       router.push('/checkout');
     },
     
-    // 从收藏夹移除商品
-    removeFromWishlist(itemId: number) {
-      const index = this.wishlistItems.findIndex(item => item.id === itemId);
-      if (index !== -1) {
-        const removedItem = this.wishlistItems.splice(index, 1)[0];
-        
-        // 保存到本地存储
-        this.saveWishlistToStorage();
-        
-        ElNotification({
-          title: '已移除收藏',
-          message: `已将 "${removedItem.name}" 从收藏夹移除`,
-          type: 'info',
-          duration: 2000
-        });
-      }
-    },
     
     // 从本地存储加载购物车数据
     loadCartFromStorage() {
@@ -313,18 +231,7 @@ export const useCartStore = defineStore("cart", {
         console.error('加载购物车数据失败:', error);
       }
     },
-    
-    // 从本地存储加载收藏夹数据
-    loadWishlistFromStorage() {
-      try {
-        const wishlistData = localStorage.getItem('wishlist');
-        if (wishlistData) {
-          this.wishlistItems = JSON.parse(wishlistData);
-        }
-      } catch (error) {
-        console.error('加载收藏夹数据失败:', error);
-      }
-    },
+
     
     // 保存购物车数据到本地存储
     saveCartToStorage() {
@@ -332,15 +239,6 @@ export const useCartStore = defineStore("cart", {
         localStorage.setItem('shoppingCart', JSON.stringify(this.cartItems));
       } catch (error) {
         console.error('保存购物车数据失败:', error);
-      }
-    },
-    
-    // 保存收藏夹数据到本地存储
-    saveWishlistToStorage() {
-      try {
-        localStorage.setItem('wishlist', JSON.stringify(this.wishlistItems));
-      } catch (error) {
-        console.error('保存收藏夹数据失败:', error);
       }
     },
     

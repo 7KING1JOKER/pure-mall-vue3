@@ -99,8 +99,8 @@
           </el-table-column>
           <el-table-column label="操作" width="160">
             <template #default="scope">
-              <el-button size="small" type="primary" @click="viewOrderDetail(scope.row.orderNumber)">查看</el-button>
-              <el-button size="small" type="danger" @click="confirmDeleteOrder(scope.row.orderNumber)">删除</el-button>
+              <el-icon  @click="viewOrderDetail(scope.row.orderNumber)" size="30px"> <Search /> </el-icon>
+              <el-icon @click="confirmDeleteOrder(scope.row.orderNumber)" size="30px"> <Delete /> </el-icon>
             </template>
           </el-table-column>
         </el-table>
@@ -126,7 +126,7 @@
               <template #footer>
                   <el-button type="primary" :icon="Edit" text @click="editAddress(address.id)"></el-button>
                   <el-button type="danger" :icon="Delete" text @click="confirmDeleteAddress(address.id)"></el-button>
-                  <el-button v-if="!address.isDefault" type="success" :icon="Check" text @click="setAsDefault(address.id)">Default</el-button>
+                  <el-button v-if="!address.isDefault" type="success" :icon="Check" text @click="setAsDefault(address.id)" style="color: #333;">Default</el-button>
               </template>
             </el-card>
           </el-col>
@@ -192,21 +192,20 @@ import {
   Delete,
   Check,
   Close,
-  DocumentAdd
+  DocumentAdd,
+  Search
 } from '@element-plus/icons-vue'
 
 import PcMenu from '../layouts/PcMenu.vue'
 import EditProfileDialog from '../layouts/EditProfileDialog.vue'
 import AddressDialog from '../layouts/AddressDialog.vue'
 import { useUserStore } from '../store/user'
-import { useCartStore } from '../store/cart'
 import { useOrderStore } from '../store/order'
 import { storeToRefs } from 'pinia'
 import ProductCard from '../components/ProductCard.vue'
 
 // 获取store中的响应式数据
 const userStore = useUserStore()
-const cartStore = useCartStore()
 const orderStore = useOrderStore()
 const router = useRouter()
 const {
@@ -218,8 +217,7 @@ const {
   memberInfo,
   addresses
 } = storeToRefs(userStore)
-const { wishlistItems } = storeToRefs(cartStore)
-const { handleMenuSelect } = userStore
+const { wishlistItems ,handleMenuSelect } = userStore
 
 // 地址管理相关方法
 // 添加新地址
@@ -317,8 +315,11 @@ const confirmRemoveFromWishlist = (item) => {
       type: 'warning'
     }
   ).then(() => {
-    // 使用cartStore的removeFromWishlist方法删除商品
-    cartStore.removeFromWishlist(item.id);
+    // 从收藏夹服务端中移除商品
+    userStore.removeWishlistItem(userStore.username, item.id);
+
+    // 使用userStore的removeFromWishlist方法删除商品
+    userStore.removeFromWishlist(item.id);
   }).catch(() => {
     // 取消移除，不做任何操作
   })
@@ -326,7 +327,7 @@ const confirmRemoveFromWishlist = (item) => {
 
 // 添加到购物车
 const addToCart = (item) => {
-  cartStore.addToCart(item);
+  userStore.addToCart(item);
 }
 
 // 获取图标组件函数
@@ -412,7 +413,11 @@ const getIconComponent = (iconName) => {
   font-size: 20px;
 }
 
-.edit-icon::after {
+.edit-icon:hover, .add-icon:hover {
+  transform: translateY(-6px);
+}
+
+.edit-icon::after , .add-icon::after {
   content: 'Edit';
   position: absolute;
   left: 100%;
@@ -430,18 +435,6 @@ const getIconComponent = (iconName) => {
 
 .add-icon::after {
   content: 'Add';
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 5px;
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
 }
 
 .edit-icon:hover::after, .add-icon:hover::after {
@@ -584,7 +577,7 @@ const getIconComponent = (iconName) => {
 }
 
 .delete-wishlist-btn {
-  color: #ffffffaa;
+  color: #ffffffaa !important;
   position: absolute;
   left: 210px;
   top: 10px;
@@ -608,6 +601,12 @@ const getIconComponent = (iconName) => {
 .empty-wishlist {
   margin-top: 50px;
   text-align: center;
+}
+
+/* 修复MessageBox确认按钮文字颜色问题 */
+/* 穿透样式，修改Element Plus MessageBox确认按钮的文字颜色 */
+:deep(.el-message-box .el-button--primary) {
+  color: #333 !important;
 }
 
 /* 响应式设计 */

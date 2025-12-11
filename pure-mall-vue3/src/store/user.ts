@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { ElMessage } from "element-plus";
-import type { Address } from "../api/interfaces";
+import { ElMessage, ElNotification } from "element-plus";
+import type { Address, Product } from "../api/interfaces";
 import request from "@/api/request";
 
 export const useUserStore = defineStore("user", {
@@ -67,6 +67,9 @@ export const useUserStore = defineStore("user", {
 				isDefault: false
 			}
 		],
+		// 用户收藏夹商品
+		wishlistItems: [] as Product[],
+
         EditProfileDialogVisible: false,
         // 地址对话框相关状态
         AddressDialogVisible: false,
@@ -363,20 +366,29 @@ export const useUserStore = defineStore("user", {
 				ElMessage.error('获取订单失败');
 			}
 		},
+		
+		async loadWishlistItems(username: string) {
+			try {
+				const response = await request.get('/wishlistItem/getWishlistItems', { username });
+				this.wishlistItems = response.data || [];
+			} catch (error) {
+				console.error('加载收藏夹数据失败:', error);
+			}
+		},
 
 		async loadUserData(username: string) {
 			try{
 				await Promise.all([
 					this.loadUserInfo(username),
 					this.loadUserAddress(username),
-					this.loadUserOrders(username)
+					this.loadUserOrders(username),
+					this.loadWishlistItems(username)
 				]);
 			} catch (error) {
 				ElMessage.error('获取用户数据失败');
 			}
 		},
 
-		
 		/**
 		 * 用户登录
 		 * @param username 用户名
@@ -471,6 +483,115 @@ export const useUserStore = defineStore("user", {
 			this.isLoggedIn = false
 			localStorage.removeItem('isLoggedIn') // 从localStorage移除
 			ElMessage.success('已退出登录')
-		}
+		},
+
+		/* 收藏夹商品接口 */
+		// 添加到收藏夹
+		addToWishlist(item: any) {
+			const userStore = useUserStore();
+
+			// 检查登录状态
+			if (!userStore.isLoggedIn) {
+				ElNotification({
+				title: '请先登录',
+				message: '您需要登录后才能添加商品到收藏夹',
+				type: 'warning',
+				duration: 2000
+				});
+				return;
+			}
+			
+			// 检查商品是否已在收藏夹中
+			const existingItem = this.wishlistItems.find(wishItem => wishItem.id === item.id);
+			
+			if (existingItem) {
+				ElNotification({
+				title: '已在收藏夹中',
+				message: `"${item.name}" 已在收藏夹中`,
+				type: 'warning',
+				duration: 2000
+				});
+			} else {
+
+				// 添加到收藏夹
+				this.wishlistItems.push({
+				id: item.id,
+				name: item.name,
+				price: item.price,
+				image: item.image || item.images?.[0] || '',
+				sales: item.sales || 0
+				});
+				
+				ElNotification({
+				title: '已添加到收藏',
+				message: `已将 "${item.name}" 添加到收藏夹`,
+				type: 'info',
+				duration: 2000
+				});
+			}
+		},
+
+		// 从收藏夹移除商品
+		removeFromWishlist(itemId: number) {
+			const index = this.wishlistItems.findIndex(item => item.id === itemId);
+			if (index !== -1) {
+				const removedItem = this.wishlistItems.splice(index, 1)[0];
+				
+				ElNotification({
+				title: '已移除收藏',
+				message: `已将 "${removedItem.name}" 从收藏夹移除`,
+				type: 'info',
+				duration: 2000
+				});
+			}
+		},
+		
+		/**
+		 * 向服务器添加商品到收藏夹
+		 * @param username - 用户名
+		 * @param productId - 商品ID
+		 */
+		async addToWishlistItem(username: string, productId: number) {
+			try {
+				// 后端接口使用@RequestParam注解，需要将参数作为查询参数传递
+				await request.post('/wishlistItem/addWishlistItem', {}, {
+				params: { username, productId }
+				});
+			} catch (error) {
+				console.error('添加到收藏夹失败:', error);
+			}
+		},
+
+		/**
+		 * 检查商品是否在收藏夹中
+		 * @param username - 用户名
+		 * @param productId - 商品ID
+		 */
+		async checkInWishlistItem(username: string, productId: number) {
+			try {
+				const response = await request.get('/wishlistItem/checkInWishlist', {
+				params: { username, productId }
+				});
+				return response.data || false;
+			} catch (error) {
+				console.error('检查收藏夹商品失败:', error);
+				return false;
+			}
+		},
+
+		/**
+		 * 从服务器移除商品从收藏夹
+		 * @param username - 用户名
+		 * @param productId - 商品ID
+		 */
+		async removeWishlistItem(username: string, productId: number) {
+			try {
+				await request.del('/wishlistItem/removeWishlistItem', {}, {
+					params: { username, productId }
+				});
+			} catch (error) {
+				console.error('移除收藏夹商品失败:', error);
+			}
+		},
 	}
 })

@@ -263,6 +263,7 @@ onMounted(() => {
   line-height: 48px;
   font-size: 0.95rem;
   text-align: left;
+  color: #ffffffd4 !important;
 }
 
 .login-form :deep(.el-input__prefix) {
