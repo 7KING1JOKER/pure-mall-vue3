@@ -7,13 +7,15 @@
             top="0" width="25%"
             transition="fade" :open-delay="0.3"
         >
+        
         <!-- 尺码选择方块 -->
         <div class="size-squres">
-            <div v-for="productSize in productStore.productSizeList" class="size-square">
+            <div v-for="productSize in productStore.productSizeList" class="size-square" :class="{ 'selected': isSelected(productSize) }" @click="selectSize(productSize)">
                 <h1> {{ productSize.detail }} </h1>
                 <h1>({{ productSize.size }})</h1>
             </div>
         </div>
+
         <!-- 尺码选择提示 -->
         <div class="size-guider">
             <div class="size-guider-header" @click="toggleGuider">
@@ -45,6 +47,21 @@ const toggleGuider = () => {
   productStore.toggleGuider();
 };
 
+// 判断当前尺码是否被选中
+const isSelected = (productSize) => {
+  // 拼接当前尺码信息字符串
+  const sizeInfo = `${productSize.detail} (${productSize.size})`;
+  // 与store中保存的选中尺码信息进行比较
+  return productStore.selectedSize === sizeInfo;
+};
+
+// 选中尺码处理函数
+const selectSize = (productSize) => {
+  // 拼接尺码信息字符串
+  const sizeInfo = `${productSize.detail} (${productSize.size})`;
+  // 保存到store中
+  productStore.setSelectedSize(sizeInfo);
+};
 </script>
 
 <style scoped>
@@ -67,7 +84,8 @@ const toggleGuider = () => {
   text-align: left;
 }
 
-.size-square:hover {
+.size-square:hover,
+.size-square.selected {
   border: 1px solid #000;
 }
 

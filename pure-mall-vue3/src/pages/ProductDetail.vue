@@ -47,7 +47,7 @@
           <div class="color-text"> {{ selectedSpec && product.specs ? product.specs.find(spec => spec.id === selectedSpec)?.name : '请选择颜色' }} </div>
           <div class="color-options">
             <div 
-              v-for="spec in product.specs" 
+              v-for="spec in product.specs"
               :key="spec.id" 
               class="color-option" 
               :class="{ 'selected': selectedSpec === spec.id }"
@@ -77,7 +77,7 @@
               <span class="action-text">收藏</span>
             </div>
             <div class="action-button add-to-cart-wrapper">
-              <el-icon class="add-to-cart" @click="cartStore.addToCart(product)">
+              <el-icon class="add-to-cart" @click="addCartItem(product)">
                 <ShoppingBag />
               </el-icon>
               <span class="action-text">购物车</span>
@@ -114,6 +114,7 @@ import { useCartStore } from '../store/cart';
 import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
 import { ShoppingBag, Notebook, ArrowRight } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
 import ProductSizeDialog from '../layouts/ProductSizeDialog.vue';
 
@@ -180,8 +181,32 @@ const {
 // 添加到收藏夹方法
 const addToWishlist = (item: any) => {
   userStore.addToWishlistItem(userStore.username, item.id);
-
   userStore.addToWishlist(item);
+};
+
+// 添加到购物车方法
+const addCartItem = (product: any) => {
+  // 检查是否已选择尺码
+  if (productStore.selectedSize === '') {
+    // 提示用户先选择尺码
+    ElMessage.warning('请先选择尺码');
+    return;
+  }
+  
+  cartStore.addToCart({
+    productId: product.id,
+    userId: Number(userStore.userId),
+    name: product.name,
+    price: product.price,
+    quantity: 1,
+    imageUrl: product.images[0],
+    spec: productStore.selectedColor + ' ' + productStore.selectedSize,
+    description: product.description,
+    selected: true
+  });
+  
+  // 成功加入购物车后重置选中的尺码
+  productStore.setSelectedSize('');
 };
 
 

@@ -122,8 +122,8 @@ const orderId = computed(() => {
   if (route.query.orderNumber) {
     return route.query.orderNumber as string;
   }
-  // 其次从params获取id，这是其他可能的跳转方式
-  return route.params.id as string;
+  // 其次从params获取orderNumber，这是其他可能的跳转方式
+  return route.params.orderNumber as string;
 });
 
 // 计算商品总价

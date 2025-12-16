@@ -17,8 +17,8 @@
           <div 
             v-for="address in addresses" 
             :key="address.id"
-            :class="['address-item', { 'active': address.id === selectedAddressId }]"
-            @click="selectAddress(address.id)"
+            :class="['address-item', { 'active': address.id.toString() === selectedAddressId }]"
+            @click="selectAddress(address.id.toString())"
           >
             <div class="address-info">
               <div class="name-phone">
@@ -29,7 +29,7 @@
             </div>
             <div class="address-actions">
               <el-tag v-if="address.isDefault" size="small" type="success">默认</el-tag>
-              <el-button type="primary" text size="small" @click.stop="editAddress(address.id)">
+              <el-button type="primary" text size="small" @click.stop="editAddress(address.id as unknown as number)">
                 <el-icon><Edit /></el-icon>
               </el-button>
               <el-button type="danger" text size="small" @click.stop="confirmDeleteAddress(address.id)">
@@ -48,7 +48,7 @@
         <div class="order-items">
           <div class="order-item" v-for="(item, index) in selectedItemsForCheckout" :key="index">
             <div class="item-image">
-              <el-image :src="item.image" fit="cover" class="product-img" />
+              <el-image :src="item.imageUrl" fit="cover" class="product-img" />
             </div>
             <div class="item-info">
               <div class="item-title">{{ item.name }}</div>
@@ -168,7 +168,7 @@ const goBack = () => {
 }
 
 // 确认删除地址
-const confirmDeleteAddress = (addressId: string) => {
+const confirmDeleteAddress = (addressId: number) => {
   ElMessageBox.confirm(
     '确定要删除这个地址吗？',
     '删除确认',
@@ -178,7 +178,8 @@ const confirmDeleteAddress = (addressId: string) => {
       type: 'warning'
     }
   ).then(() => {
-    deleteAddress(addressId)
+    // 调用userStore的deleteAddress方法，传递用户名和地址ID
+    deleteAddress(userStore.username, addressId)
   }).catch(() => {
     // 取消删除，不做任何操作
   })
@@ -200,8 +201,14 @@ const confirmDeleteAddress = (addressId: string) => {
       return
     }
     
+    // 将CartItem转换为OrderItem
+    const orderItems = selectedItems.map(item => ({
+      ...item,
+      image: item.imageUrl // CartItem使用imageUrl，OrderItem需要image
+    }))
+    
     // 准备订单商品数据 - 只同步已选中的商品
-    orderStore.syncCartItems(selectedItems)
+    orderStore.syncCartItems(orderItems)
     // 设置配送方式
     orderStore.deliveryMethod = deliveryMethod.value
     // 设置订单备注
@@ -214,9 +221,9 @@ const confirmDeleteAddress = (addressId: string) => {
       console.log('订单创建成功，即将清除购物车中已购买的商品')
       // 清除购物车中的已选商品
       cartStore.removeSelected()
-      // 保存购物车数据到本地存储，确保刷新后数据一致
-      cartStore.saveCartToStorage()
-      console.log('购物车数据已更新并保存到本地存储')
+      // 保存购物车数据（如果需要的话，可以调用cartStore的其他保存方法）
+      // 注意：cartStore中没有saveCartToStorage方法，可能是想调用其他方法或API
+      console.log('购物车数据已更新')
       // 提交成功后跳转到支付页面
       router.push('/payment')
     } else {

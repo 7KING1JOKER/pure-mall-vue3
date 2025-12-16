@@ -19,36 +19,36 @@
         <div v-else>
           <!-- 购物车商品列表 -->
           <div class="cart-items">
-            <div class="cart-item" v-for="(item, index) in cartItems" :key="item.id">
+            <div class="cart-item" v-for="(item) in cartItems" :key="item.productId">
               <div class="item-checkbox">
-                <el-checkbox v-model="item.selected" />
+                <el-checkbox v-model="item.selected" @change="setSelected(item.id || 0)"/>
               </div>
               <div class="item-image">
                 <el-image 
-                  :src="item.image" 
+                  :src="item.imageUrl" 
                   fit="cover" 
                   class="product-img"
-                  :preview-src-list="[item.image]"
+                  :preview-src-list="[item.imageUrl]"
                   hide-on-click-modal
                 />
               </div>
               <div class="item-info">
                 <div class="item-title">{{ item.name }}</div>
-                <div class="item-description">{{ item.description }}</div>
                 <div class="item-spec">规格：{{ item.spec }}</div>
               </div>
-              <div class="item-price">¥{{ item.price.toFixed(2) }}</div>
+              <div class="item-price">¥{{ item.price?.toFixed(2) }}</div>
               <div class="item-quantity">
                 <el-input-number
                   v-model="item.quantity" 
                   :min="1" 
                   :max="10" 
                   size="small"
+                  @change="updateQuantity(item.id || 0, item.quantity)"
                 />
               </div>
-              <div class="item-subtotal">¥{{ (item.price * item.quantity).toFixed(2) }}</div>
+              <div class="item-subtotal">¥{{ item.price && item.quantity ? (item.price * item.quantity).toFixed(2) : '0.00' }}</div>
               <div class="item-actions">
-                <el-button type="danger" circle plain @click="removeItem(index)">
+                <el-button type="danger" circle plain @click="removeCartItem(item.id || 0)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
                 <el-button type="info" circle plain @click="addToWishlist(item)">
@@ -94,6 +94,7 @@
 
 <script setup lang="ts">
 import { useCartStore } from '../store/cart';
+import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
 import { Delete, Remove, Star, ArrowRightBold } from '@element-plus/icons-vue';
 import PcMenu from '../layouts/PcMenu.vue';
@@ -104,17 +105,19 @@ import { ElMessage } from 'element-plus';
 
 // 使用购物车store
 const cartStore = useCartStore();
+// 使用用户store
+const userStore = useUserStore();
 
 // 使用storeToRefs解构响应式数据和计算属性
 const { cartItems, selectedCount, totalQuantity, totalAmount, selectAll } = storeToRefs(cartStore);
 
-// 直接解构方法（方法不需要使用storeToRefs）
 const { 
+  setSelected,
   setSelectAll, 
-  removeItem, 
+  removeCartItem, 
   removeSelected, 
+  updateQuantity,
   clearCart, 
-  addToWishlist, 
   goShopping, 
   setActiveStep
 } = cartStore;
@@ -140,10 +143,21 @@ const checkout = () => {
   router.push('/checkout');
 };
 
+// 添加到收藏夹方法
+const addToWishlist = (item: any) => {
+  userStore.addToWishlistItem(userStore.username, item.productId);
+  userStore.addToWishlist(item);
+};
+
 onMounted(() => {
   console.log('购物车页面已加载')
   // 购物车步骤条设置为第1步
   setActiveStep(0)
+
+  if(userStore.isLoggedIn) {
+    // 加载用户购物车商品
+    cartStore.loadCartItems(userStore.username);
+  }
 })
 
 
@@ -188,7 +202,7 @@ onMounted(() => {
 }
 
 .cart-item:hover {
-  background-color: #fafafaad;
+  background-color: #fafafa31;
 }
 
 .cart-item > div {
@@ -197,6 +211,11 @@ onMounted(() => {
 
 .item-checkbox {
   width: 40px;
+}
+
+.item-checkbox:deep(.el-checkbox__inner), .footer-left:deep(.el-checkbox__inner) {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-color: #333;
 }
 
 .item-image {
@@ -255,6 +274,19 @@ onMounted(() => {
   gap: 5px;
 }
 
+.item-actions:deep(.el-button) {
+  background-color: transparent !important;
+}
+
+.item-actions:deep(.el-icon) {
+  transition: all 0.3s ease;
+}
+
+.item-actions:deep(.el-icon):hover {
+  transform: translateY(-5px);
+}
+
+
 /* 购物车底部 */
 .cart-footer {
   display: flex;
@@ -272,6 +304,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.footer-left:deep(.el-checkbox__label) {
+  color: #333;
+}
+
+.footer-left:deep(.el-button) {
+  color: #333;
 }
 
 .footer-right {

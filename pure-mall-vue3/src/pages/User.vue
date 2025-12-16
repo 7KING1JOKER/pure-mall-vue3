@@ -279,7 +279,16 @@ const getStatusText = (status) => {
 
 // 查看订单详情
 const viewOrderDetail = (orderNumber) => {
-  router.push({ path: `/order/${orderNumber}` })
+  
+  if (orderNumber) {
+    router.push({
+      name: 'OrderDetail',
+      params: { orderNumber }
+    })
+    console.log('跳转到订单详情，订单编号:', orderNumber)
+  } else {
+    ElMessage.error('无法获取订单信息')
+  }
 }
 
 // 确认删除订单

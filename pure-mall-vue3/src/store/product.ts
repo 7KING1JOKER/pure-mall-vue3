@@ -10,6 +10,12 @@ export const useProductStore = defineStore("product", {
     
     // 选中的规格
     selectedSpec: null as number | null,
+
+    // 选中的颜色 默认白色
+    selectedColor: "白色", 
+    
+    // 选中的尺码信息
+    selectedSize: '',
     
     // 购买数量
     quantity: 1,
@@ -108,10 +114,10 @@ export const useProductStore = defineStore("product", {
         const response = await request.get(`/product/${productId}`);
         // 检查后端响应格式
         if (response && typeof response === 'object') {
-          console.log('后端响应格式:', response);
+          // console.log('后端响应格式:', response);
           // 根据后端Response<T>类的格式，检查code字段
           if (response.code === 200) {
-            console.log(response.data);
+            // console.log(response.data);
             // 请求成功，使用response.data作为商品数据
             this.product = response.data;
           } else {
@@ -129,7 +135,7 @@ export const useProductStore = defineStore("product", {
         console.error('加载商品详情失败:', error);
         // 这里可以添加错误处理逻辑，例如显示错误提示
       }
-      console.log("this.product:", this.product);
+      // console.log("this.product:", this.product);
       // 初始化未统一信息
       if (this.product?.specs && this.product.specs.length > 0) {
         this.selectedSpec = this.product.specs[0].id;
@@ -163,9 +169,19 @@ export const useProductStore = defineStore("product", {
       this.isGuiderExpanded = !(this.isGuiderExpanded);
     },
 
-    // 设置选中的规格
+    // 设置选中的规格和颜色
     setSelectedSpec(specId: number) {
       this.selectedSpec = specId;
+      // 根据规格ID找到对应的颜色名称并设置到selectedColor
+      if (this.product && this.product.specs) {
+        const selectedSpecItem = this.product.specs.find(spec => spec.id === specId);
+        this.selectedColor = selectedSpecItem ? selectedSpecItem.name : "白色";
+      }
+    },
+    
+    // 设置选中的尺码信息
+    setSelectedSize(sizeInfo: string) {
+      this.selectedSize = sizeInfo;
     },
     
     // 设置购买数量

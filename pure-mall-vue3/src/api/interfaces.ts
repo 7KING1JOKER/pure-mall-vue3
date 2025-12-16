@@ -10,13 +10,15 @@
 
 // 购物车商品类型定义
 export interface CartItem {
-  id: number;
+  id?: number;
+  productId: number;
+  userId: number;
   name: string;
   description: string;
   spec: string;
   price: number;
   quantity: number;
-  image: string;
+  imageUrl: string;
   selected: boolean;
 }
 
@@ -34,14 +36,6 @@ export interface RecommendedProduct {
  * @Location: @/store/category.ts
  */
 
-// 定义商品接口
-// export interface Product {
-//   id: number;
-//   name: string;
-//   price: number;
-//   sales: number;
-//   image: string;
-// }
 
 // 定义分类节点接口
 export interface CategoryNode {

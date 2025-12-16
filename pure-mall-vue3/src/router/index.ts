@@ -51,7 +51,7 @@ const routes = [
     meta: { title: '个人' }
   },
   {
-    path: '/order/:id',
+    path: '/order/:orderNumber',
     name: 'OrderDetail',
     component: () => import('@/pages/OrderDetail.vue'),
     props: true,
@@ -70,7 +70,7 @@ router.beforeEach((to, _, next) => {
   const titleMap: Record<string, string> = {
     Home: '首页',
     Category: '分类',
-    'product-detail': '商品详情',
+    ProductDetail: '商品详情',
     Cart: '购物车',
     Checkout: '结算',
     Payment: '支付',

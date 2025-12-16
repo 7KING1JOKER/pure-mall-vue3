@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, nextTick } from 'vue'
-import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
+import { type FormInstance, type FormRules } from 'element-plus'
 import { User,  Lock } from '@element-plus/icons-vue'
 import { useUserStore } from '../store/user'
 
@@ -177,12 +177,6 @@ const submit = async () => {
     
     // 登录成功后，将用户名存储到userStore
     userStore.username = formData.username
-    
-    ElNotification({
-      title: '登录成功',
-      message: '欢迎回来',
-      type: 'success'
-    })
     
     // 通知父组件登录成功
     emit('success', {

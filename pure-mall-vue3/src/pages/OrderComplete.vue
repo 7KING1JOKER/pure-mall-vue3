@@ -84,7 +84,7 @@ const viewOrderDetails = () => {
     // 使用订单编号作为ID参数
     router.push({
       name: 'OrderDetail',
-      params: { id: currentOrder.value.orderNumber }
+      params: { orderNumber: currentOrder.value.orderNumber }
     })
     console.log('跳转到订单详情，订单编号:', currentOrder.value.orderNumber)
   } else {

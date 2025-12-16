@@ -183,10 +183,10 @@ export const useCategoryStore = defineStore('category', {
         
         // 检查后端响应格式
         if (response && typeof response === 'object') {
-          console.log('后端响应格式:', response);
+          // console.log('后端响应格式:', response);
           // 根据后端Response<T>类的格式，检查code字段
           if (response.code === 200) {
-            console.log(response.data);
+            // console.log(response.data);
             // 请求成功，使用response.data作为商品数据
             let sortedProducts = [...response.data];
             

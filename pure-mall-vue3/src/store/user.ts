@@ -6,6 +6,7 @@ import request from "@/api/request";
 export const useUserStore = defineStore("user", {
 	state: () => ({
 		username: '默认用户',
+		userId: 0,
 		email: 'default@example.com',
 		vip: '会员',
 		activeTab: 'profile',
@@ -223,8 +224,8 @@ export const useUserStore = defineStore("user", {
 				const response = await request.del(`/address/deleteAddress/${addressId}`,
 					{ username, addressId }
 				);
-				console.log('删除地址请求参数:', { username, addressId });
-				console.log('删除地址响应信息:', response.message);
+				// console.log('删除地址请求参数:', { username, addressId });
+				// console.log('删除地址响应信息:', response.message);
 				
 				// 从本地地址列表中删除
 				const index = this.addresses.findIndex(addr => addr.id === addressId)
@@ -305,7 +306,7 @@ export const useUserStore = defineStore("user", {
 					{ label: '性别', value: data.sex },
 					{ label: '出生日期', value: data.birthday }
 				];
-				console.log("loadBasicInfo:", this.basicInfo);
+				// console.log("loadBasicInfo:", this.basicInfo);
 				// 更新用户状态
 				this.username = data.username || '';
 				this.email = data.email || '';
@@ -316,7 +317,7 @@ export const useUserStore = defineStore("user", {
 
 		async updateUserInfo(username: string, user: any) {
 			try {
-				console.log("updateUserInfo:", user);
+				// console.log("updateUserInfo:", user);
 				// 将username作为查询参数，user作为请求体发送
 				const response = await request.put('/user/updateInfo', user, {
 					params: { username: username }
@@ -350,7 +351,7 @@ export const useUserStore = defineStore("user", {
 				const response = await request.get('/address/userAddressList', { username });
 				// 更新地址状态
 				this.addresses = response.data || [];
-				console.log("loadUserAddress:", this.addresses);
+				// console.log("loadUserAddress:", this.addresses);
 			} catch (error) {
 				ElMessage.error('获取地址失败');
 			}
@@ -358,10 +359,10 @@ export const useUserStore = defineStore("user", {
 
 		async loadUserOrders(username: string) {
 			try {
-				const response = await request.get('order/userOrders', { username });
+				const response = await request.get('/order/userOrders', { username });
 				// 更新订单状态
 				this.orders = response.data.orders || [];
-				console.log("loadUserOrders:", this.orders);
+				// console.log("loadUserOrders:", this.orders);
 			} catch (error) {
 				ElMessage.error('获取订单失败');
 			}
@@ -369,16 +370,30 @@ export const useUserStore = defineStore("user", {
 		
 		async loadWishlistItems(username: string) {
 			try {
-				const response = await request.get('/wishlistItem/getWishlistItems', { username });
+				const response = await request.get('/wishlist/getWishlistItems', { username });
 				this.wishlistItems = response.data || [];
 			} catch (error) {
 				console.error('加载收藏夹数据失败:', error);
 			}
 		},
 
+		async loadUserId(username: string) {
+			try {
+
+				const response = await request.get('/user/getUserId', {}, { params: { username: username } });
+				// 确保userId是数字类型
+				this.userId = Number(response.data.userId) || 0;
+				// console.log("loadUserId:", this.userId);
+			} catch (error) {
+				ElMessage.error('获取用户ID失败');
+				console.error('获取用户ID失败:', error);
+			}
+		},
+
 		async loadUserData(username: string) {
 			try{
 				await Promise.all([
+					this.loadUserId(username),
 					this.loadUserInfo(username),
 					this.loadUserAddress(username),
 					this.loadUserOrders(username),
@@ -515,13 +530,13 @@ export const useUserStore = defineStore("user", {
 
 				// 添加到收藏夹
 				this.wishlistItems.push({
-				id: item.id,
+				id: item.productId,
 				name: item.name,
 				price: item.price,
 				image: item.image || item.images?.[0] || '',
 				sales: item.sales || 0
 				});
-				
+
 				ElNotification({
 				title: '已添加到收藏',
 				message: `已将 "${item.name}" 添加到收藏夹`,
@@ -554,7 +569,7 @@ export const useUserStore = defineStore("user", {
 		async addToWishlistItem(username: string, productId: number) {
 			try {
 				// 后端接口使用@RequestParam注解，需要将参数作为查询参数传递
-				await request.post('/wishlistItem/addWishlistItem', {}, {
+				await request.post('/wishlist/addWishlistItem', {}, {
 				params: { username, productId }
 				});
 			} catch (error) {
@@ -569,7 +584,7 @@ export const useUserStore = defineStore("user", {
 		 */
 		async checkInWishlistItem(username: string, productId: number) {
 			try {
-				const response = await request.get('/wishlistItem/checkInWishlist', {
+				const response = await request.get('/wishlist/checkInWishlist', {
 				params: { username, productId }
 				});
 				return response.data || false;
@@ -586,7 +601,7 @@ export const useUserStore = defineStore("user", {
 		 */
 		async removeWishlistItem(username: string, productId: number) {
 			try {
-				await request.del('/wishlistItem/removeWishlistItem', {}, {
+				await request.del('/wishlist/removeWishlistItem', {}, {
 					params: { username, productId }
 				});
 			} catch (error) {
