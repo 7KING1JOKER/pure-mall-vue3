@@ -134,6 +134,7 @@ import {
 import RegisterDialog from '../layouts/RegisterDialog.vue'
 import LoginDialog from '../layouts/LoginDialog.vue'
 import { useUserStore } from '../store/user'
+import { useCategoryStore } from '../store/category'
 import { storeToRefs } from 'pinia'
 
 // data
@@ -154,6 +155,10 @@ const loginDialogVisible = ref(false) // 登录弹窗状态
 // 用户状态管理
 const userStore = useUserStore()
 const { isLoggedIn } = storeToRefs(userStore)
+
+// 分类状态管理（用于搜索功能）
+const categoryStore = useCategoryStore()
+
 // console.log('当前路由路径:', activeIndex.value)
 
 // methods
@@ -167,8 +172,10 @@ const checkScreenWidth = () => {
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
     console.log("执行搜索:", searchQuery.value)
-    // 这里可以添加实际的搜索逻辑
-    // 例如: 调用API搜索商品，或跳转到搜索结果页
+    // 设置搜索关键词到分类 store
+    categoryStore.setSearchQuery(searchQuery.value)
+    // 跳转到分类页面显示搜索结果
+    router.push('/category')
   }
 }
 

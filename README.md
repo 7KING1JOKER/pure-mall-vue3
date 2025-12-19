@@ -171,6 +171,7 @@ e:/vue-project/pure-mall-vue3/pure-mall-vue3/
 - 支付功能未完善，仅模拟支付过程
 - 数据库数据不完善，product.brief 和 product.detail 字段为默认值
 - 移动端样式未完善，仅有基础样式
+- AMap地图未成功映射文字到坐标点
 
 ## 开发规范
 

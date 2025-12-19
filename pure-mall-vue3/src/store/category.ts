@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ElNotification } from 'element-plus';
+import { ElMessage, ElNotification } from 'element-plus';
 import type { CategoryNode, Product } from '../api/interfaces';
 import request from '@/api/request';
 
@@ -107,7 +107,7 @@ export const productData: Product[] = [
   // 鞋子类
   { id: 1033, name: '透气网面运动鞋', price: 399, sales: 2150, image: 'https://images.unsplash.com/photo-1578314921455-34dd4626b38d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHNob2VzJTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D' },
   { id: 1034, name: '经典小白鞋', price: 359, sales: 3250, image: 'https://images.unsplash.com/photo-1556812191-381c7e7d96d6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fHNob2VzJTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D' },
-  { id: 1035, name: '马丁靴', price: 459, sales: 1850, image: 'https://images.unsplash.com/photo-1631482665514-567048726eb1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjJ8fHNob2VzJTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D' },
+  { id: 1035, name: 'Martin靴', price: 459, sales: 1850, image: 'https://images.unsplash.com/photo-1631482665514-567048726eb1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjJ8fHNob2VzJTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D' },
   { id: 1036, name: '夏季凉鞋', price: 259, sales: 2750, image: 'https://images.unsplash.com/photo-1561304211-f88bafcc4e22?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHNob2VzJTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwwfHwwfHx8MA%3D%3D' },
   
   // 配饰类
@@ -164,6 +164,9 @@ export const useCategoryStore = defineStore('category', {
     // 用于页面显示的商品数据
     displayProducts: [] as Product[],
     
+    // 搜索相关
+    searchQuery: '',
+    
     // 树形控件配置
     defaultProps: {
       children: 'children',
@@ -190,7 +193,15 @@ export const useCategoryStore = defineStore('category', {
             // 请求成功，使用response.data作为商品数据
             let sortedProducts = [...response.data];
             
-            // 根据当前选中的分类筛选商品
+            // 1. 首先根据搜索关键词筛选商品
+            if (this.searchQuery) {
+              const query = this.searchQuery.toLowerCase();
+              sortedProducts = sortedProducts.filter(product => 
+                product.name.toLowerCase().includes(query)
+              );
+            }
+            
+            // 2. 然后根据当前选中的分类筛选商品
             if (this.currentCategory.id) {
               // 假设id格式为：大类(1-6)+子类(1-6)，如11代表T恤
               const categoryId = this.currentCategory.id;
@@ -256,8 +267,7 @@ export const useCategoryStore = defineStore('category', {
             // 请求失败，显示错误信息
             const errorMsg = response.message || '加载商品数据失败';
             console.error('加载商品数据失败:', errorMsg);
-            ElNotification({
-              title: '加载失败',
+            ElMessage({
               message: errorMsg,
               type: 'error',
               duration: 3000
@@ -266,8 +276,7 @@ export const useCategoryStore = defineStore('category', {
         } else {
           // 响应格式不符合预期
           console.error('加载商品数据失败: 响应格式错误', response);
-          ElNotification({
-            title: '加载失败',
+          ElMessage({
             message: '服务器响应格式错误',
             type: 'error',
             duration: 3000
@@ -286,6 +295,16 @@ export const useCategoryStore = defineStore('category', {
         });
       }
     },
+    
+
+    // 设置搜索关键词
+    setSearchQuery(query: string) {
+      this.searchQuery = query;
+      // 重置分页并重新加载商品，以便应用搜索筛选
+      this.currentPage = 1;
+      this.loadProducts();
+    },
+    
     
     // 分类点击事件
     handleNodeClick(data: CategoryNode) {
