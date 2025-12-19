@@ -9,22 +9,28 @@ const userStore = useUserStore();
 
 export const useCartStore = defineStore("cart", {
   state: () => ({
-    // 购物车商品数据 - 优先从本地存储加载
+    // 购物车商品列表
     cartItems: [] as CartItem[],
     
-    // 当前步骤（购物车流程）
+    // 当前购物车步骤条步骤
     activeStep: 0
   }),
   
   getters: {
-    // 计算已选择的商品数量
+    /**
+     * 计算已选择的商品数量
+     * @returns {number} 已选择商品的数量
+     */
     selectedCount: (state) => {
       // 确保 cartItems 是数组
       const items = Array.isArray(state.cartItems) ? state.cartItems : [];
       return items.filter(item => item?.selected).length;
     },
     
-    // 计算选中商品总数
+    /**
+     * 计算选中商品的总数量（包含各商品的购买数量）
+     * @returns {number} 选中商品的总数量
+     */
     totalQuantity: (state) => {
       // 确保 cartItems 是数组
       const items = Array.isArray(state.cartItems) ? state.cartItems : [];
@@ -33,7 +39,10 @@ export const useCartStore = defineStore("cart", {
         .reduce((total, item) => total + (item?.quantity || 0), 0);
     },
     
-    // 计算总金额
+    /**
+     * 计算选中商品的总金额
+     * @returns {number} 选中商品的总金额
+     */
     totalAmount: (state) => {
       // 确保 cartItems 是数组
       const items = Array.isArray(state.cartItems) ? state.cartItems : [];
@@ -42,7 +51,10 @@ export const useCartStore = defineStore("cart", {
         .reduce((total, item) => total + ((item?.price || 0) * (item?.quantity || 0)), 0);
     },
     
-    // 是否全选
+    /**
+     * 判断是否全选商品
+     * @returns {boolean} 是否全选状态
+     */
     selectAll: (state) => {
       // 确保 cartItems 是数组
       const items = Array.isArray(state.cartItems) ? state.cartItems : [];
@@ -51,14 +63,20 @@ export const useCartStore = defineStore("cart", {
   },
   
   actions: {
-    // 设置购物车步骤条步骤
+    /**
+     * 设置购物车步骤条步骤
+     * @param {number} step - 要设置的步骤编号
+     */
     setActiveStep(step: number) {
       this.activeStep = step;
     },
 
-    // 设置单个商品选中状态
+    /**
+     * 设置单个商品的选中状态
+     * @param {number} Id - 商品ID
+     * @description 调用后端API更新选中状态，并处理错误情况
+     */
     setSelected(Id: number) {
-      // console.log('设置选中状态:', Id);
       try {
         // 从后端更新购物车商品选中状态
         this.toggleSelectCartItem(userStore.userId, Id);
@@ -72,12 +90,13 @@ export const useCartStore = defineStore("cart", {
         });
         return;
       }
-
-      // v-model已经会更新item.selected的值，不需要手动切换
-      // console.log('商品选中状态已更新');
     },
 
-    // 设置全选状态
+    /**
+     * 设置全选/取消全选状态
+     * @param {boolean} value - 是否全选
+     * @description 调用后端API更新所有商品的选中状态
+     */
     setSelectAll(value: boolean) {
       try {
         // 从后端更新购物车商品选中状态
@@ -98,9 +117,13 @@ export const useCartStore = defineStore("cart", {
       });
     },
     
-    // 更新购物车商品数量
+    /**
+     * 更新购物车商品数量
+     * @param {number} Id - 商品ID
+     * @param {number} quantity - 新的数量
+     * @description 调用后端API更新商品数量，并处理错误情况
+     */
     updateQuantity(Id: number, quantity: number) {
-      // console.log('更新购物车商品数量:', Id, quantity);
       try {
         // 从后端更新购物车商品数量
         this.updateCartItemQuantity(userStore.userId, Id, quantity);
@@ -116,7 +139,11 @@ export const useCartStore = defineStore("cart", {
       }
     },
     
-    // 删除单个商品
+    /**
+     * 删除单个商品
+     * @param {number} Id - 商品ID
+     * @description 调用后端API删除商品，并更新本地购物车数据
+     */
     removeCartItem(Id: number) {
       try {
         // 从后端删除购物车商品
@@ -136,15 +163,16 @@ export const useCartStore = defineStore("cart", {
       if (cartItem) {
         this.cartItems = this.cartItems.filter(item => item.id !== Id);
       }
-
     },
     
-    // 删除选中的商品
+    /**
+     * 删除所有选中的商品
+     * @description 调用后端API删除选中商品，并更新本地购物车数据
+     */
     removeSelected() {
       try {
         // 从后端删除选中购物车商品
         this.deleteSelectedItems(userStore.userId);
-
       } catch (error) {
         console.error('删除选中购物车商品失败:', error);
         ElNotification({
@@ -159,7 +187,10 @@ export const useCartStore = defineStore("cart", {
       this.cartItems = this.cartItems.filter(item => !item.selected);
     },
     
-    // 清空购物车
+    /**
+     * 清空购物车
+     * @description 调用后端API清空购物车，并更新本地购物车数据
+     */
     clearCart() {
       try {
         // 清空后端购物车
@@ -184,7 +215,11 @@ export const useCartStore = defineStore("cart", {
       });
     },
     
-    // 添加商品到购物车
+    /**
+     * 添加商品到购物车
+     * @param {CartItem} cartItem - 要添加的商品信息
+     * @description 调用后端API保存商品，并更新本地购物车数据
+     */
     addToCart(cartItem: CartItem) {
       try {
         // 调用后端保存购物车商品
@@ -200,8 +235,6 @@ export const useCartStore = defineStore("cart", {
         return;
       }
       
-      // console.log("添加商品到购物车:", cartItem);
-
       // 检查是否已在购物车中
       const existingItem = this.cartItems.find(item => item.productId === cartItem.productId && item.spec === cartItem.spec);
       
@@ -227,19 +260,24 @@ export const useCartStore = defineStore("cart", {
         });
       }
 
-      // console.log("传递的购物车商品:", this.cartItems);
       ElMessage.success({
         message: `已添加 "${cartItem.name}" 到购物车`,
         duration: 2000
       });
     },
     
-    // 去购物
+    /**
+     * 跳转至商品分类页面
+     */
     goShopping() {
       router.push('/category');
     },
     
-    // 结算
+    /**
+     * 结算选中商品
+     * @returns {Promise<void>}
+     * @description 检查选中商品并跳转至结算页面
+     */
     async checkout() {
       // 检查是否有选中商品
       if (this.selectedCount === 0) {
@@ -264,7 +302,9 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 加载用户购物车商品
-     * @param username 用户名
+     * @param {string} username - 用户名
+     * @returns {Promise<void>}
+     * @description 从后端获取用户的购物车商品数据
      */
     async loadCartItems(username: string) {
       try {
@@ -274,7 +314,6 @@ export const useCartStore = defineStore("cart", {
         if (response.code === 200) {
           // 确保 cartItems 始终是数组，防止后端返回非数组数据
           this.cartItems = response.data.cartItems || [];
-          // console.log('this.cartItems:', this.cartItems);
         }
       } catch (error) {
         console.error('加载购物车商品失败:', error);
@@ -289,16 +328,17 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 保存购物车商品
-     * @param username 用户名
+     * @param {string} username - 用户名
+     * @param {CartItem} cartItem - 要保存的商品信息
+     * @returns {Promise<void>}
      */
     async addCartItems(username: string, cartItem: CartItem) {
       try {
-        
         const response = await request.post('/cart/addCartItems', cartItem, {
           params: { username: username }
         });
         if (response.code === 200) {
-          // console.log('购物车商品添加成功:', response.data);
+          // 商品添加成功
         }
       } catch (error) {
         console.error('更新购物车商品失败:', error);
@@ -313,8 +353,9 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 删除购物车商品
-     * @param username 用户名
-     * @param Id 购物车商品ID
+     * @param {string} username - 用户名
+     * @param {number} Id - 商品ID
+     * @returns {Promise<void>}
      */
     async deleteCartItem(username: string, Id: number) {
       try {
@@ -342,7 +383,8 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 删除选中购物车商品
-     * @param userId 用户ID
+     * @param {number} userId - 用户ID
+     * @returns {Promise<void>}
      */
     async deleteSelectedItems(userId: number) {
       try {
@@ -350,7 +392,7 @@ export const useCartStore = defineStore("cart", {
           params: { userId: userId }
         });
         if (response.code === 200) {
-          // console.log('删除选中购物车商品成功');
+          // 选中商品删除成功
         }
       } catch (error) {
         console.error('删除购物车商品失败:', error);
@@ -365,7 +407,8 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 删除所有购物车商品
-     * @param username 用户名
+     * @param {string} username - 用户名
+     * @returns {Promise<void>}
      */
     async clearCartItems(username: string) {
       try {
@@ -388,8 +431,9 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 全选/取消全选购物车商品
-     * @param userId 用户ID
-     * @param selected 是否选中
+     * @param {number} userId - 用户ID
+     * @param {boolean} selected - 是否选中
+     * @returns {Promise<void>}
      */
     async toggleSelectAll(userId: number, selected: boolean) {
       try {
@@ -397,7 +441,7 @@ export const useCartStore = defineStore("cart", {
           params: { userId: userId, selected: selected }
         });
         if (response.code === 200) {
-          // console.log('全选/取消全选购物车商品成功');
+          // 全选/取消全选操作成功
         }
       } catch (error) {
         console.error('全选/取消全选购物车商品失败:', error);
@@ -412,7 +456,9 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 设置单个商品选中状态
-     * @param Id 购物车商品ID
+     * @param {number} userId - 用户ID
+     * @param {number} cartItemId - 购物车商品ID
+     * @returns {Promise<void>}
      */
     async toggleSelectCartItem(userId: number, cartItemId: number) {
       try {
@@ -420,7 +466,7 @@ export const useCartStore = defineStore("cart", {
           params: { userId: userId, cartItemId: cartItemId }
         });
         if (response.code === 200) {
-          // console.log('设置单个商品选中状态成功');
+          // 设置商品选中状态操作成功
         }
       } catch (error) {
         console.error('设置单个商品选中状态失败:', error);
@@ -435,9 +481,10 @@ export const useCartStore = defineStore("cart", {
 
     /**
      * 更新购物车商品数量
-     * @param userId 用户ID
-     * @param cartItemId 购物车商品ID
-     * @param quantity 数量
+     * @param {number} userId - 用户ID
+     * @param {number} cartItemId - 购物车商品ID
+     * @param {number} quantity - 新的数量
+     * @returns {Promise<void>}
      */
     async updateCartItemQuantity(userId: number, cartItemId: number, quantity: number) {
       try {
@@ -445,7 +492,7 @@ export const useCartStore = defineStore("cart", {
           params: { userId: userId, cartItemId: cartItemId, quantity: quantity }
         });
         if (response.code === 200) {
-          // console.log('更新购物车商品数量成功');
+          // 更新商品数量操作成功
         }
       } catch (error) {
         console.error('更新购物车商品数量失败:', error);

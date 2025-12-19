@@ -5,23 +5,24 @@ import { useUserStore } from './user';
 import { ElMessageBox, ElMessage, ElNotification } from 'element-plus';
 import router from '../router/index';
 
-
 export const useOrderStore = defineStore('order', {
   state: () => ({
-    // 用于结算的选中商品
+    // 用于结算的选中商品列表
     selectedItemsForCheckout: [] as CartItem[],
-
+    
     // 选中的地址ID
     selectedAddressId: 0 as number,
-
-    // 订单全部相关状态
+   
+    // 订单列表
     OrderList: [] as Order[],
 
-    // 订单商品相关状态
+    // 订单商品列表
     orderItems: [] as CartItem[],
 
-    // 配送方式
+    // 当前选择的配送方式
     deliveryMethod: 'standard',
+    
+    // 可用的配送方式列表
     deliveryMethods: [
       { value: 'standard', label: '标准配送 (免费)', fee: 0 },
       { value: 'express', label: '快速配送 (¥15.00)', fee: 15 }
@@ -30,8 +31,10 @@ export const useOrderStore = defineStore('order', {
     // 订单备注
     orderRemark: '',
 
-    // 支付相关状态
+    // 当前选择的支付方式
     paymentMethod: 'alipay',
+    
+    // 可用的支付方式列表
     paymentMethods: [
       { 
         value: 'alipay', 
@@ -50,10 +53,10 @@ export const useOrderStore = defineStore('order', {
       }
     ] as PaymentMethod[],
 
-    // 订单信息
+    // 当前订单信息
     currentOrder: null as Order | null,
 
-    // 信用卡表单
+    // 信用卡表单数据
     cardForm: {
       number: '',
       name: '',
@@ -62,26 +65,38 @@ export const useOrderStore = defineStore('order', {
       cvv: ''
     },
 
-    // 倒计时
+    // 支付倒计时
     countdown: '15:00',
     
-    // 倒计时清理函数引用
+    /**
+     * 倒计时清理函数引用
+     * @type {(() => void) | null}
+     */
     countdownCleanup: null as (() => void) | null
   }),
 
   getters: {
 
-    // 计算配送费用
+    /**
+     * 计算配送费用
+     * @returns {number} 配送费用
+     */
     deliveryFee: (state) => {
       return state.deliveryMethods.find(m => m.value === state.deliveryMethod)?.fee || 0;
     },
 
-    // 计算商品总价
+    /**
+     * 计算商品总价
+     * @returns {number} 商品总价
+     */
     subtotal: (state) => {
       return state.selectedItemsForCheckout.reduce((total, item) => total + (item.price * item.quantity), 0);
     },
 
-    // 计算应付总额
+    /**
+     * 计算应付总额（商品总价 + 配送费）
+     * @returns {number} 应付总额
+     */
     totalAmount: (state) => {
       // 计算总价和配送费
       const subtotal = state.selectedItemsForCheckout.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -89,39 +104,60 @@ export const useOrderStore = defineStore('order', {
       return subtotal + deliveryFee;
     },
     
-    // 获取用户地址列表
+    /**
+     * 获取用户地址列表
+     * @returns {Address[]} 地址列表
+     */
     addresses: () => {
       return useUserStore().addresses || [];
     },
 
-    // 获取当前默认地址
+    /**
+     * 获取当前默认地址
+     * @returns {Address | undefined} 默认地址
+     */
     defaultAddress: () => {
       const userStore = useUserStore();
       const addresses = userStore.addresses || [];
       return addresses.find(addr => addr.isDefault) || addresses[0];
     },
     
-    // 订单编号
+    /**
+     * 获取当前订单编号
+     * @returns {string} 订单编号
+     */
     orderNumber: (state) => {
       return state.currentOrder?.orderNumber || '';
     },
     
-    // 订单时间
+    /**
+     * 获取当前订单时间
+     * @returns {string} 订单时间
+     */
     orderTime: (state) => {
       return state.currentOrder?.orderTime || '';
     },
     
-    // 订单金额
+    /**
+     * 获取当前订单金额
+     * @returns {number} 订单金额
+     */
     orderAmount: (state) => {
       return state.currentOrder?.orderAmount || 0;
     },
     
-    // 支付时间
+    /**
+     * 获取当前订单支付时间
+     * @returns {string} 支付时间
+     */
     paymentTime: (state) => {
       return state.currentOrder?.paymentTime || new Date().toISOString();
     },
     
-    // 支付方式
+    /**
+     * 获取当前订单支付方式
+     * @returns {string} 支付方式
+     */
     formattedPaymentMethod: (state) => {
       return state.currentOrder?.paymentMethod || '支付宝';
     }
@@ -129,12 +165,19 @@ export const useOrderStore = defineStore('order', {
 
   actions: {
     
-    // 选择地址
+    /**
+     * 选择地址
+     * @param {number} addressId - 地址ID
+     */
     selectAddress(addressId: number) {
       this.selectedAddressId = addressId;
     },
     
-    // 确认删除地址
+    /**
+     * 确认删除地址
+     * @param {number} addressId - 地址ID
+     * @returns {Promise<void>}
+     */
     async confirmDeleteAddress(addressId: number) {
       try {
         await ElMessageBox.confirm(
@@ -158,7 +201,10 @@ export const useOrderStore = defineStore('order', {
       }
     },
     
-    // 提交订单，进入支付页面
+    /**
+     * 提交订单，进入支付页面
+     * @returns {Promise<boolean>} 是否提交成功
+     */
     async proceedToPayment() {
       // 验证是否已选择地址
       if (!this.selectedAddressId) {
@@ -182,7 +228,6 @@ export const useOrderStore = defineStore('order', {
         }).catch((error) => {
           // 导航失败时的处理
           console.error('页面跳转失败:', error);
-          // 如果导航失败，可以考虑显示错误信息或其他处理
         });
 
         // 加入订单列表
@@ -195,9 +240,15 @@ export const useOrderStore = defineStore('order', {
           type: 'error'
         });
       }
+      
+      return true;
     },
 
-    // 创建订单
+    /**
+     * 创建订单
+     * @param {number} selectedAddressId - 选中的地址ID
+     * @returns {Order | null} 创建的订单或null
+     */
     createOrder(selectedAddressId: number) {
       const userStore = useUserStore();
       const addresses = userStore.addresses || [];
@@ -218,7 +269,7 @@ export const useOrderStore = defineStore('order', {
         return null;
       }
       
-      // 获取当前登录用户ID (这里假设从userStore获取)
+      // 获取当前登录用户ID
       const userId = userStore.userId || 0;
       
       // 构建完整地址
@@ -244,7 +295,11 @@ export const useOrderStore = defineStore('order', {
       return order;
     },
 
-    // 获取支付方式名称
+    /**
+     * 获取支付方式中文名称
+     * @param {string} method - 支付方式代码
+     * @returns {string} 支付方式中文名称
+     */
     getPaymentMethodName(method: string) {
       const methodMap: Record<string, string> = {
         alipay: '支付宝',
@@ -254,7 +309,10 @@ export const useOrderStore = defineStore('order', {
       return methodMap[method] || method;
     },
 
-    // 启动倒计时
+    /**
+     * 启动支付倒计时
+     * @param {(() => void) | undefined} callback - 倒计时结束时的回调函数
+     */
     startCountdown(callback?: () => void) {
       let minutes = 15;
       let seconds = 0;
@@ -284,19 +342,21 @@ export const useOrderStore = defineStore('order', {
       };
     },
 
-
-    /**
-     * 根据订单编号获取订单详情
-     * @param orderNumber 订单编号
-     */
     /**
      * 根据订单号获取订单
-     * @param orderNumber 订单号
-     * @returns 订单对象或undefined
+     * @param {string} orderNumber - 订单号
+     * @returns {Order | undefined} 订单对象或undefined
      */
     getOrderByNumber(orderNumber: string): Order | undefined {
       return this.OrderList.find(order => order.orderNumber === orderNumber);
     },
+    
+    /**
+     * 根据订单号获取订单详情
+     * @param {number} userId - 用户ID
+     * @param {string} orderNumber - 订单号
+     * @returns {Promise<void>}
+     */
     async getOrderDetailByOrderNumber(userId: number, orderNumber: string) {
       try {
         // GET请求通常不需要请求体，所以只需要传递URL
@@ -318,7 +378,8 @@ export const useOrderStore = defineStore('order', {
 
     /**
      * 根据订单编号删除订单
-     * @param orderNumber 订单编号
+     * @param {string} orderNumber - 订单编号
+     * @returns {Promise<void>}
      */
     async deleteOrder(orderNumber: string){
       try {
@@ -347,7 +408,9 @@ export const useOrderStore = defineStore('order', {
 
     /**
      * 添加订单
-     * @param order 订单对象
+     * @param {number} userId - 用户ID
+     * @param {Order} order - 订单对象
+     * @returns {Promise<void>}
      */
     async addOrder(userId: number, order: Order) {
       try {
@@ -364,6 +427,7 @@ export const useOrderStore = defineStore('order', {
     
     /**
      * 确认支付
+     * @returns {Promise<void>}
      */
     async completePayment() {
       
