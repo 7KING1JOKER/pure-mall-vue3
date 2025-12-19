@@ -31,7 +31,7 @@
               </div>
               <div class="info-item">
                 <span class="label">支付方式：</span>
-                <span class="value">{{ paymentMethod }}</span>
+                <span class="value">{{ formattedPaymentMethod }}</span>
               </div>
             </div>
             <div class="action-buttons">
@@ -46,9 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useOrderStore } from '../store/order'
 import { useCartStore } from '../store/cart'
 import { storeToRefs } from 'pinia'
@@ -61,21 +59,14 @@ const router = useRouter()
 const orderStore = useOrderStore()
 const cartStore = useCartStore()
 
+// 使用orderStore中的getters和state
 const { currentOrder } = storeToRefs(orderStore)
 
-const {
-  setActiveStep
-} = cartStore
+const { orderNumber, paymentTime, orderAmount, formattedPaymentMethod } = orderStore
+
+const { setActiveStep } = cartStore
 // 购物车步骤条设置为第4步
 setActiveStep(3)
-
-
-// 订单信息计算属性
-const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
-const paymentTime = computed(() => currentOrder.value?.paymentTime || new Date().toLocaleString())
-const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
-const paymentMethod = computed(() => currentOrder.value?.paymentMethod || '支付宝')
-
 
 // 查看订单详情
 const viewOrderDetails = () => {
@@ -87,8 +78,6 @@ const viewOrderDetails = () => {
       params: { orderNumber: currentOrder.value.orderNumber }
     })
     console.log('跳转到订单详情，订单编号:', currentOrder.value.orderNumber)
-  } else {
-    ElMessage.error('无法获取订单信息')
   }
 }
 
@@ -96,7 +85,6 @@ const viewOrderDetails = () => {
 const continueShopping = () => {
   router.push('/')
 }
-
 </script>
 
 <style scoped>

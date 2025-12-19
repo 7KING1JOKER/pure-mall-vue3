@@ -1,65 +1,24 @@
 import { defineStore } from 'pinia';
-import type { Address, OrderItem, Order, DeliveryMethod, PaymentMethod } from '../api/interfaces';
+import type { CartItem, Order, DeliveryMethod, PaymentMethod } from '../api/interfaces';
 import request from '@/api/request';
 import { useUserStore } from './user';
+import { ElMessageBox, ElMessage, ElNotification } from 'element-plus';
+import router from '../router/index';
 
-// 从本地存储加载订单数据的辅助函数
-function loadOrdersFromStorage(): Order[] {
-  try {
-    const ordersData = localStorage.getItem('completeOrders');
-    return ordersData ? JSON.parse(ordersData) : [];
-  } catch (error) {
-    console.error('加载订单数据失败:', error);
-    return [];
-  }
-}
-
-// 从本地存储加载当前订单的辅助函数
-function loadCurrentOrderFromStorage(): Order | null {
-  try {
-    const currentOrderData = localStorage.getItem('currentOrder');
-    return currentOrderData ? JSON.parse(currentOrderData) : null;
-  } catch (error) {
-    console.error('加载当前订单数据失败:', error);
-    return null;
-  }
-}
 
 export const useOrderStore = defineStore('order', {
   state: () => ({
-    // 地址相关状态
-    addresses: [
-      {
-        id: 1,
-        name: '张三',
-        phone: '13800138000',
-        province: '广东省',
-        city: '深圳市',
-        district: '南山区',
-        detail: '科技园南路XX号XX大厦XX室',
-        isDefault: true,
-        street: '',
-        zip: ''
-      },
-      {
-        id: 2,
-        name: '李四',
-        phone: '13900139000',
-        province: '广东省',
-        city: '广州市',
-        district: '天河区',
-        detail: '天河路XX号XX公寓XX室',
-        isDefault: false,
-        street: '',
-        zip: ''
-      }
-    ] as unknown as Address[],
+    // 用于结算的选中商品
+    selectedItemsForCheckout: [] as CartItem[],
 
-    // 订单全部相关状态 - 从本地存储加载
-    CompleteOrder: loadOrdersFromStorage(),
+    // 选中的地址ID
+    selectedAddressId: 0 as number,
+
+    // 订单全部相关状态
+    OrderList: [] as Order[],
 
     // 订单商品相关状态
-    orderItems: [] as OrderItem[],
+    orderItems: [] as CartItem[],
 
     // 配送方式
     deliveryMethod: 'standard',
@@ -91,8 +50,8 @@ export const useOrderStore = defineStore('order', {
       }
     ] as PaymentMethod[],
 
-    // 订单信息 - 从本地存储加载
-    currentOrder: loadCurrentOrderFromStorage(),
+    // 订单信息
+    currentOrder: null as Order | null,
 
     // 信用卡表单
     cardForm: {
@@ -104,126 +63,185 @@ export const useOrderStore = defineStore('order', {
     },
 
     // 倒计时
-    countdown: '15:00'
+    countdown: '15:00',
+    
+    // 倒计时清理函数引用
+    countdownCleanup: null as (() => void) | null
   }),
 
   getters: {
-    // 计算商品总价
-    subtotal: (state) => {
-      return state.orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    },
 
     // 计算配送费用
     deliveryFee: (state) => {
       return state.deliveryMethods.find(m => m.value === state.deliveryMethod)?.fee || 0;
     },
 
+    // 计算商品总价
+    subtotal: (state) => {
+      return state.selectedItemsForCheckout.reduce((total, item) => total + (item.price * item.quantity), 0);
+    },
+
     // 计算应付总额
     totalAmount: (state) => {
-      // 重新计算总价和配送费
-      const subtotal = state.orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+      // 计算总价和配送费
+      const subtotal = state.selectedItemsForCheckout.reduce((total, item) => total + (item.price * item.quantity), 0);
       const deliveryFee = state.deliveryMethods.find(m => m.value === state.deliveryMethod)?.fee || 0;
       return subtotal + deliveryFee;
     },
+    
+    // 获取用户地址列表
+    addresses: () => {
+      return useUserStore().addresses || [];
+    },
 
     // 获取当前默认地址
-    defaultAddress: (state) => {
-      return state.addresses.find(addr => addr.isDefault) || state.addresses[0];
+    defaultAddress: () => {
+      const userStore = useUserStore();
+      const addresses = userStore.addresses || [];
+      return addresses.find(addr => addr.isDefault) || addresses[0];
+    },
+    
+    // 订单编号
+    orderNumber: (state) => {
+      return state.currentOrder?.orderNumber || '';
+    },
+    
+    // 订单时间
+    orderTime: (state) => {
+      return state.currentOrder?.orderTime || '';
+    },
+    
+    // 订单金额
+    orderAmount: (state) => {
+      return state.currentOrder?.orderAmount || 0;
+    },
+    
+    // 支付时间
+    paymentTime: (state) => {
+      return state.currentOrder?.paymentTime || new Date().toISOString();
+    },
+    
+    // 支付方式
+    formattedPaymentMethod: (state) => {
+      return state.currentOrder?.paymentMethod || '支付宝';
     }
   },
 
   actions: {
+    
     // 选择地址
-    selectAddress(index: number) {
-      this.addresses.forEach((address, i) => {
-        address.isDefault = i === index;
-      });
+    selectAddress(addressId: number) {
+      this.selectedAddressId = addressId;
     },
-
-    // 编辑地址
-    editAddress(index: number) {
-      // 实际项目中这里会打开编辑地址的表单
-      console.log('编辑地址：', this.addresses[index].name);
+    
+    // 确认删除地址
+    async confirmDeleteAddress(addressId: number) {
+      try {
+        await ElMessageBox.confirm(
+          '确定要删除这个地址吗？',
+          '删除确认',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        );
+        
+        const userStore = useUserStore();
+        await userStore.deleteAddress(userStore.username, addressId);
+        ElMessage.success('地址删除成功');
+      } catch (error) {
+        // 取消删除或删除失败
+        if (error !== 'cancel') {
+          ElMessage.error('地址删除失败');
+        }
+      }
     },
+    
+    // 提交订单，进入支付页面
+    async proceedToPayment() {
+      // 验证是否已选择地址
+      if (!this.selectedAddressId) {
+        ElMessage.error('请选择收货地址');
+        return false;
+      }
+      
+      // 创建订单
+      const order = this.createOrder(this.selectedAddressId);
+      
+      if (order) {
+        // 提交成功后跳转到支付页面
+        // 利用router.push返回的Promise，确保导航成功后再执行后续操作
+        router.push('/payment').then(() => {
+          // 清除购物车中的已选商品 - 动态导入以避免循环依赖
+          import('./cart').then(({ useCartStore }) => {
+            const cartStore = useCartStore();
+            cartStore.removeSelected();
+            console.log('购物车数据已更新');
+          });
+        }).catch((error) => {
+          // 导航失败时的处理
+          console.error('页面跳转失败:', error);
+          // 如果导航失败，可以考虑显示错误信息或其他处理
+        });
 
-    // 删除地址
-    deleteAddress(index: number) {
-      this.addresses.splice(index, 1);
-    },
-
-    // 添加新地址
-    addNewAddress() {
-      // 实际项目中这里会打开添加地址的表单
-      console.log('添加新地址');
+        // 加入订单列表
+        this.OrderList.push(order);
+        // 保存当前订单到前端状态，但不立即保存到后端
+        // 等待用户确认支付后，在completePayment方法中统一保存到后端
+      } else {
+        ElMessageBox.alert('创建订单失败，请重试', '提示', {
+          confirmButtonText: '确定',
+          type: 'error'
+        });
+      }
     },
 
     // 创建订单
-    createOrder(selectedAddressId?: string) {
-      // 重新计算总价
-      const subtotal = this.orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-      const deliveryFee = this.deliveryMethods.find(m => m.value === this.deliveryMethod)?.fee || 0;
-      const totalAmount = subtotal + deliveryFee;
+    createOrder(selectedAddressId: number) {
+      const userStore = useUserStore();
+      const addresses = userStore.addresses || [];
       
       // 获取选中的地址，如果没有指定则使用默认地址
       let selectedAddr;
       if (selectedAddressId) {
         // 根据ID查找选中的地址
-        selectedAddr = this.addresses.find(addr => addr.id?.toString() === selectedAddressId);
+        selectedAddr = addresses.find(addr => addr.id == selectedAddressId);
       }
+
       // 如果没有找到指定地址或没有指定ID，则使用默认地址或第一个地址
-      selectedAddr = selectedAddr || this.addresses.find(addr => addr.isDefault) || this.addresses[0];
+      selectedAddr = selectedAddr || addresses.find(addr => addr.isDefault) || addresses[0];
       
+      // 检查是否找到地址
+      if (!selectedAddr) {
+        console.error('无法找到收货地址，请先添加收货地址');
+        return null;
+      }
+      
+      // 获取当前登录用户ID (这里假设从userStore获取)
+      const userId = userStore.userId || 0;
+      
+      // 构建完整地址
+      const complete_receiverAddress = `${selectedAddr.province} ${selectedAddr.city} ${selectedAddr.district} ${selectedAddr.detail}`;
       
       const order: Order = {
-        id: Date.now().toString(),
-        orderNumber: 'PO' + Date.now().toString().slice(-8),
-        orderTime: new Date().toLocaleString(),
-        paymentTime: '',
-        orderAmount: totalAmount,
+        orderNumber: 'PO' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+        userId,
+        orderTime: new Date().toISOString(),
+        orderAmount: this.totalAmount,
         paymentMethod: this.getPaymentMethodName(this.paymentMethod),
         status: 'pending',
-        deliveryInfo: {
-          name: selectedAddr.name || '',
-          phone: selectedAddr.phone || '',
-          address: `${selectedAddr.province} ${selectedAddr.city} ${selectedAddr.district} ${selectedAddr.detail}`
-        },
-        items: [...this.orderItems],
+        receiverName: selectedAddr.name || '',
+        receiverPhone: selectedAddr.phone || '',
+        receiverAddress: complete_receiverAddress,
         remark: this.orderRemark,
-
-        // 设置配送地址具体位置为默认地址
-        deliveryAddress: '广东省佛山市南海区华南师范大学南海校区'
+        orderItems: this.selectedItemsForCheckout,
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString(),
       };
       
       this.currentOrder = order;
       return order;
-    },
-
-    // 完成支付
-    completePayment() {
-      if (!this.currentOrder) {
-        this.currentOrder = this.createOrder();
-      }
-      
-      if (this.currentOrder) {
-        this.currentOrder.status = 'paid';
-        this.currentOrder.paymentTime = new Date().toLocaleString();
-        this.currentOrder.paymentMethod = this.getPaymentMethodName(this.paymentMethod);
-        
-        // 保存到本地存储
-        this.saveCurrentOrderToStorage();
-        
-        // 检查是否已存在该订单，如果不存在则添加到订单列表
-        const existingOrderIndex = this.CompleteOrder.findIndex(order => order.orderNumber === this.currentOrder!.orderNumber);
-        if (existingOrderIndex === -1) {
-          this.CompleteOrder.push({...this.currentOrder});
-        } else {
-          // 更新已存在的订单
-          this.CompleteOrder[existingOrderIndex] = {...this.currentOrder};
-        }
-        this.saveOrdersToStorage();
-      }
-      
-      return this.currentOrder;
     },
 
     // 获取支付方式名称
@@ -258,147 +276,152 @@ export const useOrderStore = defineStore('order', {
         this.countdown = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       }, 1000);
 
-      return () => {
+      // 保存清理函数到state
+      this.countdownCleanup = () => {
         if (countdownInterval) {
           clearInterval(countdownInterval);
         }
       };
     },
 
-    // 从购物车同步商品
-    syncCartItems(items: OrderItem[]) {
-      this.orderItems = items;
-    },
 
-    // 清空订单数据
-    clearOrderData() {
-      this.currentOrder = null;
-      this.orderRemark = '';
-      this.paymentMethod = 'alipay';
-      this.deliveryMethod = 'standard';
-      this.cardForm = {
-        number: '',
-        name: '',
-        expiryMonth: '',
-        expiryYear: '',
-        cvv: ''
-      };
+    /**
+     * 根据订单编号获取订单详情
+     * @param orderNumber 订单编号
+     */
+    /**
+     * 根据订单号获取订单
+     * @param orderNumber 订单号
+     * @returns 订单对象或undefined
+     */
+    getOrderByNumber(orderNumber: string): Order | undefined {
+      return this.OrderList.find(order => order.orderNumber === orderNumber);
     },
-
-    // 保存订单数据到本地存储的辅助方法
-    saveOrdersToStorage() {
+    async getOrderDetailByOrderNumber(userId: number, orderNumber: string) {
       try {
-        localStorage.setItem('completeOrders', JSON.stringify(this.CompleteOrder));
-      } catch (error) {
-        console.error('保存订单数据失败:', error);
-      }
-    },
-    
-    // 保存当前订单到本地存储的辅助方法
-    saveCurrentOrderToStorage() {
-      try {
-        if (this.currentOrder) {
-          localStorage.setItem('currentOrder', JSON.stringify(this.currentOrder));
-        } else {
-          localStorage.removeItem('currentOrder');
+        // GET请求通常不需要请求体，所以只需要传递URL
+        const response = await request.get(`/order/{orderNumber}`, {}, {
+          params: { userId: userId, orderNumber: orderNumber }
+        });
+
+        // 检查响应数据是否存在
+        const orderDetail = response.data.order || null;
+        if (orderDetail) {
+          this.OrderList.push(orderDetail);
+          this.currentOrder = orderDetail;
         }
+        console.log('获取订单详情成功:', orderDetail);
       } catch (error) {
-        console.error('保存当前订单数据失败:', error);
+        console.error('获取订单详情失败:', error);
       }
-    },
-
-    // 存储完整订单数据（用于OrderDetail页面展示）
-    saveCompleteOrder(orderData: Partial<Order>) {
-      // 如果没有订单数据，使用当前订单或创建新订单
-      if (!orderData.orderNumber) {
-        if (!this.currentOrder) {
-          const newOrder = this.createOrder();
-          // 将新创建的订单添加到订单列表中
-          this.CompleteOrder.push(newOrder);
-          // 保存到本地存储
-          this.saveOrdersToStorage();
-          return newOrder;
-        }
-        orderData = this.currentOrder;
-      }
-
-      // 创建完整的订单对象
-      const completeOrder: Order = {
-        id: orderData.id || Date.now().toString(),
-        orderNumber: orderData.orderNumber || 'PO' + Date.now().toString().slice(-8),
-        orderTime: orderData.orderTime || new Date().toLocaleString(),
-        paymentTime: orderData.paymentTime || '',
-        orderAmount: orderData.orderAmount || this.totalAmount,
-        paymentMethod: orderData.paymentMethod || this.getPaymentMethodName(this.paymentMethod),
-        status: orderData.status || 'pending',
-        deliveryInfo: orderData.deliveryInfo || {
-          name: this.defaultAddress?.name || '',
-          phone: this.defaultAddress?.phone || '',
-          address: this.defaultAddress ? `${this.defaultAddress.province} ${this.defaultAddress.city} ${this.defaultAddress.district} ${this.defaultAddress.detail}` : ''
-        },
-        items: orderData.items || [...this.orderItems],
-        remark: orderData.remark || this.orderRemark,
-        // 设置配送地址具体位置为默认地址
-        deliveryAddress: orderData.deliveryAddress || '广东省佛山市南海区华南师范大学南海校区'
-      };
-
-      // 更新当前订单
-      this.currentOrder = completeOrder;
-      
-      // 检查是否已存在该订单，如果不存在则添加到订单列表
-      const existingOrderIndex = this.CompleteOrder.findIndex(order => order.orderNumber === completeOrder.orderNumber);
-      if (existingOrderIndex === -1) {
-        this.CompleteOrder.push(completeOrder);
-      } else {
-        // 更新已存在的订单
-        this.CompleteOrder[existingOrderIndex] = completeOrder;
-      }
-      
-      // 保存到本地存储
-      this.saveOrdersToStorage();
-      this.saveCurrentOrderToStorage();
-      
-      return completeOrder;
-    },
-
-    // 根据订单编号获取订单
-    getOrderByNumber(orderNumber: string) {
-      if (!orderNumber || typeof orderNumber !== 'string') {
-        console.error('无效的订单编号参数');
-        return null;
-      }
-      
-      const order = this.CompleteOrder.find(order => order.orderNumber === orderNumber);
-      if (!order) {
-        console.log(`未找到订单编号: ${orderNumber}`);
-        console.log('当前订单列表中有以下订单:', this.CompleteOrder.map(o => o.orderNumber));
-      }
-      
-      return order || null;
     },
 
     /**
      * 根据订单编号删除订单
      * @param orderNumber 订单编号
-     * @returns Promise<boolean> 删除成功返回true，失败返回false
      */
-    async deleteOrder(orderNumber: string): Promise<boolean> {
+    async deleteOrder(orderNumber: string){
       try {
         // DELETE请求通常不需要请求体，所以只需要传递URL
-        const response = await request.del(`/order/${orderNumber}`, { orderNumber });
-        console.log('删除订单成功:', response);
+        const response = await request.del(`/order/deleteOrder`, {}, {
+          params: { orderNumber: orderNumber }
+        });
+        if (response.message === 'success') {
+          ElMessage.success('订单已成功删除');
+        } else {
+          ElMessage.error('删除订单失败，请稍后重试');
+        }
         
         // 从userStore的orders数组中移除对应的订单
+        const { useUserStore } = await import('./user');
         const userStore = useUserStore();
         const orderIndex = userStore.orders.findIndex(order => order.orderNumber === orderNumber);
         if (orderIndex !== -1) {
           userStore.orders.splice(orderIndex, 1);
         }
-        
-        return true;
+
       } catch (error) {
         console.error('删除订单失败:', error);
-        return false;
+      }
+    },
+
+    /**
+     * 添加订单
+     * @param order 订单对象
+     */
+    async addOrder(userId: number, order: Order) {
+      try {
+        // POST请求通常需要请求体，所以传递order对象作为请求体
+        const response = await request.post('/order/addOrder', order, {
+          params: { userId: userId }
+        });
+        console.log('添加订单成功:', response);
+
+      } catch (error) {
+        console.error('添加订单失败:', error);
+      }
+    },
+    
+    /**
+     * 确认支付
+     */
+    async completePayment() {
+      
+      // 验证信用卡信息
+      if (this.paymentMethod === 'creditcard') {
+        if (!this.cardForm.number || !this.cardForm.name || !this.cardForm.expiryMonth || !this.cardForm.expiryYear || !this.cardForm.cvv) {
+          ElMessage.error('请填写完整的信用卡信息');
+          return;
+        }
+      }
+      
+      // 模拟支付处理
+      ElNotification({
+        title: '支付处理中',
+        message: '正在处理您的支付请求，请稍候...',
+        type: 'info',
+        duration: 2000
+      });
+      
+      // 保存完整订单数据，供OrderDetail页面展示
+      if (this.currentOrder) {
+        // 更新订单状态为已支付
+        const updatedOrder = {
+          ...this.currentOrder,
+          status: 'paid' as 'paid',
+          paymentTime: new Date().toISOString()
+        };
+        
+        // 更新当前订单
+        this.currentOrder = updatedOrder;
+        
+        // 添加到订单列表
+        this.OrderList.push(updatedOrder);
+        
+        // 保存订单到用户store
+        const { useUserStore } = await import('./user');
+        const userStore = useUserStore();
+        // 转换为userStore.orders期望的格式
+        const userOrder = {
+          orderNumber: updatedOrder.orderNumber,
+          createTime: updatedOrder.createTime || '',
+          product: updatedOrder.orderItems?.map(item => item.name).join(', ') || '',
+          orderAmount: updatedOrder.orderAmount.toString(),
+          status: updatedOrder.status
+        };
+        userStore.orders.push(userOrder);
+        
+        // 调用后端API保存订单
+        await this.addOrder(userStore.userId || 0, updatedOrder);
+        
+        console.log('订单已保存:', updatedOrder.orderNumber);
+        
+        // 模拟支付成功，实际项目中这里会调用支付API
+        setTimeout(() => {
+          router.push('/order-complete');
+        }, 2000);
+      } else {
+        ElMessage.error('保存订单失败，请重试');
       }
     }
   }

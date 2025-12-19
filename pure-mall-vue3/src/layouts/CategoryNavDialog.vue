@@ -18,7 +18,7 @@
             <el-tag
               v-for="subCategory in category.children"
               :key="subCategory.id"
-              :type="currentCategory.id === subCategory.id ? 'primary' : 'default'"
+              :type="currentCategory.id === subCategory.id ? 'primary' : 'info'"
               @click="selectCategory(subCategory)"
               class="sub-category-tag"
             >
@@ -28,7 +28,7 @@
           <template v-else>
             <!-- 没有子分类时直接显示当前分类 -->
             <el-tag
-              :type="currentCategory.id === category.id ? 'primary' : 'default'"
+              :type="currentCategory.id === category.id ? 'primary' : 'info'"
               @click="selectCategory(category)"
               class="sub-category-tag"
             >

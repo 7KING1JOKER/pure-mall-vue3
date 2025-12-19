@@ -154,7 +154,7 @@ const loginDialogVisible = ref(false) // 登录弹窗状态
 // 用户状态管理
 const userStore = useUserStore()
 const { isLoggedIn } = storeToRefs(userStore)
-console.log('当前路由路径:', activeIndex.value)
+// console.log('当前路由路径:', activeIndex.value)
 
 // methods
 
@@ -182,7 +182,7 @@ const handleSelect = (index: string) => {
     return
   }
 
-  console.log(`导航到: ${index}`)
+  // console.log(`导航到: ${index}`)
 
   router.push(index)
 

@@ -96,12 +96,11 @@
 import { useCartStore } from '../store/cart';
 import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
+import { ElMessage } from 'element-plus';
 import { Delete, Remove, Star, ArrowRightBold } from '@element-plus/icons-vue';
 import PcMenu from '../layouts/PcMenu.vue';
 import CardSteps from '../layouts/CardSteps.vue';
 import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
 
 // 使用购物车store
 const cartStore = useCartStore();
@@ -119,38 +118,24 @@ const {
   updateQuantity,
   clearCart, 
   goShopping, 
-  setActiveStep
+  setActiveStep,
+  checkout
 } = cartStore;
 
-// 初始化路由
-const router = useRouter();
-
-// 自定义结算方法，添加清除已购买商品的功能
-const checkout = () => {
-  // 检查是否有选中商品
-  if (cartStore.selectedCount === 0) {
-    ElMessage.error('请至少选择一件商品进行结算');
-    return;
-  }
-  
-  // 获取选中的商品，用于传递给订单页面
-  const selectedItems = cartStore.cartItems.filter(item => item.selected);
-  
-  // 将选中的商品ID存储到cartStore中，供结算页面使用
-  cartStore.setSelectedItemsForCheckout(selectedItems);
-  
-  // 跳转到结算页面
-  router.push('/checkout');
-};
 
 // 添加到收藏夹方法
-const addToWishlist = (item: any) => {
-  userStore.addToWishlistItem(userStore.username, item.productId);
-  userStore.addToWishlist(item);
+const addToWishlist = async (item: any) => {
+  try {
+    await userStore.addToWishlistItem(userStore.username, item.productId);
+    // 成功添加后，前端更新购物车商品列表
+    userStore.addToWishlist(item);
+  } catch (error) {
+    ElMessage.error('添加到收藏夹失败，请重试');
+  }
 };
 
 onMounted(() => {
-  console.log('购物车页面已加载')
+  // console.log('购物车页面已加载')
   // 购物车步骤条设置为第1步
   setActiveStep(0)
 

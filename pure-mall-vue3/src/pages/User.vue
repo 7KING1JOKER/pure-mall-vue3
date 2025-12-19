@@ -302,12 +302,7 @@ const confirmDeleteOrder = (orderNumber) => {
       type: 'warning'
     }
   ).then(async () => {
-    const result = await orderStore.deleteOrder(orderNumber);
-    if (result) {
-      ElMessage.success('订单已成功删除');
-    } else {
-      ElMessage.error('删除订单失败，请稍后重试');
-    }
+    const response = await orderStore.deleteOrder(orderNumber);
   }).catch(() => {
     // 取消删除，不做任何操作
   })

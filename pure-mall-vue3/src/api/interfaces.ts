@@ -65,21 +65,25 @@ export interface OrderItem {
 
 // 订单接口定义
 export interface Order {
-  id: string;
+  id?: number;
   orderNumber: string;
+  userId: number;
   orderTime: string;
-  paymentTime: string;
+  paymentTime?: string;
+  deliveryTime?: string;
+  receiveTime?: string;
   orderAmount: number;
   paymentMethod: string;
   status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
-  deliveryInfo: {
-    name: string;
-    phone: string;
-    address: string;
-  };
-  items: OrderItem[];
+  receiverName: string;
+  receiverPhone: string;
+  receiverAddress: string;
   remark?: string;
-  deliveryAddress?: string
+  createTime?: string;
+  updateTime?: string;
+  
+  // 非数据库字段，用于关联购物车项
+  orderItems?: CartItem[];
 }
 
 // 配送方式接口定义

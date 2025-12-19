@@ -114,7 +114,7 @@ import { useCartStore } from '../store/cart';
 import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
 import { ShoppingBag, Notebook, ArrowRight } from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElNotification } from 'element-plus';
 import ProductDetailsDialog from '../layouts/ProductDetailsDialog.vue';
 import ProductSizeDialog from '../layouts/ProductSizeDialog.vue';
 
@@ -180,12 +180,32 @@ const {
 
 // 添加到收藏夹方法
 const addToWishlist = (item: any) => {
+  // 检查登录状态
+  if (!userStore.isLoggedIn) {
+    ElNotification({
+    title: '请先登录',
+    message: '您需要登录后才能添加商品到收藏夹',
+    type: 'warning',
+    duration: 2000
+    });
+    return;
+  }
   userStore.addToWishlistItem(userStore.username, item.id);
   userStore.addToWishlist(item);
 };
 
 // 添加到购物车方法
 const addCartItem = (product: any) => {
+  // 检查登录状态
+  if (!userStore.isLoggedIn) {
+    ElNotification({
+    title: '请先登录',
+    message: '您需要登录后才能添加商品到购物车',
+    type: 'warning',
+    duration: 2000
+    });
+    return;
+  }
   // 检查是否已选择尺码
   if (productStore.selectedSize === '') {
     // 提示用户先选择尺码

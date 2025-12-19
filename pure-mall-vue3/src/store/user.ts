@@ -352,6 +352,8 @@ export const useUserStore = defineStore("user", {
 				// 更新地址状态
 				this.addresses = response.data || [];
 				// console.log("loadUserAddress:", this.addresses);
+
+
 			} catch (error) {
 				ElMessage.error('获取地址失败');
 			}
@@ -503,18 +505,6 @@ export const useUserStore = defineStore("user", {
 		/* 收藏夹商品接口 */
 		// 添加到收藏夹
 		addToWishlist(item: any) {
-			const userStore = useUserStore();
-
-			// 检查登录状态
-			if (!userStore.isLoggedIn) {
-				ElNotification({
-				title: '请先登录',
-				message: '您需要登录后才能添加商品到收藏夹',
-				type: 'warning',
-				duration: 2000
-				});
-				return;
-			}
 			
 			// 检查商品是否已在收藏夹中
 			const existingItem = this.wishlistItems.find(wishItem => wishItem.id === item.id);
@@ -536,12 +526,9 @@ export const useUserStore = defineStore("user", {
 				image: item.image || item.images?.[0] || '',
 				sales: item.sales || 0
 				});
-
-				ElNotification({
-				title: '已添加到收藏',
-				message: `已将 "${item.name}" 添加到收藏夹`,
-				type: 'info',
-				duration: 2000
+				ElMessage.success({
+					message: `已添加 "${item.name}" 到收藏夹`,
+					duration: 2000
 				});
 			}
 		},
@@ -560,7 +547,6 @@ export const useUserStore = defineStore("user", {
 				});
 			}
 		},
-		
 		/**
 		 * 向服务器添加商品到收藏夹
 		 * @param username - 用户名
@@ -573,7 +559,10 @@ export const useUserStore = defineStore("user", {
 				params: { username, productId }
 				});
 			} catch (error) {
+				
 				console.error('添加到收藏夹失败:', error);
+				// 将错误向上抛出，让调用者知道添加失败
+				throw error;
 			}
 		},
 
@@ -610,3 +599,4 @@ export const useUserStore = defineStore("user", {
 		},
 	}
 })
+

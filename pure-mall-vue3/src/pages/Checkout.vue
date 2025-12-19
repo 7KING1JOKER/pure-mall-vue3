@@ -9,16 +9,19 @@
     <div class="checkout-content">
       <!-- 收货地址 -->
       <div class="address-section">
+        <!-- 选择地址标题 -->
         <div class="section-title">
           <el-icon><Location /></el-icon> 收货地址
           <el-icon @click="addNewAddress" class="add-icon"> <Plus /> </el-icon>
         </div>
+
+        <!-- 地址列表 -->
         <div class="address-list">
           <div 
             v-for="address in addresses" 
             :key="address.id"
-            :class="['address-item', { 'active': address.id.toString() === selectedAddressId }]"
-            @click="selectAddress(address.id.toString())"
+            :class="['address-item', { 'active': address.id === selectedAddressId }]"
+            @click="selectAddress(address.id)"
           >
             <div class="address-info">
               <div class="name-phone">
@@ -67,7 +70,7 @@
           <el-icon><Van /></el-icon> 配送方式
         </div>
         <div class="delivery-options">
-          <el-radio-group v-model="deliveryMethod">
+          <el-radio-group v-model="orderStore.deliveryMethod">
             <el-radio label="standard">标准配送 (免费)</el-radio>
             <el-radio label="express">快速配送 (¥15.00)</el-radio>
           </el-radio-group>
@@ -81,7 +84,7 @@
         </div>
         <div class="remark-input">
           <el-input
-            v-model="orderRemark"
+            v-model="orderStore.orderRemark"
             type="textarea"
             :rows="2"
             placeholder="请输入订单备注，如有特殊要求请在此说明"
@@ -94,145 +97,67 @@
       <!-- 底部操作栏 -->
       <div class="checkout-footer">
         <div class="checkout-footer-left">
-          <span>商品总价({{ totalAmount.toFixed(2) }})</span>
+          <span>商品总价({{ orderStore.subtotal.toFixed(2) }})</span>
           <span>配送费({{ deliveryFee.toFixed(2) }})</span>
-          <span>总额({{ (totalAmount + deliveryFee).toFixed(2) }})</span>
+          <span>总额({{ totalAmount.toFixed(2) }})</span>
         </div>
         <div class="checkout-footer-right">
-          <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
           <el-icon @click="proceedToPayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- 地址弹窗 -->
   <AddressDialog v-model="userStore.AddressDialogVisible" />
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted } from 'vue'
+
 import { useCartStore } from '../store/cart'
 import { useUserStore } from '../store/user'
 import { useOrderStore } from '../store/order'
+
 import { storeToRefs } from 'pinia'
-import { ElMessageBox, ElMessage } from 'element-plus'
 import PcMenu from '../layouts/PcMenu.vue'
 import CardSteps from '../layouts/CardSteps.vue'
 import AddressDialog from '../layouts/AddressDialog.vue'
 
-import { Location, Edit, Delete, Plus, Goods, Van, ChatLineRound, ArrowRightBold, ArrowLeftBold } from '@element-plus/icons-vue'
-
-const router = useRouter()
+import { Location, Edit, Delete, Plus, Goods, Van, ChatLineRound, ArrowRightBold } from '@element-plus/icons-vue'
 
 // 使用stores
 const cartStore = useCartStore()
 const userStore = useUserStore()
 const orderStore = useOrderStore()
 
-// 本地选中的地址ID
-const selectedAddressId = ref<string>('')
-
 // 从store解构获取非响应式方法
 const { 
   openEditAddressDialog: editAddress,
-  openAddAddressDialog: addNewAddress,
-  deleteAddress
+  openAddAddressDialog: addNewAddress
 } = userStore
 
 const { setActiveStep } = cartStore
-
-// 选择地址
-const selectAddress = (addressId: string) => {
-  selectedAddressId.value = addressId
-}
 
 // 从store中解构响应式数据
 const { 
   addresses
 } = storeToRefs(userStore)
 
-// 本地状态管理
-const deliveryMethod = ref('standard')
-const orderRemark = ref('')
-const deliveryFee = ref(0)
-
-// 从cartStore中解构响应式数据
-const { 
+// 从orderStore中解构响应式数据
+const {
   selectedItemsForCheckout,
+  selectedAddressId,
+  deliveryFee,
   totalAmount
-} = storeToRefs(cartStore)
+} = storeToRefs(orderStore)
 
-// 返回购物车
-const goBack = () => {
-  router.push('/cart')
-}
-
-// 确认删除地址
-const confirmDeleteAddress = (addressId: number) => {
-  ElMessageBox.confirm(
-    '确定要删除这个地址吗？',
-    '删除确认',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(() => {
-    // 调用userStore的deleteAddress方法，传递用户名和地址ID
-    deleteAddress(userStore.username, addressId)
-  }).catch(() => {
-    // 取消删除，不做任何操作
-  })
-}
-
-// 提交订单，进入支付页面
-  const proceedToPayment = () => {
-    // 验证是否已选择地址
-    if (!selectedAddressId.value) {
-      ElMessage.error('请选择收货地址')
-      return
-    }
-    
-    // 使用从购物车页面传递过来的选中商品
-    const selectedItems = selectedItemsForCheckout.value
-    
-    if (selectedItems.length === 0) {
-      ElMessage.error('请至少选择一件商品')
-      return
-    }
-    
-    // 将CartItem转换为OrderItem
-    const orderItems = selectedItems.map(item => ({
-      ...item,
-      image: item.imageUrl // CartItem使用imageUrl，OrderItem需要image
-    }))
-    
-    // 准备订单商品数据 - 只同步已选中的商品
-    orderStore.syncCartItems(orderItems)
-    // 设置配送方式
-    orderStore.deliveryMethod = deliveryMethod.value
-    // 设置订单备注
-    orderStore.orderRemark = orderRemark.value
-    
-    // 创建订单
-    const order = orderStore.createOrder(selectedAddressId.value)
-    
-    if (order) {
-      console.log('订单创建成功，即将清除购物车中已购买的商品')
-      // 清除购物车中的已选商品
-      cartStore.removeSelected()
-      // 保存购物车数据（如果需要的话，可以调用cartStore的其他保存方法）
-      // 注意：cartStore中没有saveCartToStorage方法，可能是想调用其他方法或API
-      console.log('购物车数据已更新')
-      // 提交成功后跳转到支付页面
-      router.push('/payment')
-    } else {
-      ElMessageBox.alert('创建订单失败，请重试', '提示', {
-        confirmButtonText: '确定',
-        type: 'error'
-      })
-    }
-  }
+// 从orderStore解构获取非响应式方法
+const { 
+  selectAddress,
+  confirmDeleteAddress,
+  proceedToPayment
+} = orderStore
 
 // 页面加载时的操作
 onMounted(() => {

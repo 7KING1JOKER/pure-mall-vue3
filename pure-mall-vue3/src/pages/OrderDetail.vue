@@ -11,7 +11,7 @@
           <!-- 高德地图容器 -->
           <div id="mapContainer" class="map-container-element"></div>
           <div class="address-info">
-            <span v-if="currentOrder.deliveryAddress"> {{ currentOrder.deliveryAddress }}</span>
+            <span v-if="currentOrder.receiverAddress"> {{ currentOrder.receiverAddress }}</span>
             <span v-else> 配送地址获取中... </span>
           </div>
         </div>
@@ -54,9 +54,9 @@
           <h1 class="products-title">商品信息</h1>
           <div class="product-item-container" id="sortableProductList">
             
-            <div class="product-item" v-for="(item, index) in currentOrder.items" :key="index">
+            <div class="product-item" v-for="(item, index) in currentOrder.orderItems" :key="index">
               <div class="product-image">
-                <el-image :src="item.image" fit="cover" />
+                <el-image :src="item.imageUrl" fit="cover" />
               </div>
               <!-- 还需要展示商品名称、数量、单价、颜色、尺码 -->
               <div class="product-info">
@@ -76,7 +76,7 @@
               <span class="amount-value">¥{{ subtotal.toFixed(2) }}</span>
             </div>
             <div class="amount-item">
-              <span class="amount-label">订单总额：</span>
+              <span class="amount-label">订单总额(含运费)：</span>
               <span class="amount-value total">¥{{ currentOrder.orderAmount.toFixed(2) }}</span>
             </div>
           </div>
@@ -103,6 +103,7 @@ import PcMenu from '../layouts/PcMenu.vue';
 import Footer from '../layouts/Footer.vue';
 import { useOrderStore } from '../store/order';
 import { storeToRefs } from 'pinia';
+import type { CartItem } from '../api/interfaces';
 
 // 其它js库的引入
 import Sortable from 'sortablejs';
@@ -128,8 +129,8 @@ const orderId = computed(() => {
 
 // 计算商品总价
 const subtotal = computed(() => {
-  if (!currentOrder.value) return 0;
-  return currentOrder.value.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  if (!currentOrder.value || !currentOrder.value.orderItems) return 0;
+  return currentOrder.value.orderItems.reduce((total: number, item: CartItem) => total + (item.price * item.quantity), 0);
 });
 
 // 地图相关变量
@@ -208,7 +209,7 @@ const locateAddress = () => {
   }
   
   // 使用 deliveryAddress 作为定位地址
-  const address = currentOrder.value.deliveryAddress;
+  const address = currentOrder.value.receiverAddress;
   
   // 检查地址参数是否有效
   if (!address || typeof address !== 'string' || address.trim() === '') {

@@ -78,7 +78,6 @@
             <p>付款后请勿关闭页面，等待系统自动跳转</p>
           </div>
           <div class="payment-footer">
-            <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
             <el-icon @click="completePayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
           </div>
         </div>
@@ -96,7 +95,6 @@
             <p>付款后请勿关闭页面，等待系统自动跳转</p>
           </div>
           <div class="payment-footer">
-            <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
             <el-icon @click="completePayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
           </div>
         </div>
@@ -128,7 +126,6 @@
             </el-form-item>
           </el-form>
           <div class="payment-footer">
-            <el-icon @click="goBack" class="footer-icon"> <ArrowLeftBold /> </el-icon>
             <el-icon @click="completePayment" class="footer-icon"> <ArrowRightBold /> </el-icon>
           </div>
         </div>
@@ -139,17 +136,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElNotification } from 'element-plus'
+import { onMounted, onBeforeUnmount } from 'vue'
 import { useOrderStore } from '../store/order'
 import { useCartStore } from '../store/cart'
 import { storeToRefs } from 'pinia'
 import PcMenu from '../layouts/PcMenu.vue'
 import CardSteps from '../layouts/CardSteps.vue';
-import { CreditCard, Document, ArrowRightBold, ArrowLeftBold } from '@element-plus/icons-vue'
-
-const router = useRouter()
+import { CreditCard, Document, ArrowRightBold } from '@element-plus/icons-vue'
 
 // 使用stores
 const orderStore = useOrderStore()
@@ -157,12 +150,12 @@ const cartStore = useCartStore()
 
 // 从store解构获取非响应式方法
 const { 
-  completePayment: storeCompletePayment,
+  completePayment,
   getPaymentMethodName,
   startCountdown
 } = orderStore
 
-const {
+const { 
   setActiveStep
 } = cartStore
 // 购物车步骤条设置为第3步
@@ -173,7 +166,9 @@ const {
   paymentMethod,
   cardForm,
   countdown,
-  currentOrder
+  orderNumber,
+  orderTime,
+  orderAmount
 } = storeToRefs(orderStore)
 
 // 确保cardForm有初始值
@@ -184,79 +179,27 @@ if (!cardForm.value.expiryYear) {
   cardForm.value.expiryYear = ''
 }
 
-// 倒计时清理函数引用
-const countdownCleanup = ref<(() => void) | null>(null)
-
-// 订单信息 - 从当前订单中获取计算属性
-const orderNumber = computed(() => currentOrder.value?.orderNumber || '')
-const orderTime = computed(() => currentOrder.value?.orderTime || '')
-const orderAmount = computed(() => currentOrder.value?.orderAmount || 0)
-
-
-// 返回订单确认页面
-const goBack = () => {
-  router.push('/checkout')
-}
-
-// 确认支付
-const completePayment = () => {
-  // 这里可以添加支付验证逻辑
-  if (paymentMethod.value === 'creditcard') {
-    // 验证信用卡信息
-    if (!cardForm.value.number || !cardForm.value.name || !cardForm.value.expiryMonth || !cardForm.value.expiryYear || !cardForm.value.cvv) {
-      ElMessage.error('请填写完整的信用卡信息')
-      return
-    }
-  }
-
-  // 模拟支付处理
-  ElNotification({
-    title: '支付处理中',
-    message: '正在处理您的支付请求，请稍候...',
-    type: 'info',
-    duration: 2000
-  })
-
-  // 调用store中的支付方法
-  storeCompletePayment()
-  
-  // 准备支付成功后的订单数据
-  const paymentSuccessData = {
-    paymentTime: new Date().toLocaleString(),
-    status: 'paid' as 'paid',
-    paymentMethod: getPaymentMethodName(paymentMethod.value)
-  }
-  
-  // 保存完整订单数据，供OrderDetail页面展示
-  const savedOrder = orderStore.saveCompleteOrder(paymentSuccessData)
-  
-  // 确保订单已保存再跳转
-  if (savedOrder) {
-    console.log('订单已保存:', savedOrder.orderNumber)
-    // 模拟支付成功，实际项目中这里会调用支付API
-    setTimeout(() => {
-      router.push('/order-complete')
-    }, 2000)
-  } else {
-    ElMessage.error('保存订单失败，请重试')
-  }
-}
-
 // 页面加载时启动倒计时
 onMounted(() => {
   console.log('支付页面已加载')
   // 启动倒计时，传入超时回调
-  countdownCleanup.value = startCountdown(() => {
-    ElMessage.warning('支付超时，请重新下单')
-    router.push('/cart')
+  startCountdown(() => {
+    import('element-plus').then(({ ElMessage }) => {
+      import('vue-router').then(({ useRouter }) => {
+        const router = useRouter()
+        ElMessage.warning('支付超时，请重新下单')
+        router.push('/cart')
+      })
+    })
   })
   
 })
 
 // 页面卸载前清除倒计时
 onBeforeUnmount(() => {
-  if (countdownCleanup.value) {
-    countdownCleanup.value()
+  if (orderStore.countdownCleanup) {
+    orderStore.countdownCleanup()
+    orderStore.countdownCleanup = null
   }
 })
 </script>
