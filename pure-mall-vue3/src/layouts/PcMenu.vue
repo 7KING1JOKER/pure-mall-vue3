@@ -57,7 +57,7 @@
         @click="drawerVisible = true"
         :icon="More"
         circle
-        size="medium"
+        size="default"
       />
     </div>
 
@@ -201,7 +201,7 @@ const handleSelect = (index: string) => {
 // 处理用户点击
 const handleUserClick = () => {
   // 检查用户是否登录 - 这里应该是从全局状态获取
-  if (isLoggedIn.value) {
+  if (isLoggedIn.value  && localStorage.getItem('token')) {
     router.push('/user')
   } else {
     // 显示注册弹窗

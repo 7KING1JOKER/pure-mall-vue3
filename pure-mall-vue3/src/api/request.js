@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/store/user';
-import router from '@/router';
 
 // 创建axios实例
 const service = axios.create({
@@ -13,17 +12,23 @@ const service = axios.create({
 });
 
 // 请求拦截器
- service.interceptors.request.use( 
-   config => { 
-    //  console.log('请求URL:', config.url);
-    //  console.log('请求参数:', config.data);
-    //  console.log('请求头:', config.headers);
-     return config; 
-   }, 
-   error => { 
-     return Promise.reject(error); 
-   } 
- );
+service.interceptors.request.use( 
+  config => { 
+  //  console.log('请求URL:', config.url);
+  //  console.log('请求参数:', config.data);
+  //  console.log('请求头:', config.headers);
+    // 从localStorage获取JWT令牌
+    const token = localStorage.getItem('token');
+    // 如果令牌存在，添加到请求头
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config; 
+  }, 
+  error => { 
+    return Promise.reject(error); 
+  } 
+);
 
 // 响应拦截器
 service.interceptors.response.use(
@@ -44,7 +49,6 @@ service.interceptors.response.use(
           // 未登录或登录失效
           const userStore = useUserStore();
           userStore.logout();
-          router.push('/login');
           ElMessage.error('请先登录');
           break;
         case 403:
@@ -54,10 +58,10 @@ service.interceptors.response.use(
           ElMessage.error('请求的资源不存在');
           break;
         case 500:
-          // 不在这里显示错误消息，让具体的请求方法处理
+          ElMessage.error('服务器内部错误，请稍后重试');
           break;
         default:
-          // 不在这里显示错误消息，让具体的请求方法处理
+          ElMessage.error(`请求失败：${error.response.message}`);
           break;
       }
     } else if (error.request) {

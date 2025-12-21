@@ -52,17 +52,6 @@ export interface CategoryNode {
  */
 
 
-// 订单项接口定义
-export interface OrderItem {
-  id: number;
-  name: string;
-  spec: string;
-  price: number;
-  quantity: number;
-  image: string;
-  selected?: boolean;
-}
-
 // 订单接口定义
 export interface Order {
   id?: number;
@@ -83,7 +72,7 @@ export interface Order {
   updateTime?: string;
   
   // 非数据库字段，用于关联购物车项
-  orderItems?: CartItem[];
+  orderItems: CartItem[];
 }
 
 // 配送方式接口定义

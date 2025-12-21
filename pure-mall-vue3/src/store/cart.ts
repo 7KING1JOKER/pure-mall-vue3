@@ -293,7 +293,7 @@ export const useCartStore = defineStore("cart", {
       const selectedItems = this.cartItems.filter(item => item.selected);
       orderStore.selectedItemsForCheckout = selectedItems;
 
-      // 从购物车中删除选中商品 包括前后端
+      // 从购物车中删除选中商品 前后端
       this.removeSelected();
 
       // 跳转到结算页面

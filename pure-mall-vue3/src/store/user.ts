@@ -1,31 +1,32 @@
 import { defineStore } from "pinia";
 import { ElMessage, ElNotification } from "element-plus";
-import type { Address, Product } from "../api/interfaces";
+import type { Address, Product, Order } from "../api/interfaces";
 import request from "@/api/request";
+import { useOrderStore } from './order';
 
 export const useUserStore = defineStore("user", {
 	state: () => ({
-    // 用户名
-		username: '默认用户',
-    // 用户ID
-		userId: 0,
-    // 邮箱
+		// 用户名
+		username: localStorage.getItem('username') || '默认用户',
+		// 用户ID
+		userId: parseInt(localStorage.getItem('userId') || '0'),
+		// 邮箱
 		email: 'default@example.com',
-    // 会员等级
+		// 会员等级
 		vip: '会员',
-    // 当前激活的标签页
+		// 当前激活的标签页
 		activeTab: 'profile',
-    // 登录状态
+		// 登录状态
 		isLoggedIn: JSON.parse(localStorage.getItem('isLoggedIn') || 'false'), // 从localStorage恢复登录状态
-		
-    // 标签页图标
-    tabIcons: {
+			
+		// 标签页图标
+		tabIcons: {
 			profile: 'User',
 			orders: 'ShoppingCart',
 			address: 'Location',
 			wishlist: 'Star'
 		},
-    // 标签页标题
+		// 标签页标题
 		tabTitles: {
 			profile: '个人资料',
 			orders: '我的订单',
@@ -33,7 +34,7 @@ export const useUserStore = defineStore("user", {
 			wishlist: '我的收藏'
 		},
 
-    // 个人资料
+		// 个人资料
 		basicInfo: [
 			{ label: '用户名', value: '张明' },
 			{ label: '邮箱', value: 'zhangsan@example.com' },
@@ -42,23 +43,17 @@ export const useUserStore = defineStore("user", {
 			{ label: '出生日期', value: '1999-01-01' }
 		],
 
-    // 会员信息
+		// 会员信息
 		memberInfo: [
 			{ label: '会员等级', value: '黄金会员' },
 			{ label: '积分', value: '3,000 分' },
 			{ label: '优惠券', value: '5 张可用' }
 		],
 
-    // 我的订单
-		orders: [
-			{ orderNumber: '20230528001', createTime: '2023-05-28 10:00:00', product: 'Apple iPhone 14 Pro Max', orderAmount: '¥8,999', status: '已完成' },
-			{ orderNumber: '20230527002', createTime: '2023-05-27 15:30:00', product: 'Samsung Galaxy S23 Ultra', orderAmount: '¥7,899', status: '待发货' },
-			{ orderNumber: '20230525003', createTime: '2023-05-25 09:15:00', product: 'Sony WH-1000XM5 耳机', orderAmount: '¥2,599', status: '已发货' },
-			{ orderNumber: '20230520004', createTime: '2023-05-20 12:45:00', product: 'MacBook Pro 14英寸', orderAmount: '¥14,999', status: '已完成' },
-			{ orderNumber: '20230515005', createTime: '2023-05-15 18:30:00', product: 'Nike Air Jordan 1', orderAmount: '¥1,299', status: '已取消' }
-		],
+		// 我的订单
+		orders: [] as Order[],
 
-    // 地址管理
+		// 地址管理
 		addresses: [
 			{
 				id: 1,
@@ -90,21 +85,21 @@ export const useUserStore = defineStore("user", {
 		wishlistItems: [] as Product[],
 
 
-    // 编辑个人资料对话框相关状态
-    EditProfileDialogVisible: false,
-    // 地址对话框相关状态
-    AddressDialogVisible: false,
-    // 当前编辑的地址
-    currentAddress: null as Address | null,
-    // 是否正在编辑地址
-    isEditingAddress: false
-	}),
-	actions: {
-    /**
-     * 根据订单状态返回对应的 Element Plus 颜色类名
-     * @param status 订单状态
-     * @returns 颜色类名
-     */
+		// 编辑个人资料对话框相关状态
+		EditProfileDialogVisible: false,
+		// 地址对话框相关状态
+		AddressDialogVisible: false,
+		// 当前编辑的地址
+		currentAddress: null as Address | null,
+		// 是否正在编辑地址
+		isEditingAddress: false
+		}),
+		actions: {
+		/**
+		 * 根据订单状态返回对应的 Element Plus 颜色类名
+		 * @param status 订单状态
+		 * @returns 颜色类名
+		 */
 		statusType(status: string) {
 			const map: Record<string, string> = {
 				'已完成': 'success',
@@ -115,17 +110,17 @@ export const useUserStore = defineStore("user", {
 			return map[status] || 'info'
 		},
 
-    /**
-     * 处理菜单选择事件，切换当前激活的标签页
-     * @param index 选中的标签页索引
-     */
-		handleMenuSelect(index:string) {
-			this.activeTab = index
-		},
+		/**
+		 * 处理菜单选择事件，切换当前激活的标签页
+		 * @param index 选中的标签页索引
+		 */
+			handleMenuSelect(index:string) {
+				this.activeTab = index
+			},
 
 		/**
-     * 打开添加地址对话框
-     */
+		 * 打开添加地址对话框
+		 */
 		openAddAddressDialog() {
 			this.isEditingAddress = false
 			this.currentAddress = {
@@ -144,9 +139,9 @@ export const useUserStore = defineStore("user", {
 		},
 
 		/**
-     * 打开编辑地址对话框
-     * @param addressId 要编辑的地址ID
-     */
+		 * 打开编辑地址对话框
+		 * @param addressId 要编辑的地址ID
+		 */
 		openEditAddressDialog(addressId: number) {
 			const address = this.addresses.find(addr => addr.id === addressId)
 			if (address) {
@@ -402,9 +397,13 @@ export const useUserStore = defineStore("user", {
 				const response = await request.get('/order/userOrders', { username });
 				// 更新订单状态
 				this.orders = response.data.orders || [];
-				// console.log("loadUserOrders:", this.orders);
+				// 将订单数据同步到orderStore的OrderList数组中
+				const orderStore = useOrderStore();
+				orderStore.OrderList = this.orders;
+				console.log("loadUserOrders: 成功加载订单并同步到orderStore", this.orders);
 			} catch (error) {
 				ElMessage.error('获取订单失败');
+				console.error('加载用户订单失败:', error);
 			}
 		},
 		
@@ -453,12 +452,25 @@ export const useUserStore = defineStore("user", {
 		async login(username: string, password: string): Promise<any> {
 			try {
 				const response = await request.post('/user/login', { username, password });
-				// 响应成功后加载用户数据
+
+				console.log("response:", response);
+				// 处理JWT令牌
+				if (response.data.token) {
+					// 将JWT令牌存储到localStorage
+					localStorage.setItem('token', response.data.token);
+					// 登录成功，更新状态
+					this.isLoggedIn = true;
+					localStorage.setItem('isLoggedIn', 'true'); // 保存到localStorage
+				}
+
+				// 处理成功后加载用户数据
 				await this.loadUserData(username);
 
-				// 加载数据完毕，登录成功，更新状态
-				this.isLoggedIn = true;
-				localStorage.setItem('isLoggedIn', 'true'); // 保存到localStorage
+				// 加载完用户数据后，再存储用户信息到localStorage
+				if (this.userId && this.username) {
+					localStorage.setItem('userId', String(this.userId));
+					localStorage.setItem('username', this.username);
+				}
 
 				ElMessage.success(response.message || '登录成功');
 				return response;
@@ -533,11 +545,31 @@ export const useUserStore = defineStore("user", {
 			}
 		},
 		
+		/**
+		 * 用户退出登录
+		 */
 		logout() {
-			// 模拟登出
-			this.isLoggedIn = false
-			localStorage.removeItem('isLoggedIn') // 从localStorage移除
-			ElMessage.success('已退出登录')
+			// 清除JWT令牌
+			localStorage.removeItem('token');
+			localStorage.removeItem('userId');
+			localStorage.removeItem('username');
+			// 清除登录状态
+			localStorage.removeItem('isLoggedIn');
+			// 重置用户信息
+			this.username = '默认用户';
+			this.userId = 0;
+			this.email = 'default@example.com';
+			this.isLoggedIn = false;
+			// 清空订单和地址等敏感信息
+			this.orders = [];
+			this.addresses = [];
+			this.wishlistItems = [];
+			// 清空购物车
+			// 购物车相关状态未定义，暂不做处理
+			// this.cartItems = [];
+			// this.totalPrice = 0;
+			// this.totalQuantity = 0;
+			ElMessage.success('退出登录成功');
 		},
 
 		/* 收藏夹商品接口 */
@@ -637,4 +669,9 @@ export const useUserStore = defineStore("user", {
 		},
 	}
 })
+
+
+
+
+
 

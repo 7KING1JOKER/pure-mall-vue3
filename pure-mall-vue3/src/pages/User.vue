@@ -279,7 +279,6 @@ const getStatusText = (status) => {
 
 // 查看订单详情
 const viewOrderDetail = (orderNumber) => {
-  
   if (orderNumber) {
     router.push({
       name: 'OrderDetail',

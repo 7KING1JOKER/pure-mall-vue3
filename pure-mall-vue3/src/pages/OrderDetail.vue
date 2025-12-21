@@ -102,6 +102,7 @@ import { useRoute, useRouter } from 'vue-router';
 import PcMenu from '../layouts/PcMenu.vue';
 import Footer from '../layouts/Footer.vue';
 import { useOrderStore } from '../store/order';
+import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
 import type { CartItem } from '../api/interfaces';
 
@@ -116,6 +117,10 @@ const router = useRouter();
 // 订单详情相关
 const orderStore = useOrderStore();
 const { currentOrder } = storeToRefs(orderStore);
+
+// 用户相关
+const userStore = useUserStore();
+const { userId, isLoggedIn } = storeToRefs(userStore);
 
 // 获取订单编号，支持从params和query两种方式
 const orderId = computed(() => {
@@ -240,18 +245,31 @@ const locateAddress = () => {
 
 
 // 加载订单详情
-onMounted(() => {
+onMounted(async () => {
   if (orderId.value) {
     // 尝试通过订单编号获取订单
     const order = orderStore.getOrderByNumber(orderId.value);
     if (order) {
       // 如果找到订单，更新当前订单
       orderStore.currentOrder = order;
-      console.log('找到订单，成功加载订单详情');
+      console.log('找到订单，成功加载订单详情', order);
     } else {
-      console.log('未找到订单，设置currentOrder为null');
-      // 明确设置currentOrder为null，这样会显示订单不存在的提示
-      orderStore.currentOrder = null;
+      console.log('未找到订单，尝试从服务器获取');
+      // 如果本地找不到订单，且用户已登录且有userId，尝试从服务器获取
+      if (isLoggedIn.value && userId.value) {
+        try {
+          await orderStore.getOrderDetailByOrderNumber(userId.value, orderId.value);
+          console.log('从服务器获取订单详情成功');
+        } catch (error) {
+          console.error('从服务器获取订单详情失败:', error);
+          // 如果获取失败，设置currentOrder为null
+          orderStore.currentOrder = null;
+        }
+      } else {
+        console.log('用户未登录或无userId，设置currentOrder为null');
+        // 用户未登录或无userId，设置currentOrder为null
+        orderStore.currentOrder = null;
+      }
     }
   } else {
     // 如果没有订单ID，设置currentOrder为null

@@ -360,13 +360,15 @@ export const useOrderStore = defineStore('order', {
     async getOrderDetailByOrderNumber(userId: number, orderNumber: string) {
       try {
         // GET请求通常不需要请求体，所以只需要传递URL
-        const response = await request.get(`/order/{orderNumber}`, {}, {
+        const response = await request.get(`/order/${orderNumber}`, {}, {
           params: { userId: userId, orderNumber: orderNumber }
         });
-
+    
         // 检查响应数据是否存在
         const orderDetail = response.data.order || null;
         if (orderDetail) {
+          console.log('订单详情数据:', orderDetail);
+          console.log('订单商品列表:', orderDetail.orderItems);
           this.OrderList.push(orderDetail);
           this.currentOrder = orderDetail;
         }
@@ -422,6 +424,9 @@ export const useOrderStore = defineStore('order', {
 
       } catch (error) {
         console.error('添加订单失败:', error);
+        ElMessage.error('添加订单失败，请重试');
+        // 重新抛出异常，以便上层调用者能够捕获
+        throw error;
       }
     },
     
@@ -459,24 +464,35 @@ export const useOrderStore = defineStore('order', {
         // 更新当前订单
         this.currentOrder = updatedOrder;
         
-        // 添加到订单列表
-        this.OrderList.push(updatedOrder);
+        // 查找并更新OrderList中对应的订单
+        const orderIndex = this.OrderList.findIndex(order => order.orderNumber === updatedOrder.orderNumber);
+        if (orderIndex !== -1) {
+          this.OrderList[orderIndex] = updatedOrder;
+        } else {
+          // 如果找不到，才添加到OrderList
+          this.OrderList.push(updatedOrder);
+        }
         
         // 保存订单到用户store
         const { useUserStore } = await import('./user');
         const userStore = useUserStore();
-        // 转换为userStore.orders期望的格式
-        const userOrder = {
-          orderNumber: updatedOrder.orderNumber,
-          createTime: updatedOrder.createTime || '',
-          product: updatedOrder.orderItems?.map(item => item.name).join(', ') || '',
-          orderAmount: updatedOrder.orderAmount.toString(),
-          status: updatedOrder.status
-        };
-        userStore.orders.push(userOrder);
         
-        // 调用后端API保存订单
-        await this.addOrder(userStore.userId || 0, updatedOrder);
+        // 查找并更新userStore.orders中对应的订单
+        const userOrderIndex = userStore.orders.findIndex(order => order.orderNumber === updatedOrder.orderNumber);
+        if (userOrderIndex !== -1) {
+          userStore.orders[userOrderIndex] = updatedOrder;
+        } else {
+          // 如果找不到，才添加到userStore.orders
+          userStore.orders.push(updatedOrder);
+        }
+
+        try {
+          // 调用后端API保存订单
+          await this.addOrder(userStore.userId || 0, updatedOrder);
+        } catch (error) {
+          router.push('/');
+          return;
+        }
         
         console.log('订单已保存:', updatedOrder.orderNumber);
         
