@@ -71,8 +71,17 @@ export interface Order {
   createTime?: string;
   updateTime?: string;
   
-  // 非数据库字段，用于关联购物车项
-  orderItems: CartItem[];
+  // 订单商品列表
+  orderItems: OrderItem[];
+}
+
+export interface OrderItem {
+  orderNumber?: string;
+  name: string;
+  spec: string;
+  price: number;
+  quantity: number;
+  imageUrl: string;
 }
 
 // 配送方式接口定义

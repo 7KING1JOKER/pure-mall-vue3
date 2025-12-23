@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { CartItem, Order, DeliveryMethod, PaymentMethod } from '../api/interfaces';
+import type { OrderItem, Order, DeliveryMethod, PaymentMethod } from '../api/interfaces';
 import request from '@/api/request';
 import { useUserStore } from './user';
 import { ElMessageBox, ElMessage, ElNotification } from 'element-plus';
@@ -8,16 +8,13 @@ import router from '../router/index';
 export const useOrderStore = defineStore('order', {
   state: () => ({
     // 用于结算的选中商品列表
-    selectedItemsForCheckout: [] as CartItem[],
+    selectedItemsForCheckout: [] as OrderItem[],
     
     // 选中的地址ID
     selectedAddressId: 0 as number,
    
     // 订单列表
     OrderList: [] as Order[],
-
-    // 订单商品列表
-    orderItems: [] as CartItem[],
 
     // 当前选择的配送方式
     deliveryMethod: 'standard',
@@ -275,8 +272,17 @@ export const useOrderStore = defineStore('order', {
       // 构建完整地址
       const complete_receiverAddress = `${selectedAddr.province} ${selectedAddr.city} ${selectedAddr.district} ${selectedAddr.detail}`;
       
+      // 生成订单号
+      const OrderNumber = 'PO' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+      // 创建一个新的OrderItems数组，而不是直接修改selectedItemsForCheckout
+      const orderItems = this.selectedItemsForCheckout.map(item => ({
+        ...item,
+        orderNumber: OrderNumber
+      }));
+
       const order: Order = {
-        orderNumber: 'PO' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+        orderNumber: OrderNumber,
         userId,
         orderTime: new Date().toISOString(),
         orderAmount: this.totalAmount,
@@ -286,7 +292,7 @@ export const useOrderStore = defineStore('order', {
         receiverPhone: selectedAddr.phone || '',
         receiverAddress: complete_receiverAddress,
         remark: this.orderRemark,
-        orderItems: this.selectedItemsForCheckout,
+        orderItems: orderItems, // 使用新创建的orderItems数组
         createTime: new Date().toISOString(),
         updateTime: new Date().toISOString(),
       };
@@ -429,7 +435,85 @@ export const useOrderStore = defineStore('order', {
         throw error;
       }
     },
-    
+
+    /**
+     * 添加订单商品列表
+     * @param {OrderItem[]} orderItems - 订单商品列表
+     * @returns {Promise<void>}
+     */
+    async addOrderItems(userId: number, orderItems: OrderItem[]) {
+      try {
+        // POST请求通常需要请求体，所以传递orderItems数组作为请求体
+        const response = await request.post('/orderItem/addOrderItem', orderItems, {
+          params: { userId: userId }
+        });
+        console.log('添加订单商品列表成功:', response);
+        
+      } catch (error) {
+        console.error('添加订单商品列表失败:', error);
+        ElMessage.error('添加订单商品列表失败，请重试');
+        // 重新抛出异常，以便上层调用者能够捕获
+        throw error;
+      }
+    },
+
+    /**
+     * 根据订单号获取订单商品列表
+     * @param {string} orderNumber - 订单号
+     * @returns {Promise<OrderItem[]>} 订单商品列表
+     */
+    async getOrderItemsByOrderNumber(userId: number, orderNumber: string) {
+      try {
+        // GET请求通常不需要请求体，所以只需要传递URL
+        const response = await request.get(`/orderItem/getOrderItem`, {}, {
+          params: { userId: userId, orderNumber: orderNumber }
+        });
+        // console.log('获取订单商品列表成功:', response);
+
+        if (this.currentOrder) {
+          // 对后端返回的orderItems进行类型检查和转换，确保符合OrderItem[]类型
+          const rawOrderItems = response.data.orderItems || [];
+          const validOrderItems: OrderItem[] = rawOrderItems.map((item: any) => ({
+            orderNumber: item.orderNumber || orderNumber,
+            name: item.name || '未知商品',
+            spec: item.spec || '',
+            price: Number(item.price) || 0,
+            quantity: Number(item.quantity) || 0,
+            imageUrl: item.imageUrl || ''
+          }));
+          
+          this.currentOrder.orderItems = validOrderItems;
+          // console.log('更新后的当前订单:', this.currentOrder);
+        }
+      } catch (error) {
+        console.error('获取订单商品列表失败:', error);
+        ElMessage.error('获取订单商品列表失败，请重试');
+        // 重新抛出异常，以便上层调用者能够捕获
+        throw error;
+      }
+    },
+
+    /**
+     * 根据订单号删除订单商品列表
+     * @param {string} orderNumber - 订单号
+     * @returns {Promise<void>}
+     */
+    async deleteOrderItems(userId: number, orderNumber: string) {
+      try {
+        // DELETE请求通常不需要请求体，所以只需要传递URL
+        const response = await request.del(`/orderItem/deleteOrderItem`, {}, {
+          params: { userId: userId, orderNumber: orderNumber }
+        });
+        if (response.message === 'success') {
+          ElMessage.success('订单商品列表已成功删除');
+        } else {
+          ElMessage.error('删除订单商品列表失败，请稍后重试');
+        }
+      } catch (error) {
+        console.error('删除订单商品列表失败:', error);
+      }
+    },
+
     /**
      * 确认支付
      * @returns {Promise<void>}
@@ -489,6 +573,9 @@ export const useOrderStore = defineStore('order', {
         try {
           // 调用后端API保存订单
           await this.addOrder(userStore.userId || 0, updatedOrder);
+
+          // 调用后端API保存订单商品列表
+          await this.addOrderItems(userStore.userId || 0, this.currentOrder.orderItems);
         } catch (error) {
           router.push('/');
           return;

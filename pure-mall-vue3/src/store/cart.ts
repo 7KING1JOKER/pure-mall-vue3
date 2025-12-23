@@ -291,7 +291,13 @@ export const useCartStore = defineStore("cart", {
       
       // 获取选中的商品，用于传递给订单页面
       const selectedItems = this.cartItems.filter(item => item.selected);
-      orderStore.selectedItemsForCheckout = selectedItems;
+      orderStore.selectedItemsForCheckout = selectedItems.map(item => ({
+        name: item.name,
+        spec: item.spec,
+        price: item.price,
+        quantity: item.quantity,
+        imageUrl: item.imageUrl
+      }));
 
       // 从购物车中删除选中商品 前后端
       this.removeSelected();

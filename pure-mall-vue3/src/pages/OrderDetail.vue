@@ -104,7 +104,7 @@ import Footer from '../layouts/Footer.vue';
 import { useOrderStore } from '../store/order';
 import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
-import type { CartItem } from '../api/interfaces';
+import type { OrderItem } from '../api/interfaces';
 
 // 其它js库的引入
 import Sortable from 'sortablejs';
@@ -135,7 +135,7 @@ const orderId = computed(() => {
 // 计算商品总价
 const subtotal = computed(() => {
   if (!currentOrder.value || !currentOrder.value.orderItems) return 0;
-  return currentOrder.value.orderItems.reduce((total: number, item: CartItem) => total + (item.price * item.quantity), 0);
+  return currentOrder.value.orderItems.reduce((total: number, item: OrderItem) => total + (item.price * item.quantity), 0);
 });
 
 // 地图相关变量
@@ -252,7 +252,7 @@ onMounted(async () => {
     if (order) {
       // 如果找到订单，更新当前订单
       orderStore.currentOrder = order;
-      console.log('找到订单，成功加载订单详情', order);
+      // console.log('找到订单，成功加载订单详情', order);
     } else {
       console.log('未找到订单，尝试从服务器获取');
       // 如果本地找不到订单，且用户已登录且有userId，尝试从服务器获取
@@ -260,6 +260,7 @@ onMounted(async () => {
         try {
           await orderStore.getOrderDetailByOrderNumber(userId.value, orderId.value);
           console.log('从服务器获取订单详情成功');
+
         } catch (error) {
           console.error('从服务器获取订单详情失败:', error);
           // 如果获取失败，设置currentOrder为null
@@ -275,6 +276,11 @@ onMounted(async () => {
     // 如果没有订单ID，设置currentOrder为null
     orderStore.currentOrder = null;
     console.log('没有提供订单ID');
+  }
+
+  if(orderStore.currentOrder) {
+    // console.log(userId.value, orderStore.currentOrder.orderNumber);
+    await orderStore.getOrderItemsByOrderNumber(userId.value, orderStore.currentOrder.orderNumber);
   }
   
   // 初始化地图和可拖动功能

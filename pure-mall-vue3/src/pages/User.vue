@@ -284,7 +284,7 @@ const viewOrderDetail = (orderNumber) => {
       name: 'OrderDetail',
       params: { orderNumber }
     })
-    console.log('跳转到订单详情，订单编号:', orderNumber)
+    // console.log('跳转到订单详情，订单编号:', orderNumber)
   } else {
     ElMessage.error('无法获取订单信息')
   }
@@ -302,6 +302,7 @@ const confirmDeleteOrder = (orderNumber) => {
     }
   ).then(async () => {
     const response = await orderStore.deleteOrder(orderNumber);
+    const response2 = await orderStore.deleteOrderItems(userStore.userId, orderNumber);
   }).catch(() => {
     // 取消删除，不做任何操作
   })
