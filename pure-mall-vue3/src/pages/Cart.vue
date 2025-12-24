@@ -30,6 +30,8 @@
                   class="product-img"
                   :preview-src-list="[item.imageUrl]"
                   hide-on-click-modal
+                  loading="lazy"
+                  :alt="item.name"
                 />
               </div>
               <div class="item-info">

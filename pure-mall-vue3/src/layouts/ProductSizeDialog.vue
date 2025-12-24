@@ -82,11 +82,19 @@ const selectSize = (productSize) => {
   width: 80px;
   padding: 6px;
   text-align: left;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  /* 启用硬件加速 */
+  transform: translateZ(0);
 }
 
-.size-square:hover,
+.size-square:hover {
+  border: 1px solid #000;
+  transform: translateY(-2px);
+}
+
 .size-square.selected {
   border: 1px solid #000;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .size-square h1 {
@@ -120,7 +128,8 @@ const selectSize = (productSize) => {
 .size-guider-icon {
   font-size: 14px;
   color: #000;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
+  transform: translateZ(0);
 }
 
 .size-guider-content {
@@ -135,14 +144,16 @@ const selectSize = (productSize) => {
 
 /* 过渡动画 */
 .slide-enter-active, .slide-leave-active {
-  transition: all 0.3s ease;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
   max-height: 500px;
   overflow: hidden;
+  transform: translateZ(0);
 }
 
 .slide-enter-from, .slide-leave-to {
   max-height: 0;
   opacity: 0;
+  transform: translateZ(0);
 }
 
 </style>

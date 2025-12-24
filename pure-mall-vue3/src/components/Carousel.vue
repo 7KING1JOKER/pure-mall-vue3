@@ -11,6 +11,8 @@
             :src="item.image" 
             class="carousel-image"
             :alt="item.title"
+            :loading="index === 0 ? 'eager' : 'lazy'"
+            :fetchpriority="index === 0 ? 'high' : 'auto'"
         >
         <div class="carousel-overlay">
           <h3 :class="{'animate-in': activeItemId === item.id}">{{ item.title }}</h3>
@@ -140,33 +142,30 @@ const handleCarouselChange = (currentIndex: number) => {
 
 /* 动画类 */
 .animate-in {
-  animation: slide-fade-in 0.8s ease forwards;
+  animation: slide-fade-in 0.6s ease forwards;
+  /* 启用硬件加速 */
+  transform: translateZ(0);
 }
 
 .animate-in:nth-child(1) {
-  animation: slide-fade-in 800ms ease 300ms forwards;
+  animation: slide-fade-in 600ms ease 200ms forwards;
+  transform: translateZ(0);
 }
 
-/* .animate-in:nth-child(2) {
-  animation: slide-fade-in 800ms ease 600ms forwards;
-} */
+.animate-in:nth-child(2) {
+  animation: slide-fade-in 600ms ease 400ms forwards;
+  transform: translateZ(0);
+}
 
 /* 动画定义 */
 @keyframes slide-fade-in {
   0% {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
-    filter: blur(2px);
-  }
-  50% {
-    opacity: 0.8;
-    transform: translateY(5px) scale(0.98);
-    filter: blur(1px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 </style>

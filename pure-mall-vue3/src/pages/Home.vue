@@ -1,50 +1,50 @@
 <template>
   <div class="home-container">
     <!-- <template v-if="loading">
-      <Loading />
+      <Loading /> 
     </template>
     <template v-else> -->
-      <!-- 响应式菜单栏 -->
-      <PcMenu />
-      <!-- 页面内容 -->
-      <div class="scroll-container">
-        <!-- 轮播图区域 -->
-        <section class="scroll-section section-carousel">
-          <Carousel />
-        </section>
+    <!-- 响应式菜单栏 -->
+    <PcMenu />
+    <!-- 页面内容 -->
+    <div class="scroll-container">
+      <!-- 轮播图区域 -->
+      <section class="scroll-section section-carousel">
+        <Carousel />
+      </section>
 
-        <!-- 卡片列表区域1 -->
-        <section class="scroll-section section-cards">
-          <div class="card-list">
-            <ImageCard
-              v-for="(card, index) in cards1" 
-              :key="index" 
-              :imageUrl="card.image" 
-              :title="card.title"
-              :overlayOpacity="0.7"
-              :titleColor="'white'"
-              class="image-card"
-            />
-          </div>
-        </section>
+      <!-- 卡片列表区域1 -->
+      <section class="scroll-section section-cards">
+        <div class="card-list">
+          <ImageCard
+            v-for="(card, index) in cards1" 
+            :key="index" 
+            :image-url="card.image" 
+            :title="card.title"
+            :overlay-opacity="0.7"
+            :title-color="'white'"
+            class="image-card"
+          />
+        </div>
+      </section>
 
-        <!-- 卡片列表区域2 -->
-        <section class="scroll-section section-cards">
-          <div class="card-list">
-            <ImageCard
-              v-for="(card, index) in cards2" 
-              :key="index" 
-              :imageUrl="card.image" 
-              :title="card.title"
-              :overlayOpacity="0.7"
-              :titleColor="'white'"
-              class="image-card"
-            />
-          </div>
-        </section>
+      <!-- 卡片列表区域2 -->
+      <section class="scroll-section section-cards">
+        <div class="card-list">
+          <ImageCard
+            v-for="(card, index) in cards2" 
+            :key="index" 
+            :image-url="card.image" 
+            :title="card.title"
+            :overlay-opacity="0.7"
+            :title-color="'white'"
+            class="image-card"
+          />
+        </div>
+      </section>
 
-        <Footer />
-      </div>
+      <Footer />
+    </div>
   </div>
 </template>
 

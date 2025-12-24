@@ -24,8 +24,10 @@
   border: 5px solid #333;
   border-top: 5px solid #fff;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
   margin-bottom: 20px;
+  /* 启用硬件加速 */
+  transform: translateZ(0);
 }
 @keyframes spin {
   0% { transform: rotate(0deg); }

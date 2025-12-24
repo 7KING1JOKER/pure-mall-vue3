@@ -13,7 +13,7 @@
           class="productDetail-carousel"
           >
           <el-carousel-item v-for="(image, index) in product.images" :key="index">
-            <el-image :src="image" fit="cover" class="gallery-image" />
+            <el-image :src="image" fit="cover" class="gallery-image" loading="lazy" :alt="product.name" />
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -89,7 +89,7 @@
         <h1 class="zoom-title">缩放图</h1>
         <div class="product-gallery-zoom">
           <div v-for="(image, index) in product.images" :key="index" class="product-gallery-item">
-            <el-image :src="image" fit="contain" class="zoom-image" />
+            <el-image :src="image" fit="contain" class="zoom-image" loading="lazy" :alt="product.name" />
           </div>
         </div>
       </div>

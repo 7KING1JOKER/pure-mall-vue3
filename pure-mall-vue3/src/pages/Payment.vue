@@ -32,7 +32,7 @@
             <div class="payment-method-item">
               <el-radio label="alipay">
                 <div class="method-content">
-                  <img src="https://img.icons8.com/color/48/000000/alipay.png" alt="支付宝" class="method-icon" />
+                  <img src="https://img.icons8.com/color/48/000000/alipay.png" alt="支付宝" class="method-icon" loading="eager" />
                   <div class="method-info">
                     <div class="method-name">支付宝</div>
                     <div class="method-desc">推荐使用支付宝快捷支付</div>
@@ -43,7 +43,7 @@
             <div class="payment-method-item">
               <el-radio label="wechat">
                 <div class="method-content">
-                  <img src="https://img.icons8.com/color/48/000000/weixing.png" alt="微信支付" class="method-icon" />
+                  <img src="https://img.icons8.com/color/48/000000/weixing.png" alt="微信支付" class="method-icon" loading="eager" />
                   <div class="method-info">
                     <div class="method-name">微信支付</div>
                     <div class="method-desc">使用微信扫码支付</div>
@@ -54,7 +54,7 @@
             <div class="payment-method-item">
               <el-radio label="creditcard">
                 <div class="method-content">
-                  <img src="https://img.icons8.com/color/48/000000/bank-card-front-side.png" alt="信用卡" class="method-icon" />
+                  <img src="https://img.icons8.com/color/48/000000/bank-card-front-side.png" alt="信用卡" class="method-icon" loading="eager" />
                   <div class="method-info">
                     <div class="method-name">信用卡支付</div>
                     <div class="method-desc">支持Visa、Mastercard等</div>
@@ -71,7 +71,7 @@
         <div class="qrcode-container">
           <div class="qrcode-title">请使用支付宝扫码支付</div>
           <div class="qrcode-image">
-            <el-image src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/pay" />
+            <el-image src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/pay" loading="lazy" alt="支付二维码" />
           </div>
           <div class="qrcode-tips">
             <p>请在 <span class="countdown">{{ countdown }}</span> 内完成支付</p>
@@ -88,7 +88,7 @@
         <div class="qrcode-container">
           <div class="qrcode-title">请使用微信扫码支付</div>
           <div class="qrcode-image">
-            <el-image src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/pay" />
+            <el-image src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/pay" loading="lazy" alt="支付二维码" />
           </div>
           <div class="qrcode-tips">
             <p>请在 <span class="countdown">{{ countdown }}</span> 内完成支付</p>

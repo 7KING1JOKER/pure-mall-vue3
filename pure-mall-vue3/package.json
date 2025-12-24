@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
-    "@studio-freight/lenis": "^1.0.42",
     "axios": "^1.12.1",
     "element-plus": "^2.12.0",
     "pinia": "^3.0.3",
@@ -22,8 +21,14 @@
   "devDependencies": {
     "@types/node": "^24.2.1",
     "@types/sortablejs": "^1.15.9",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.7.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.6.2",
+    "terser": "^5.44.1",
     "typescript": "~5.8.3",
     "unplugin-auto-import": "^20.0.0",
     "unplugin-vue-components": "^29.0.0",

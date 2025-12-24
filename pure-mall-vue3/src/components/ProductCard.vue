@@ -7,6 +7,9 @@
       :src="product.image"
       fit="cover"
       class="product-image"
+      :loading="loadingMode || 'lazy'"
+      :alt="product.name"
+      :placeholder="'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2Y1ZjdmYSIvPjxwYXRoIGQ9Ik0xNTAgMTUwIEwxNTAgNTAiIHN0cm9rZT0iIzQ0NDQiIHN0cm9rZS13aWR0aD0iMSIvPgo8L3N2Zz4='"
     />
     <div class="product-info">
       <h3 class="product-name">{{ product.name }}</h3>
@@ -21,6 +24,7 @@ import type { Product } from '../api/interfaces.ts';
 
 const props = defineProps<{
   product: Product;
+  loadingMode?: 'lazy' | 'eager';
 }>();
 
 const router = useRouter();

@@ -42,9 +42,10 @@
           <!-- 商品网格 -->
           <div class="product-grid">
             <ProductCard 
-              v-for="product in displayProducts" 
+              v-for="(product, index) in displayProducts" 
               :key="product.id" 
               :product="product"
+              :loading-mode="index < pageSize ? 'eager' : 'lazy'"
             />
           </div>
           

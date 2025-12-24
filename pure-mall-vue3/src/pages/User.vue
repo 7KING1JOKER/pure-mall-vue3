@@ -415,10 +415,11 @@ const getIconComponent = (iconName) => {
   position: relative;
   cursor: pointer;
   font-size: 20px;
+  will-change: transform;
 }
 
 .edit-icon:hover, .add-icon:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
 }
 
 .edit-icon::after , .add-icon::after {
@@ -435,6 +436,8 @@ const getIconComponent = (iconName) => {
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
+  /* 使伪元素不接收鼠标事件，解决hover边界抽搐问题 */
+  pointer-events: none;
 }
 
 .add-icon::after {
@@ -587,7 +590,9 @@ const getIconComponent = (iconName) => {
   top: 10px;
   z-index: 10;
   opacity: 0.8;
-  transition: all 0.3s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  /* 启用硬件加速 */
+  transform: translateZ(0);
 }
 
 /* 当hover商品卡片时，删除图标也有上移动画 */

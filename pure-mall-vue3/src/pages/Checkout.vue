@@ -51,7 +51,7 @@
         <div class="order-items">
           <div class="order-item" v-for="(item, index) in selectedItemsForCheckout" :key="index">
             <div class="item-image">
-              <el-image :src="item.imageUrl" fit="cover" class="product-img" />
+              <el-image :src="item.imageUrl" fit="cover" loading="lazy" class="product-img" :alt="item.name" />
             </div>
             <div class="item-info">
               <div class="item-title">{{ item.name }}</div>
@@ -365,11 +365,13 @@ onMounted(() => {
 .footer-icon{
   font-size: 24px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.25s ease;
+  /* 启用硬件加速 */
+  transform: translateZ(0);
 }
 
 .footer-icon:hover {
-  transform: translateY(-10px);
+  transform: translateY(-8px);
 }
 
 

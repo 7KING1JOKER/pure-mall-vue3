@@ -102,24 +102,27 @@ body {
 /* Element Plus 输入框清空按钮默认样式 */
 .el-input__clear {
   color: #ffffff85 !important; /* 默认颜色 */
-  transition: all 0.3s ease !important;
+  transition: transform 0.25s ease, opacity 0.25s ease !important;
   animation-play-state: paused !important; /* 默认暂停动画 */
+  /* 启用硬件加速 */
+  transform: translateZ(0) !important;
 }
 
 .el-input__clear:hover {
-  animation: rotateIcon 1s linear infinite !important; /* 持续旋转动画 */
+  animation: rotateIcon 0.8s linear infinite !important; /* 持续旋转动画，加快速度 */
   animation-play-state: running !important; /* 鼠标悬停时播放动画 */
 }
 
 .el-input__clear:active {
-  transform: scale(0.95) !important; /* 点击时缩小一点 */
+  transform: scale(0.95) translateZ(0) !important; /* 点击时缩小一点 */
   animation-play-state: paused !important; /* 点击时停止动画 */
 }
 
 /* Element Plus 密码显示切换按钮默认样式 */
 .el-input__password {
   color: #ffffff85 !important;
-  transition: all 0.3s ease !important;
+  transition: transform 0.25s ease, opacity 0.25s ease !important;
+  transform: translateZ(0) !important;
 }
 
 .el-input__password:hover {
@@ -127,16 +130,16 @@ body {
 }
 
 .el-input__password:active {
-  transform: scale(0.95) !important;
+  transform: scale(0.95) translateZ(0) !important;
 }
 
 /* 旋转动画定义 */
 @keyframes rotateIcon {
   from {
-    transform: rotate(0deg);
+    transform: rotate(0deg) translateZ(0);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg) translateZ(0);
   }
 }
 

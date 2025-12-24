@@ -56,7 +56,7 @@
             
             <div class="product-item" v-for="(item, index) in currentOrder.orderItems" :key="index">
               <div class="product-image">
-                <el-image :src="item.imageUrl" fit="cover" />
+                <el-image :src="item.imageUrl" fit="cover" loading="lazy" :alt="item.name" class="product-image" />
               </div>
               <!-- 还需要展示商品名称、数量、单价、颜色、尺码 -->
               <div class="product-info">

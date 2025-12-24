@@ -4,6 +4,9 @@
       :src="imageUrl"
       fit="cover"
       class="image"
+      loading="lazy"
+      :alt="title"
+      :style="{ width: '100%', height: '100%' }"
     ></el-image>
     <div class="image-info">
       <h1 class="image-title">{{ title }}</h1>
@@ -22,10 +25,6 @@ defineProps({
   title: {
     type: String,
     default: 'Sample Image Card'
-  },
-  titleColor: {
-    type: String,
-    default: 'white'
   }
 })
 
@@ -56,7 +55,7 @@ defineProps({
   bottom: 0;
   width: 100%;
   padding: 20px;
-  color: v-bind('titleColor');
+  color: #fff;
   transition: all 0.3s ease;
 }
 
