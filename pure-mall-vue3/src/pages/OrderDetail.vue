@@ -106,6 +106,7 @@ import { useUserStore } from '../store/user';
 import { storeToRefs } from 'pinia';
 import type { OrderItem } from '../api/interfaces';
 
+
 // 其它js库的引入
 import Sortable from 'sortablejs';
 import AMapLoader from '@amap/amap-jsapi-loader';
@@ -282,13 +283,13 @@ onMounted(async () => {
     // console.log(userId.value, orderStore.currentOrder.orderNumber);
     await orderStore.getOrderItemsByOrderNumber(userId.value, orderStore.currentOrder.orderNumber);
   }
+})
   
-  // 初始化地图和可拖动功能
-  nextTick(() => {
-    initMap();
-    initSortable();
-  });
-});
+// 初始化地图和可拖动功能
+nextTick(() => {
+  initMap();
+  initSortable();
+})
 
 // 组件卸载时清理
 onUnmounted(() => {

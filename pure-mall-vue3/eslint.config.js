@@ -7,6 +7,25 @@ export default [
   { ignores: ["**/dist/**", "**/node_modules/**", "**/logs/**", "**/*.log", ".DS_Store"] },
   // 使用Vue插件提供的推荐配置
   ...pluginVue.configs["flat/recommended"],
+  // Vue + TypeScript配置
+  {
+    files: ["**/*.vue"],
+    languageOptions: {
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        parser: tsParser
+      }
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin
+    },
+    rules: {
+      "no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": "warn"
+    }
+  },
   // TypeScript文件配置
   {
     files: ["**/*.ts"],

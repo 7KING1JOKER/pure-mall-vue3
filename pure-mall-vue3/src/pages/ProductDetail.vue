@@ -26,7 +26,7 @@
             <el-breadcrumb-item :to="{ path: '/category' }">全部</el-breadcrumb-item>
             <!-- 父级分类路径 -->
             <el-breadcrumb-item v-if="productCategoryInfo.name" :to="{ path: '/category' }"
-              @click=""
+              @click.prevent
             >
               {{ productCategoryInfo.name }}
             </el-breadcrumb-item>
