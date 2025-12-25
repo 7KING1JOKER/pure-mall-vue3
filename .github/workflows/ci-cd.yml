@@ -30,6 +30,10 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    # 修复eslint权限
+    - name: Fix eslint permissions
+      run: chmod +x node_modules/.bin/eslint
+
     # 代码质量检查
     - name: Lint code
       run: npx eslint . --ext .vue,.js,.ts,.jsx,.tsx
