@@ -32,7 +32,7 @@ jobs:
 
     # 代码质量检查
     - name: Lint code
-      run: npm run lint
+      run: npx eslint . --ext .vue,.js,.ts,.jsx,.tsx
 
     # 运行构建命令
     - name: Build project
