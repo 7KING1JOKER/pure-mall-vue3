@@ -34,6 +34,10 @@ jobs:
     - name: Fix eslint permissions
       run: chmod +x node_modules/.bin/eslint
 
+    # 修复vue-tsc权限
+    - name: Fix vue-tsc permissions
+      run: chmod +x node_modules/.bin/vue-tsc
+
     # 代码质量检查
     - name: Lint code
       run: npx eslint . --ext .vue,.js,.ts,.jsx,.tsx
