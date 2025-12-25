@@ -2,7 +2,7 @@
 
 ## 项目简介
 
-Pure Mall Vue3是一个基于Vue 3 + TypeScript + Spring Boot开发的前后端分离电商商城系统。该系统采用现代化的技术栈，具有良好的可扩展性和可维护性，适用于中小型电商平台的开发和部署。
+Pure Mall Vue3是一个基于Vue 3 + TypeScript + Spring Boot + MySQL开发的前后端分离电商商城系统。该系统采用现代化的技术栈，具有良好的可扩展性和可维护性，适用于中小型电商平台的开发和部署。
 
 ## 技术栈
 
@@ -31,15 +31,26 @@ Pure Mall Vue3是一个基于Vue 3 + TypeScript + Spring Boot开发的前后端�
 ## 项目结构
 
 ```
-e:/vue-project/pure-mall-vue3/pure-mall-vue3/
+e:/vue-project/pure-mall-vue3/
 ├── .env                    # 环境变量配置
+├── .github/                # GitHub配置文件
+│   └── workflows/          # CI/CD工作流配置
+├── .vscode/                # VS Code编辑器配置
 ├── .gitignore              # Git忽略文件
 ├── README.md               # 项目说明文档
+├── api-documentation.md    # API接口文档
+├── backend_task_list.md    # 后端任务列表
+├── CI_CD_GUIDE.md          # CI/CD部署指南
+├── ds-brief.md             # 数据结构说明
 ├── 说明文档.md              # 详细开发文档
 ├── auto-imports.d.ts       # 自动导入类型声明
 ├── components.d.ts         # 组件类型声明
+├── dist/                   # 构建输出目录
+├── eslint.config.js        # ESLint配置文件
 ├── index.html              # HTML入口文件
 ├── package.json            # 项目依赖配置
+├── package-lock.json       # 依赖版本锁定文件
+├── performance-optimization-report.md # 性能优化报告
 ├── public/                 # 静态资源目录
 ├── src/                    # 源代码目录
 │   ├── App.vue             # 根组件
@@ -85,7 +96,6 @@ e:/vue-project/pure-mall-vue3/pure-mall-vue3/
 │   │   └── user.ts         # 用户状态
 │   ├── styles/             # 样式文件
 │   ├── utils/              # 工具函数
-│   │   └── HorizontalScroll.js # 水平滚动工具
 │   └── vite-env.d.ts       # Vite环境类型声明
 ├── tsconfig.app.json       # TypeScript应用配置
 ├── tsconfig.json           # TypeScript基础配置
@@ -172,6 +182,28 @@ e:/vue-project/pure-mall-vue3/pure-mall-vue3/
 - 数据库数据不完善，product.brief 和 product.detail 字段为默认值
 - 移动端样式未完善，仅有基础样式
 - AMap地图未成功映射文字到坐标点
+
+## 性能优化措施
+
+### 1. 图片懒加载
+- 实现了图片的懒加载功能，只有当图片进入视口时才会加载
+- 减少了初始页面加载时间，提高了用户体验
+
+### 2. LCP图片预加载
+- 对最大内容绘制（LCP）图片进行预加载处理
+- 确保关键图片资源优先加载，提升页面加载性能
+
+### 3. 按需引入Element Plus组件
+- 配置了Element Plus的按需引入
+- 只加载项目中实际使用的组件，减小了打包体积
+
+### 4. ESLint配置
+- 配置了ESLint规则，自动检测并移除未使用的变量和导入
+- 保持代码的整洁性和一致性，减少冗余代码
+
+### 5. Terser配置
+- 配置了Terser进行JavaScript代码的优化和压缩
+- 减小了打包后的JavaScript文件体积，提高了页面加载速度
 
 ## 开发规范
 
