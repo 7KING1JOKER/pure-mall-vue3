@@ -1,0 +1,72 @@
+name: PureMall CI/CD
+
+# 触发条件：main分支有push或pull_request事件时触发
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 工作流任务
+jobs:
+  # 构建任务
+  build:
+    # 运行环境
+    runs-on: ubuntu-latest
+
+    steps:
+    # 检出代码
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 设置Node.js环境
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    # 安装依赖
+    - name: Install dependencies
+      run: npm install
+
+    # 代码质量检查
+    - name: Lint code
+      run: npm run lint
+
+    # 运行构建命令
+    - name: Build project
+      run: npm run build
+
+    # 上传构建产物
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist
+
+  # 部署任务（仅在main分支push时触发）
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    # 检出代码
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 下载构建产物
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist
+
+    # 部署到GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        force_orphan: true
