@@ -10,7 +10,7 @@
         
         <!-- 尺码选择方块 -->
         <div class="size-squres">
-            <div v-for="productSize in productStore.productSizeList" class="size-square" :class="{ 'selected': isSelected(productSize) }" @click="selectSize(productSize)">
+            <div v-for="(productSize, index) in productStore.productSizeList" :key="index" class="size-square" :class="{ 'selected': isSelected(productSize) }" @click="selectSize(productSize)">
                 <h1> {{ productSize.detail }} </h1>
                 <h1>({{ productSize.size }})</h1>
             </div>

@@ -51,5 +51,19 @@ export default [
     rules: {
       "vue/multi-word-component-names": "off"
     }
+  },
+  // 为components目录下的组件添加例外规则
+  {
+    files: ["**/components/**/*.vue"],
+    rules: {
+      "vue/multi-word-component-names": "off"
+    }
+  },
+  // 为layouts目录下的组件添加例外规则
+  {
+    files: ["**/layouts/**/*.vue"],
+    rules: {
+      "vue/multi-word-component-names": "off"
+    }
   }
 ];
