@@ -7,6 +7,8 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import path from 'path'
 
 export default defineConfig({
+  // 基础路径配置，用于GitHub Pages部署
+  base: '/pure-mall-vue3/',
   // 插件配置区
   plugins: [
     vue(), // 核心 Vue 插件
