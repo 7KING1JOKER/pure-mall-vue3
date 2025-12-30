@@ -8,10 +8,7 @@ const service = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8'
-  }, // 跳过证书验证（仅开发环境使用）
-  httpsAgent: new (require('https-proxy-agent'))({
-    rejectUnauthorized: false
-  })
+  }
 });
 
 // 请求拦截器
