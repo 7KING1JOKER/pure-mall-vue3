@@ -39,6 +39,8 @@ service.interceptors.response.use(
       if (res.code !== 200) {
         return Promise.reject(new Error(res.message || '请求失败'));
       }
+      // 如果code是200，返回res.data，这样前端就能直接获取到数据
+      return res.data;
     }
     return res;
   },
