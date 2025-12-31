@@ -1,5 +1,5 @@
 // 配置路由文件
-import { createRouter, createWebHistory, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import { ElMessage } from 'element-plus';
 
 const routes = [
