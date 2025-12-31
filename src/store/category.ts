@@ -275,7 +275,7 @@ export const useCategoryStore = defineStore('category', {
           }
         } else {
           // 响应格式不符合预期
-          console.error('加载商品数据失败: 响应格式错误', response);
+          console.log('加载商品数据失败: 响应格式错误', response);
           ElMessage({
             message: '服务器响应格式错误',
             type: 'error',
