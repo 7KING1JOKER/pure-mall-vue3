@@ -1,5 +1,5 @@
 // 配置路由文件
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, createWebHashHistory } from "vue-router";
 import { ElMessage } from 'element-plus';
 
 const routes = [
@@ -62,7 +62,8 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/pure-mall-vue3/'),
+  // history: createWebHistory('/pure-mall-vue3/'),
+  history: createWebHashHistory('pure-mall-vue3/'),
   routes
 })
 
